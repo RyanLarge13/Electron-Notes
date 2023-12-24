@@ -1,5 +1,5 @@
 import { UserProvider } from "./contexxt/UserContext";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import MainPage from "./states/MainPage";
 import NewFolder from "./states/NewFolder";
 // import NewNote from "./states/NewNote";
