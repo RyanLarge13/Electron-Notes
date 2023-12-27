@@ -28,18 +28,23 @@ export const UserProvider = ({ children }: any): JSX.Element => {
   const [open, setOpen] = useState({ show: false, folder: null });
   const [pickFolder, setPickFolder] = useState(false);
   const [draggedOverFolder, setDraggedOverFolder] = useState(null);
+  const [noteToEdit, setNoteToEdit] = useState(null);
 
   useEffect(() => {
     if (token) {
       fetchUser(token);
+    }
+    if (!token) {
+      setLoading(false);
     }
   }, [token]);
 
   useEffect(() => {
     if (!folder && allData) {
       const topFolders = allData.folders.filter((fold) => fold.parentFolderId === null);
+      const topNotes = allData.notes.filter((aNote) => aNote.folderId === null);
       setFolders(topFolders);
-      setNotes([]);
+      setNotes(topNotes);
       setMainTitle("Folders");
     }
     if (folder) {
@@ -87,6 +92,34 @@ export const UserProvider = ({ children }: any): JSX.Element => {
       })
       .catch((err) => {
         console.log(err);
+        localStorage.removeItem("authToken");
+        setToken(null);
+        if (err.code === "ERR_NETWORK") {
+          const newError = {
+            show: true,
+            title: "Network Error",
+            text: "Please check your internet connection and try logging in again",
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              { text: "reload", func: () => window.location.reload() }
+            ]
+          };
+          return setSystemNotif(newError);
+        }
+        const status = err.response.status;
+        if (status === 401) {
+          const newError = {
+            show: true,
+            title: "Login Again",
+            text: "Please login again to confirm your identity",
+            color: "bg-red-300",
+            hasCancel: false,
+            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+          };
+          return setSystemNotif(newError);
+        }
       });
   };
 
@@ -141,7 +174,9 @@ export const UserProvider = ({ children }: any): JSX.Element => {
         pickFolder,
         setPickFolder,
         draggedOverFolder,
-        setDraggedOverFolder
+        setDraggedOverFolder,
+        noteToEdit,
+        setNoteToEdit
       }}
     >
       {children}

@@ -3,7 +3,7 @@ import { loginUser } from "@renderer/utils/api";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const Login = () => {
-  const { token, setToken, fetchUser } = useContext(UserContext);
+  const { token, setToken, fetchUser, setSystemNotif, setLoading } = useContext(UserContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,15 +11,39 @@ const Login = () => {
 
   const handleLogin = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
+    setLoading(true);
     loginUser(username, email, password)
       .then((res) => {
         const newToken = res.data.data;
         localStorage.setItem("authToken", newToken);
         setToken(newToken);
-        fetchUser(token);
       })
       .catch((err) => {
         console.log(err);
+        setLoading(false);
+        const status = err.response.status;
+        if (status === 401) {
+          const newError = {
+            show: true,
+            title: "Incorrect credentials",
+            text: err.response.data.message,
+            color: "bg-red-300",
+            hasCancel: false,
+            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+          };
+          return setSystemNotif(newError);
+        }
+        if (status === 404) {
+          const newError = {
+            show: true,
+            title: "Incorrect credentials",
+            text: err.response.data.message,
+            color: "bg-red-300",
+            hasCancel: false,
+            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+          };
+          return setSystemNotif(newError);
+        }
       });
   };
 

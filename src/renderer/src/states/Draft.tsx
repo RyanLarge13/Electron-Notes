@@ -1,29 +1,66 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLock, FaSave, FaUnlock } from "react-icons/fa";
-import { createNewNote } from "@renderer/utils/api";
+import { createNewNote, updateNote } from "@renderer/utils/api";
 import "react-quill/dist/quill.snow.css";
 import ReactQuill from "react-quill";
 import UserContext from "@renderer/contexxt/UserContext";
 
-const Draft = ({ note }) => {
-  const { token, folder, setAllData } = useContext(UserContext);
+const Draft = () => {
+  const { token, folder, setAllData, noteToEdit, setNoteToEdit } = useContext(UserContext);
 
-  const [title, setTitle] = useState("");
-  const [value, setValue] = useState(note ? note : "");
-  const [locked, setLocked] = useState(false);
+  const [title, setTitle] = useState(noteToEdit ? noteToEdit.title : "");
+  const [value, setValue] = useState(noteToEdit ? noteToEdit.htmlText : "");
+  const [locked, setLocked] = useState(noteToEdit ? noteToEdit.locked : false);
 
   const navigate = useNavigate();
 
-  const saveNote = (): void => {
+  const saveNote = () => {
     if (!token) {
       return;
     }
     const newNote = {
       title: title,
       htmlNotes: value,
-      folderId: folder.folderid
+      folderId: folder ? folder.folderid : null,
+      locked: locked
     };
+    if (noteToEdit) {
+      const updatedNote = {
+        notesId: noteToEdit.noteid,
+        title: title,
+        htmlNotes: value,
+        locked: locked
+      };
+      return updateNote(token, updatedNote)
+        .then((res) => {
+          const resNote = res.data.data[0];
+          const noteToPush = {
+            title: resNote.title,
+            createdAt: resNote.createdat,
+            noteid: resNote.notesid,
+            htmlText: resNote.htmlnotes,
+            locked: resNote.locked,
+            folderId: resNote.folderid
+          };
+          setAllData((prevUser) => {
+            const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
+            newNotes.push(noteToPush);
+            const newData = {
+              ...prevUser,
+              notes: newNotes
+            };
+            return newData;
+          });
+          navigate("/");
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          console.log("Finished updating");
+        });
+    }
     createNewNote(token, newNote)
       .then((res) => {
         const returnedNote = res.data.data[0];
@@ -56,7 +93,10 @@ const Draft = ({ note }) => {
     <>
       <div
         className="fixed z-10 inset-0 bg-black bg-opacity-10 backdrop-blur-sm"
-        onClick={() => navigate("/")}
+        onClick={() => {
+          noteToEdit && setNoteToEdit(null);
+          navigate("/");
+        }}
       ></div>
       <div className="fixed top-20 right-5 left-5 lg:right-60 lg:left-60 bottom-20 rounded-md shadow-md bg-black z-40">
         <div className="flex justify-between items-center pr-5">

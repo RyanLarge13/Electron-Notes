@@ -1,9 +1,18 @@
 import { useContext } from "react";
 import UserContext from "@renderer/contexxt/UserContext";
 import { FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const NoteView = (): JSX.Element => {
-  const { note, setNote } = useContext(UserContext);
+  const { note, setNote, setNoteToEdit } = useContext(UserContext);
+
+  const navigate = useNavigate();
+
+  const editNote = (): void => {
+    setNoteToEdit(note);
+    setNote(null);
+    navigate("/newnote");
+  };
 
   return (
     <>
@@ -14,7 +23,7 @@ const NoteView = (): JSX.Element => {
       <div className="fixed z-40 bg-black inset-10 rounded-md shadow-md p-5">
         <div className="flex justify-between items-start">
           <p className="text-3xl mb-3">{note.title}</p>
-          <button>
+          <button onClick={() => editNote()}>
             <FaEdit />
           </button>
         </div>

@@ -28,8 +28,7 @@
     "react-icons": "^4.12.0",
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.20.1",
-    "slate": "^0.101.1",
-    "slate-react": "^0.101.3"
+    "react-spinners": "^0.13.8"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^1.0.1",

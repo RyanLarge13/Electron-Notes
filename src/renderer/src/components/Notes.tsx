@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import UserContext from "@renderer/contexxt/UserContext";
 import { TbNotes } from "react-icons/tb";
 import { createNewNote, deleteANote } from "@renderer/utils/api";
@@ -6,7 +6,6 @@ import { FaLock } from "react-icons/fa";
 
 const Notes = (): JSX.Element => {
   const {
-    notes,
     notesToRender,
     token,
     view,
@@ -20,6 +19,18 @@ const Notes = (): JSX.Element => {
 
   const [pinInput, setPinInput] = useState(false);
   const [pin, setPin] = useState({ first: "", second: "", third: "", fourth: "" });
+  const [awaitingNote, setAwaitingNote] = useState(null);
+
+  const firstInput = useRef(null);
+  const secondInput = useRef(null);
+  const thirdInput = useRef(null);
+  const fourthInput = useRef(null);
+
+  useEffect(() => {
+    if (pinInput && firstInput.current) {
+      firstInput.current.focus();
+    }
+  }, [pinInput]);
 
   const edit = (note) => {
     setNote(note);
@@ -155,17 +166,45 @@ const Notes = (): JSX.Element => {
 
   const openNote = (note): void => {
     if (note.locked) {
+      setAwaitingNote(note);
       return setPinInput(true);
     }
     setNote(note);
   };
 
-  const handlePinInput = (e, level) => {
+  const unlockNote = (): void => {
+    localStorage.setItem("pin", JSON.stringify(pin));
+    setPinInput(false);
+    setPin({ first: "", second: "", third: "", fourth: "" });
+    setNote(awaitingNote);
+    setAwaitingNote(null);
+  };
+
+  const handlePinInput = (e, level): void => {
     const newValue = e.target.value.replace(/[^0-9]/g, "").slice(0, 1);
     if (level === "first") {
       setPin((prev) => {
         return { ...prev, first: newValue };
       });
+      secondInput.current.focus();
+    }
+    if (level === "second") {
+      setPin((prev) => {
+        return { ...prev, second: newValue };
+      });
+      thirdInput.current.focus();
+    }
+    if (level === "third") {
+      setPin((prev) => {
+        return { ...prev, third: newValue };
+      });
+      fourthInput.current.focus();
+    }
+    if (level === "fourth") {
+      setPin((prev) => {
+        return { ...prev, fourth: newValue };
+      });
+      unlockNote();
     }
   };
 
@@ -208,22 +247,32 @@ const Notes = (): JSX.Element => {
           ></div>
           <form className="p-5 fixed bottom-5 left-5 rounded-md shadow-md bg-slate-900 flex justify-center items-center gap-x-5">
             <input
+              ref={firstInput}
               value={pin.first}
               type="password"
               onChange={(e) => handlePinInput(e, "first")}
-              className="w-10 h-10 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className="w-10 h-10 p-3 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
             />
             <input
+              ref={secondInput}
               value={pin.second}
-              className="w-10 h-10 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              type="password"
+              className="w-10 h-10 p-3 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              onChange={(e) => handlePinInput(e, "second")}
             />
             <input
+              ref={thirdInput}
               value={pin.third}
-              className="w-10 h-10 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              type="password"
+              className="w-10 h-10 p-3 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              onChange={(e) => handlePinInput(e, "third")}
             />
             <input
+              ref={fourthInput}
               value={pin.fourth}
-              className="w-10 h-10 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              type="password"
+              className="w-10 h-10 p-3 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              onChange={(e) => handlePinInput(e, "fourth")}
             />
           </form>
         </>

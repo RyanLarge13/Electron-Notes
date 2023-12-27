@@ -33,7 +33,8 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
 
   const [folderStates, setFolderStates] = useState({});
 
-  const toggleNested = (folderId: string): void => {
+  const toggleNested = (e, folderId: string): void => {
+    e.stopPropagation();
     setFolderStates((prev) => ({
       ...prev,
       [folderId]: !prev[folderId]
@@ -48,13 +49,17 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
             <div
               key={fold.folderid}
               style={{ marginLeft: level * 5 }}
-              className="w-full relative py-2 px-3 rounded-md bg-slate-700 hover:bg-slate-800 duration-200 my-2"
-              onClick={() => {
+              className="w-full relative py-2 px-3 rounded-md bg-slate-700 hover:bg-slate-800 duration-200 my-2 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
                 moving
                   ? open.item.title === fold.title
                     ? null
                     : setSelectedFolder(fold)
-                  : setFolder(fold);
+                  : setFolder(() => {
+                      console.log("Calling");
+                      return fold;
+                    });
               }}
             >
               <div
@@ -64,7 +69,7 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
               <div className="flex justify-between items-center">
                 <p className="">{fold.title}</p>
                 {open.item.title !== fold.title && (
-                  <button className="" onClick={() => toggleNested(fold.folderid)}>
+                  <button className="p-2" onClick={(e) => toggleNested(e, fold.folderid)}>
                     {folderStates[fold.folderid] ? (
                       <PiArrowsInLineVertical className="font-semibold" />
                     ) : (

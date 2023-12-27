@@ -79,6 +79,15 @@ export const createNewNote = (token: string, note) => {
   return res;
 };
 
+export const updateNote = (token, note) => {
+  const res = Axios.patch(
+    `${devUrl}/notes/update`,
+    { ...note },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
+
 export const deleteANote = (token, noteId) => {
   const res = Axios.delete(`${devUrl}/notes/delete/${noteId}`, {
     headers: {

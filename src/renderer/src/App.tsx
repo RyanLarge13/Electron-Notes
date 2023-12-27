@@ -2,7 +2,6 @@ import { UserProvider } from "./contexxt/UserContext";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import MainPage from "./states/MainPage";
 import NewFolder from "./states/NewFolder";
-// import NewNote from "./states/NewNote";
 import Draft from "./states/Draft";
 
 function App(): JSX.Element {

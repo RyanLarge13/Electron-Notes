@@ -36,6 +36,7 @@ const Menu = () => {
     setToken(null);
     setUser(null);
     localStorage.removeItem("authToken");
+    setSystemNotif({ show: false });
   };
 
   const confirmDeleteAccount = (): void => {
