@@ -1,13 +1,25 @@
 import { app, shell, BrowserWindow } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
+import fs from "fs";
 import appIcon from "../../resources/icon.png?asset";
 
 function createWindow(): void {
   // Create the browser window.
+  const userDataPath = app.getPath("userData");
+  const windowStatePath = join(userDataPath, "window-state.json");
+
+  let windowState;
+  try {
+    windowState = JSON.parse(fs.readFileSync(windowStatePath, "utf-8"));
+  } catch (err) {
+    console.log(err);
+    windowState = { width: 1000, height: 700 };
+  }
+
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: windowState.width,
+    height: windowState.height,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === "linux" ? { appIcon } : {}),
@@ -19,6 +31,12 @@ function createWindow(): void {
 
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
+  });
+
+  mainWindow.on("resize", () => {
+    const { width, height } = mainWindow.getBounds();
+    windowState = { width, height };
+    fs.writeFileSync(windowStatePath, JSON.stringify(windowState));
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
