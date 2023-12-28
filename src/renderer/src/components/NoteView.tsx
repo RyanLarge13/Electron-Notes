@@ -20,7 +20,7 @@ const NoteView = (): JSX.Element => {
         className="fixed z-40 inset-0 bg-black backdrop-blur-sm bg-opacity-20"
         onClick={() => setNote(null)}
       ></div>
-      <div className="fixed z-40 bg-black inset-10 rounded-md shadow-md p-5">
+      <div className="fixed z-40 bg-black inset-10 overflow-y-auto no-scroll-bar rounded-md shadow-md p-5">
         <div className="flex justify-between items-start">
           <p className="text-3xl mb-3">{note.title}</p>
           <button onClick={() => editNote()}>
