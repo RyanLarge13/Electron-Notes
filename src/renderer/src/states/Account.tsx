@@ -9,6 +9,7 @@ import Notes from "@renderer/components/Notes";
 import UserContext from "@renderer/contexxt/UserContext";
 import NoteView from "@renderer/components/NoteView";
 import Menu from "@renderer/components/Menu";
+import Settings from "@renderer/components/Settings";
 import { FaFolderPlus } from "react-icons/fa";
 import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +32,8 @@ const Account = (): JSX.Element => {
     edit,
     selectedForEdit,
     setSelectedForEdit,
-    setEdit
+    setEdit,
+    settings
   } = useContext(UserContext);
 
   const [filterOptions, setFilterOptions] = useState(false);
@@ -215,6 +217,7 @@ const Account = (): JSX.Element => {
       )}
       {note && <NoteView />}
       {menu && <Menu />}
+      {settings && <Settings />}
       <Outlet />
     </section>
   );

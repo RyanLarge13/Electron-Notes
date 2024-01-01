@@ -29,8 +29,29 @@ export const UserProvider = ({ children }: any): JSX.Element => {
   const [pickFolder, setPickFolder] = useState(false);
   const [draggedOverFolder, setDraggedOverFolder] = useState(null);
   const [noteToEdit, setNoteToEdit] = useState(null);
+  const [settings, setSettings] = useState(false);
+  const [userPreferences, setUserPreferences] = useState({});
 
   useEffect(() => {
+    //preferences settings
+    const preferences = localStorage.getItem("preferences");
+    if (!preferences) {
+      const defaultPreferences = {
+        darkMode: true,
+        theme: false,
+        commands: {
+          newFolder: "ctrl + f",
+          newNote: "ctrl + n"
+        }
+      };
+      localStorage.setItem("preferences", JSON.stringify(defaultPreferences));
+      setUserPreferences(defaultPreferences);
+    }
+    if (preferences) {
+      const parsedPreferences = JSON.parse(preferences);
+      setUserPreferences(parsedPreferences);
+    }
+    //Login and token handling
     if (token) {
       fetchUser(token);
     }
@@ -176,7 +197,11 @@ export const UserProvider = ({ children }: any): JSX.Element => {
         draggedOverFolder,
         setDraggedOverFolder,
         noteToEdit,
-        setNoteToEdit
+        setNoteToEdit,
+        settings,
+        setSettings,
+        userPreferences,
+        setUserPreferences
       }}
     >
       {children}

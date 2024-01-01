@@ -14,7 +14,8 @@ const Menu = () => {
     setToken,
     setFolders,
     setMainTitle,
-    setSystemNotif
+    setSystemNotif,
+    setSettings
   } = useContext(UserContext);
 
   const confirmLogout = (): void => {
@@ -119,14 +120,20 @@ const Menu = () => {
         </div>
         <div>
           <button
+            onClick={() => setSettings(true)}
+            className="p-2 rounded-md shadow-md bg-emerald-300 text-black w-full hover:bg-emerald-200 duration-200"
+          >
+            Settings
+          </button>
+          <button
             onClick={() => confirmLogout()}
-            className="p-2 rounded-md shadow-md bg-amber-300 text-black w-full hover:bg-amber-200 duration-200"
+            className="p-2 rounded-md shadow-md bg-amber-300 my-3 text-black w-full hover:bg-amber-200 duration-200"
           >
             Logout &rarr;
           </button>
           <button
             onClick={() => confirmDeleteAccount()}
-            className="p-2 rounded-md shadow-md bg-red-300 mt-3 w-full hover:bg-red-200 duration-200"
+            className="p-2 rounded-md shadow-md bg-red-300 w-full hover:bg-red-200 duration-200"
           >
             Delete Account
           </button>
