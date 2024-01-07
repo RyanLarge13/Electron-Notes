@@ -117,6 +117,9 @@ const Menu = () => {
             level={0}
             open={{ item: { title: null } }}
           />
+          <button className="p-2 mt-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200">
+            Create Folder +
+          </button>
         </div>
         <div>
           <button

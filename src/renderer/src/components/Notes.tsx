@@ -1,8 +1,9 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import UserContext from "@renderer/contexxt/UserContext";
 import { TbNotes } from "react-icons/tb";
-import { createNewNote, deleteANote } from "@renderer/utils/api";
+import { createNewNote, deleteANote, updateNote } from "@renderer/utils/api";
 import { FaLock } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Notes = (): JSX.Element => {
   const {
@@ -14,17 +15,24 @@ const Notes = (): JSX.Element => {
     setAllData,
     setContextMenu,
     setPosition,
-    setSystemNotif
+    setSystemNotif,
+    setNoteToEdit,
+    setMove
   } = useContext(UserContext);
 
   const [pinInput, setPinInput] = useState(false);
   const [pin, setPin] = useState({ first: "", second: "", third: "", fourth: "" });
   const [awaitingNote, setAwaitingNote] = useState(null);
+  const [renameANote, setRenameANote] = useState(null);
+  const [renameText, setRenameText] = useState("");
 
   const firstInput = useRef(null);
   const secondInput = useRef(null);
   const thirdInput = useRef(null);
   const fourthInput = useRef(null);
+  const renameRef = useRef(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (pinInput && firstInput.current) {
@@ -32,8 +40,9 @@ const Notes = (): JSX.Element => {
     }
   }, [pinInput]);
 
-  const edit = (note) => {
-    setNote(note);
+  const edit = (note): void => {
+    setNoteToEdit(note);
+    navigate("/newnote");
     setContextMenu({ show: false });
   };
 
@@ -87,8 +96,65 @@ const Notes = (): JSX.Element => {
       });
   };
 
-  const rename = (note): void => {};
-  const move = (note): void => {};
+  const rename = (note): void => {
+    setRenameANote(note);
+    setContextMenu({ show: false });
+    if (renameRef.current) {
+      renameRef.current.focus();
+    }
+    setTimeout(() => {
+      renameRef.current.focus();
+    }, 250);
+  };
+
+  const changeTitle = (e): void => {
+    e.preventDefault();
+    const newNote = {
+      notesId: renameANote.noteid,
+      htmlNotes: renameANote.htmlText,
+      locked: renameANote.locked,
+      title: renameText,
+      folderId: renameANote.folderId
+    };
+    updateNote(token, newNote)
+      .then((res) => {
+        const resNote = res.data.data[0];
+        const noteToPush = {
+          title: resNote.title,
+          createdAt: resNote.createdat,
+          noteid: resNote.notesid,
+          htmlText: resNote.htmlnotes,
+          locked: resNote.locked,
+          folderId: resNote.folderid
+        };
+        setAllData((prevUser) => {
+          const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
+          newNotes.push(noteToPush);
+          const newData = {
+            ...prevUser,
+            notes: newNotes
+          };
+          return newData;
+        });
+        setRenameANote(null);
+        setRenameText("");
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const move = (note): void => {
+    setContextMenu({ show: false });
+    setMove({
+      isMoving: true,
+      from: note.folderId,
+      itemTitle: note.title,
+      item: note,
+      type: "note"
+    });
+  };
 
   const confirmDelete = (note): void => {
     setContextMenu({ show: false });
@@ -217,11 +283,23 @@ const Notes = (): JSX.Element => {
           className={`${
             view === "list" ? "w-full" : "w-[45%]"
           } max-w-60 h-80 bg-slate-900 p-3 rounded-md shadow-lg overflow-hidden relative`}
-          onClick={() => openNote(note)}
+          onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
         >
           <div aria-hidden="true" className="absolute inset-0 radial-gradient"></div>
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-xl">{note.title}</h3>
+            {renameANote && renameANote.noteid === note.noteid ? (
+              <form onSubmit={changeTitle}>
+                <input
+                  ref={renameRef}
+                  value={renameText}
+                  onChange={(e) => setRenameText(e.target.value)}
+                  placeholder={note.title}
+                  className="focus:outline-none font-semibold text-xl bg-transparent"
+                />
+              </form>
+            ) : (
+              <h3 className="font-semibold text-xl">{note.title}</h3>
+            )}
             <TbNotes />
           </div>
           {note.locked ? (

@@ -8,7 +8,7 @@ import Colors from "@renderer/components/Colors";
 import UserContext from "@renderer/contexxt/UserContext";
 import { findFolder } from "@renderer/utils/helpers";
 
-const NewFolder = () => {
+const NewFolder = (): JSX.Element => {
   const { folder, token, setAllData, setSelectedFolder, selectedFolder } = useContext(UserContext);
 
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ const NewFolder = () => {
   const [title, setTitle] = useState(selectedFolder ? selectedFolder.foldertitle : "");
   const [lock, setLock] = useState(selectedFolder ? selectedFolder.locked : false);
 
-  const createFolder = (e) => {
+  const createFolder = (e): void => {
     e.preventDefault();
     const newFolder = {
       title: title,

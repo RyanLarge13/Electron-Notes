@@ -38,7 +38,7 @@ export const createNewFolder = (token: string, data) => {
   return res;
 };
 
-export const updateFolder = (token, folder) => {
+export const updateFolder = (token: string, folder) => {
   const res = Axios.patch(
     `${devUrl}/folders/update`,
     { ...folder },
@@ -46,6 +46,10 @@ export const updateFolder = (token, folder) => {
   );
   return res;
 };
+
+export const updateMultiFolders = (token, folders, newFolderId) => {};
+
+export const updateMultiNotes = (token, notes, newFolderId) => {};
 
 export const deleteAFolder = (token, folderId) => {
   const res = Axios.delete(`${devUrl}/folders/delete/${folderId}`, {
@@ -79,7 +83,7 @@ export const createNewNote = (token: string, note) => {
   return res;
 };
 
-export const updateNote = (token, note) => {
+export const updateNote = (token: string, note) => {
   const res = Axios.patch(
     `${devUrl}/notes/update`,
     { ...note },

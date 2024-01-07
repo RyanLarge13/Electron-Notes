@@ -26,11 +26,11 @@ export const UserProvider = ({ children }: any): JSX.Element => {
   const [edit, setEdit] = useState(false);
   const [selectedForEdit, setSelectedForEdit] = useState([]);
   const [open, setOpen] = useState({ show: false, folder: null });
-  const [pickFolder, setPickFolder] = useState(false);
   const [draggedOverFolder, setDraggedOverFolder] = useState(null);
   const [noteToEdit, setNoteToEdit] = useState(null);
   const [settings, setSettings] = useState(false);
   const [userPreferences, setUserPreferences] = useState({});
+  const [move, setMove] = useState(null);
 
   useEffect(() => {
     //preferences settings
@@ -191,9 +191,6 @@ export const UserProvider = ({ children }: any): JSX.Element => {
         selectedForEdit,
         setSelectedForEdit,
         open,
-        setOpen,
-        pickFolder,
-        setPickFolder,
         draggedOverFolder,
         setDraggedOverFolder,
         noteToEdit,
@@ -201,7 +198,9 @@ export const UserProvider = ({ children }: any): JSX.Element => {
         settings,
         setSettings,
         userPreferences,
-        setUserPreferences
+        setUserPreferences,
+        move,
+        setMove
       }}
     >
       {children}

@@ -3,10 +3,19 @@ import UserContext from "@renderer/contexxt/UserContext";
 import { BsArrowsExpand } from "react-icons/bs";
 import { PiArrowsInLineVertical } from "react-icons/pi";
 
-const NestedFolder = ({ moving, setSelectedFolder, childFolders, parentId, level, open }) => {
+const NestedFolder = ({
+  moving,
+  setPickFolder,
+  setSelectedFolder,
+  childFolders,
+  parentId,
+  level,
+  open
+}) => {
   return (
-    <Tree
+    <TreeSelect
       moving={moving}
+      setPickFolder={setPickFolder}
       setSelectedFolder={setSelectedFolder}
       folders={childFolders}
       parentId={parentId}
@@ -16,8 +25,8 @@ const NestedFolder = ({ moving, setSelectedFolder, childFolders, parentId, level
   );
 };
 
-const Tree = ({ moving, folders, parentId, level, open }) => {
-  const { setFolder, setSelectedFolder } = useContext(UserContext);
+const TreeSelect = ({ moving, folders, parentId, level, open }) => {
+  const { setFolder, setPickFolder, setSelectedFolder } = useContext(UserContext);
 
   const childFolders = folders.filter((fold) => fold.parentFolderId !== parentId);
   const topFolders = folders.filter((fold) => fold.parentFolderId === parentId);
@@ -43,7 +52,14 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
               className="w-full relative py-2 px-3 rounded-md bg-slate-700 hover:bg-slate-800 duration-200 my-2 cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
-                moving ? setSelectedFolder(fold) : setFolder(fold);
+                moving
+                  ? open.item.title === fold.title
+                    ? null
+                    : setSelectedFolder(fold)
+                  : setFolder(() => {
+                      console.log("Calling");
+                      return fold;
+                    });
               }}
             >
               <div
@@ -66,6 +82,7 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
                 {folderStates[fold.folderid] && (
                   <NestedFolder
                     moving={moving}
+                    setPickFolder={setPickFolder}
                     setSelectedFolder={setSelectedFolder}
                     childFolders={childFolders}
                     parentId={fold.folderid}
@@ -82,4 +99,4 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
   );
 };
 
-export default Tree;
+export default TreeSelect;

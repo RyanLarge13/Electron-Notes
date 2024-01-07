@@ -1,15 +1,17 @@
 import { useContext, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Folders from "@renderer/components/Folders";
-import Header from "@renderer/components/Header";
 import { TbFilters } from "react-icons/tb";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
+import { updateNote, updateFolder } from "@renderer/utils/api";
 import { FiEdit } from "react-icons/fi";
+import Folders from "@renderer/components/Folders";
+import Header from "@renderer/components/Header";
 import Notes from "@renderer/components/Notes";
 import UserContext from "@renderer/contexxt/UserContext";
 import NoteView from "@renderer/components/NoteView";
 import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
+import Tree from "@renderer/components/Tree";
 import { FaFolderPlus } from "react-icons/fa";
 import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
@@ -25,15 +27,21 @@ const Account = (): JSX.Element => {
     menu,
     filter,
     setFilter,
+    folder,
     order,
+    allData,
     setAllData,
     token,
     setOrder,
     edit,
     selectedForEdit,
     setSelectedForEdit,
+    selectedFolder,
+    setSelectedFolder,
     setEdit,
-    settings
+    settings,
+    move,
+    setMove
   } = useContext(UserContext);
 
   const [filterOptions, setFilterOptions] = useState(false);
@@ -75,6 +83,83 @@ const Account = (): JSX.Element => {
       .finally(() => {
         console.log("Attempted to delete multiple folders");
       });
+  };
+
+  const moveItem = () => {
+    if (move.type === "note") {
+      const noteMoving = move.item;
+      const newNote = {
+        notesId: noteMoving.noteid,
+        htmlNotes: noteMoving.htmlText,
+        locked: noteMoving.locked,
+        title: noteMoving.title,
+        folderId: selectedFolder ? selectedFolder.folderid : null
+      };
+      updateNote(token, newNote)
+        .then((res) => {
+          const resNote = res.data.data[0];
+          const noteToPush = {
+            title: resNote.title,
+            createdAt: resNote.createdat,
+            noteid: resNote.notesid,
+            htmlText: resNote.htmlnotes,
+            locked: resNote.locked,
+            folderId: resNote.folderid
+          };
+          setAllData((prevUser) => {
+            const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
+            newNotes.push(noteToPush);
+            const newData = {
+              ...prevUser,
+              notes: newNotes
+            };
+            return newData;
+          });
+          setMove(null);
+          setSelectedFolder(null);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+    if (move.type === "folder") {
+      const folderMoving = move.item;
+      const newFolder = {
+        folderId: folderMoving.folderid,
+        title: folderMoving.title,
+        color: folderMoving.color,
+        parentFolderId: selectedFolder ? selectedFolder.folderid : null
+      };
+      updateFolder(token, newFolder)
+        .then((res) => {
+          const resFolder = res.data.data[0];
+          const folderToPush = {
+            title: resFolder.title,
+            color: resFolder.color,
+            folderid: resFolder.folderid,
+            parentFolderId: resFolder.parentfolderid
+          };
+          setAllData((prevData) => {
+            const newFolders = prevData.folders.filter(
+              (fold) => fold.folderid !== resFolder.folderid
+            );
+            newFolders.push(folderToPush);
+            const newData = {
+              ...prevData,
+              folders: newFolders
+            };
+            return newData;
+          });
+          setMove(null);
+          setSelectedFolder(null);
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          console.log("Finished moving folder atttempt");
+        });
+    }
   };
 
   return (
@@ -218,6 +303,52 @@ const Account = (): JSX.Element => {
       {note && <NoteView />}
       {menu && <Menu />}
       {settings && <Settings />}
+      {move && move.isMoving && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed z-40 inset-0 bg-black backdrop-blur-sm bg-opacity-20"
+            onClick={() => setMove(false)}
+          ></motion.div>
+          <motion.div
+            initial={{ x: -10, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className="fixed z-40 right-0 top-0 w-[80%] lg:w-[30%] p-5 rounded-l-md overflow-y-auto no-scroll-bar bottom-0 bg-slate-900"
+          >
+            <Tree
+              moving={true}
+              folders={allData.folders.filter((fold) => fold.folderid !== move.from)}
+              parentId={null}
+              level={0}
+              open={{ item: { title: null } }}
+            />
+            <button className="p-2 mt-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200">
+              Create Folder +
+            </button>
+            <div className="mt-3">
+              <p>
+                Move {move.itemTitle} from {folder ? folder.title : "Home"} &rarr;{" "}
+                {selectedFolder ? selectedFolder.title : "Home"}
+              </p>
+              <div className="flex justify-start items-start gap-x-5">
+                <button
+                  onClick={() => moveItem()}
+                  className="p-2 mt-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200"
+                >
+                  Move &rarr;
+                </button>
+                <button
+                  onClick={() => setSelectedFolder(null)}
+                  className="p-2 mt-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200"
+                >
+                  Move to home
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
       <Outlet />
     </section>
   );

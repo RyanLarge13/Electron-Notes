@@ -30,7 +30,8 @@ const Draft = () => {
         notesId: noteToEdit.noteid,
         title: title,
         htmlNotes: value,
-        locked: locked
+        locked: locked,
+        folderId: noteToEdit.folderId
       };
       return updateNote(token, updatedNote)
         .then((res) => {

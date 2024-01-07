@@ -23,7 +23,6 @@ const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
 
   const handleKeyPress = (e): void => {
-    e.preventDefault();
     const key = e.key;
     if (keyPresses.hasOwnProperty(key)) {
       setKeyPressed((prevPresses) => {
@@ -36,7 +35,6 @@ const MainPage = (): JSX.Element => {
   };
 
   const handleKeyUp = (e): void => {
-    e.preventDefault();
     const key = e.key;
     if (keyPresses.hasOwnProperty(key)) {
       setKeyPressed((prevPresses) => {

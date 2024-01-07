@@ -1,5 +1,5 @@
-import colors from '@renderer/constants/colors'
-import { motion } from 'framer-motion'
+import colors from "@renderer/constants/colors";
+import { motion } from "framer-motion";
 
 const Colors = ({ setColor }) => {
   return (
@@ -9,11 +9,14 @@ const Colors = ({ setColor }) => {
           whileHover={{ scale: 1.1 }}
           key={color.color}
           className={`${color.color} w-5 h-5 rounded-full shadow-md`}
-          onClick={() => setColor(color.color)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setColor(color.color);
+          }}
         ></motion.button>
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default Colors
+export default Colors;

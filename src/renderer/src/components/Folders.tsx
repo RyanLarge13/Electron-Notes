@@ -1,12 +1,19 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Folder } from "@renderer/types/types";
-import { createNewNote, updateFolder } from "@renderer/utils/api";
+import {
+  createNewFolder,
+  createNewNote,
+  updateFolder,
+  updateMultiFolders,
+  updateMultiNotes,
+  deleteAFolder
+} from "@renderer/utils/api";
 import { CiFolderOn } from "react-icons/ci";
 import { TbNotes } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
-import { deleteAFolder } from "@renderer/utils/api";
 import { FaCheckCircle, FaRegCheckCircle } from "react-icons/fa";
+import Colors from "./Colors";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const Folders = (): JSX.Element => {
@@ -26,11 +33,18 @@ const Folders = (): JSX.Element => {
     selectedForEdit,
     setSelectedForEdit,
     draggedOverFolder,
-    setDraggedOverFolder
+    setDraggedOverFolder,
+    setMove
   } = useContext(UserContext);
 
   const [dragging, setDragging] = useState(false);
   const [folderDragging, setFolderDragging] = useState(null);
+  const [folderToRename, setFolderToRename] = useState(null);
+  const [renameText, setRenameText] = useState("");
+  const [folderToChangeColor, setFolderToChangeColor] = useState(null);
+  const [newColor, setNewColor] = useState(null);
+
+  const renameRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -90,6 +104,202 @@ const Folders = (): JSX.Element => {
     setContextMenu({ show: false });
   };
 
+  const moveFolder = (folder) => {
+    setContextMenu({ show: false });
+    setMove({
+      isMoving: true,
+      from: folder.folderid,
+      itemTitle: folder.title,
+      item: folder,
+      type: "folder"
+    });
+  };
+
+  // const moveFolderCOntents = (folderId):void => {
+  //   const foldersOfFolder = allData.folders.filter((fold) => fold.parentFolderId === folderId);
+  //   const notesOfFolder = allData.notes.filter((aNote) => aNote.folderid === folderId);
+  //   setMove({
+  //     isMoving: true,
+  //     from: folder.folderid,
+  //     itemTitle: folder.title,
+  //     item: folder,
+  //     type: "folder"
+  //   })
+  // };
+
+  const confirmDup = (folder): void => {
+    setContextMenu({ show: false });
+    const newConfirmation = {
+      show: true,
+      title: `Duplicate ${folder.title}`,
+      text: "Would you like to duplicate this folder and all of its contents or only the folder?",
+      color: folder.color,
+      hasCancel: true,
+      actions: [
+        { text: "cancel", func: () => setSystemNotif({ show: false }) },
+        { text: "duplicate all", func: () => dupAll(folder) },
+        { text: "du[plicate folder", func: () => dupFolder(folder) }
+      ]
+    };
+    setSystemNotif(newConfirmation);
+  };
+
+  const dupAll = (folder) => {};
+
+  const dupFolder = (folder) => {
+    setSystemNotif({ show: false });
+    const newFolder = {
+      title: folder.title,
+      color: folder.color,
+      parentFolderId: folder.parentFolderId
+    };
+    createNewFolder(token, newFolder)
+      .then((res) => {
+        setAllData((prevData) => {
+          const resFolder = res.data.data[0];
+          const folderToPush = {
+            folderid: resFolder.folderid,
+            title: resFolder.foldertitle,
+            color: resFolder.foldercolor,
+            parentFolderId: resFolder.parentfolderid
+          };
+          const newData = {
+            ...prevData,
+            folders: [...prevData.folders, folderToPush]
+          };
+          return newData;
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        const newError = {
+          show: true,
+          title: "Error duplicating",
+          text: err.response.message,
+          color: "bg-red-300",
+          hasCancel: true,
+          actions: [
+            { text: "close", func: () => setSystemNotif({ show: false }) },
+            { text: "retry", func: () => dupFolder(folder) }
+          ]
+        };
+        setSystemNotif(newError);
+      });
+  };
+
+  const renameFolder = (folder): void => {
+    setFolderToRename(folder);
+    setContextMenu({ show: false });
+    if (renameRef.current) {
+      renameRef.current.focus();
+    }
+    setTimeout(() => {
+      renameRef.current.focus();
+    }, 250);
+  };
+
+  const handleRename = (e): void => {
+    setSystemNotif({ show: false });
+    e.preventDefault();
+    const newFolder = {
+      folderId: folderToRename.folderid,
+      title: renameText,
+      color: folderToRename.color,
+      parentFolderId: folderToRename.parentFolderId
+    };
+    updateFolder(token, newFolder)
+      .then((res) => {
+        const resFolder = res.data.data[0];
+        const folderToPush = {
+          folderid: resFolder.folderid,
+          title: resFolder.title,
+          color: resFolder.color,
+          parentFolderId: resFolder.parentfolderid
+        };
+        setAllData((prevUser) => {
+          const newFolders = prevUser.folders.filter(
+            (fold) => fold.folderid !== resFolder.folderid
+          );
+          newFolders.push(folderToPush);
+          const newData = {
+            ...prevUser,
+            folders: newFolders
+          };
+          return newData;
+        });
+        setFolderToRename(null);
+        setRenameText("");
+      })
+      .catch((err) => {
+        console.log(err);
+        const newError = {
+          show: true,
+          title: "Error Renaming Folder",
+          text: err.response.data.message,
+          color: "bg-red-300",
+          hasCancel: true,
+          actions: [
+            { text: "close", func: () => setSystemNotif({ show: false }) },
+            { text: "retry", func: () => handleRename(e) }
+          ]
+        };
+        setSystemNotif(newError);
+      });
+  };
+
+  const changeFolderColor = (folder) => {
+    setFolderToChangeColor(folder);
+    setContextMenu({ show: false });
+  };
+
+  const changeColor = (): void => {
+    setSystemNotif({ show: false });
+    const newFolder = {
+      folderId: folderToChangeColor.folderid,
+      title: folderToChangeColor.title,
+      color: newColor,
+      parentFolderId: folderToChangeColor.parentFolderId
+    };
+    updateFolder(token, newFolder)
+      .then((res) => {
+        const resFolder = res.data.data[0];
+        const folderToPush = {
+          folderid: resFolder.folderid,
+          title: resFolder.title,
+          color: resFolder.color,
+          parentFolderId: resFolder.parentfolderid
+        };
+        setAllData((prevUser) => {
+          const newFolders = prevUser.folders.filter(
+            (fold) => fold.folderid !== resFolder.folderid
+          );
+          newFolders.push(folderToPush);
+          const newData = {
+            ...prevUser,
+            folders: newFolders
+          };
+          return newData;
+        });
+        setFolderToChangeColor(false);
+        setNewColor(null);
+      })
+      .catch((err) => {
+        console.log(err);
+        const newError = {
+          show: true,
+          title: "Error Renaming Folder",
+          text: err.response.data.message,
+          color: "bg-red-300",
+          hasCancel: true,
+          actions: [
+            { text: "close", func: () => setSystemNotif({ show: false }) },
+            { text: "retry", func: () => handleRename(e) }
+          ]
+        };
+        setSystemNotif(newError);
+      });
+  };
+
   const deleteFolder = (folderId: number): void => {
     deleteAFolder(token, folderId)
       .then((res) => {
@@ -133,23 +343,24 @@ const Folders = (): JSX.Element => {
         },
         {
           title: "move",
-          func: () => {}
+          func: () => moveFolder(folder)
         },
         {
           title: "move contents",
+          // func: () => moveFolderCOntents(folder.folderid);
           func: () => {}
         },
         {
           title: "duplicate",
-          func: () => {}
+          func: () => confirmDup(folder)
         },
         {
           title: "rename",
-          func: () => {}
+          func: () => renameFolder(folder)
         },
         {
           title: "change color",
-          func: () => {}
+          func: () => changeFolderColor(folder)
         },
         {
           title: "delete",
@@ -260,11 +471,38 @@ const Folders = (): JSX.Element => {
           onDragStart={(e) => onDragStart(e, folder)}
           onDragEnd={onDragEnd}
           onMouseEnter={(e) => (dragging ? handleDragOver(e, folder) : null)}
-          whileHover={{ scale: 1.1 }}
+          whileHover={!folderToChangeColor && { scale: 1.1 }}
           key={folder.folderid}
           className="relative w-60 h-40 bg-slate-900 rounded-md shadow-lg p-2 flex flex-col justify-between cursor-pointer"
-          onClick={() => !edit && openFolder(folder)}
+          onClick={() => !edit && !folderToRename && !folderToChangeColor && openFolder(folder)}
         >
+          {folderToChangeColor && folderToChangeColor.folderid === folder.folderid && (
+            <>
+              <div
+                className="fixed z-40 inset-0 bg-transparent"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFolderToChangeColor(null);
+                }}
+              ></div>
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute bottom-[110%] p-3 z-[990] rounded-md shadow-md bg-slate-900"
+              >
+                <div
+                  className={`z-10 absolute top-0 right-0 w-[50%] h-3 rounded-bl-md rounded-tr-md ${newColor} bg-amber-300`}
+                ></div>
+                <Colors setColor={setNewColor} />
+                <button
+                  onClick={() => changeColor()}
+                  className="py-1 px-3 mt-2 duration-200 hover:bg-slate-700 rounded-md"
+                >
+                  Change Color on {folderToChangeColor.title}
+                </button>
+              </motion.div>
+            </>
+          )}
           <div
             className={`z-10 absolute top-0 right-0 w-[50%] h-3 rounded-bl-md rounded-tr-md ${folder.color} bg-amber-300`}
           ></div>
@@ -278,7 +516,19 @@ const Folders = (): JSX.Element => {
               {allData.notes.filter((aNote) => aNote.folderId === folder.folderid).length}
             </p>
           </div>
-          <p className="font-semibold">{folder.title}</p>
+          {folderToRename && folderToRename.folderid === folder.folderid ? (
+            <form onSubmit={handleRename}>
+              <input
+                ref={renameRef}
+                placeholder={folder.title}
+                value={renameText}
+                onChange={(e) => setRenameText(e.target.value)}
+                className="font-semibold bg-transparent focus:outline-none"
+              />
+            </form>
+          ) : (
+            <h2 className="font-semibold">{folder.title}</h2>
+          )}
           {edit && (
             <motion.button
               initial={{ opacity: 0, scale: 0.5 }}
