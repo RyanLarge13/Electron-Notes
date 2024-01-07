@@ -196,6 +196,7 @@ const Notes = (): JSX.Element => {
 
   const openNotesOptions = (event, note): void => {
     event.preventDefault();
+    event.stopPropagation();
     const { clientX, clientY } = event;
     setPosition({ top: clientY, left: clientX });
     const newMenu = {

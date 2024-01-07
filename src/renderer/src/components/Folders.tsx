@@ -324,6 +324,7 @@ const Folders = (): JSX.Element => {
 
   const openOptions = (event, folder) => {
     event.preventDefault();
+    event.stopPropagation();
     const { clientX, clientY } = event;
     setPosition({ top: clientY, left: clientX });
     const newMenu = {
