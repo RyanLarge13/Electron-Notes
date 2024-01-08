@@ -1,7 +1,7 @@
 import Axios from "axios";
 import { AxiosResponse } from "axios";
-const devUrl = "http://localhost:8080";
-// const devUrl = "https://notes-server-s05q.onrender.com";
+// const devUrl = "http://localhost:8080";
+const devUrl = "https://notes-server-s05q.onrender.com";
 
 export const loginUser = (
   username: string,

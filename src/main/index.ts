@@ -20,6 +20,7 @@ function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: windowState.width,
     height: windowState.height,
+    title: "Notes",
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === "linux" ? { appIcon } : {}),
@@ -45,7 +46,7 @@ function createWindow(): void {
   });
 
   mainWindow.loadFile(join(__dirname, "../renderer/index.html"), { hash: "login" });
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
