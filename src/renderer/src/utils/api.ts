@@ -1,7 +1,7 @@
 import Axios from "axios";
 import { AxiosResponse } from "axios";
-const devUrl = "http://localhost:8080";
-// const devUrl = "https://notes-server-s05q.onrender.com";
+// const devUrl = "http://localhost:8080";
+const devUrl = "https://notesserver-production-9640.up.railway.app";
 
 export const loginUser = (
   username: string,
@@ -9,6 +9,51 @@ export const loginUser = (
   password: string
 ): Promise<AxiosResponse> => {
   const res = Axios.post(`${devUrl}/users/login`, { username, email, password });
+  return res;
+};
+
+export const signupUser = (user: {
+  username: string;
+  email: string;
+  password: string;
+}): Promise<AxiosResponse> => {
+  const res = Axios.post(`${devUrl}/users/signup`, { ...user });
+  return res;
+};
+
+export const updateUsername = (username: string, token: string): Promise<AxiosResponse> => {
+  const res = Axios.patch(
+    `${devUrl}/users/update`,
+    { newUsername: username, newEmail: null },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
+
+export const updatePassword = (
+  oldPass: string,
+  newPass: string,
+  token: string
+): Promise<AxiosResponse> => {
+  const res = Axios.patch(
+    `${devUrl}/users/update/password`,
+    { oldPassword: oldPass, newPassword: newPass },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
+
+export const forgotCreds = (email: string): Promise<AxiosResponse> => {
+  const res = Axios.post(`${devUrl}/users/forgotcreds`, { email: email });
+  return res;
+};
+
+export const deleteUser = (token: string): Promise<AxiosResponse> => {
+  const res = Axios.delete(`${devUrl}/users/delete`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
   return res;
 };
 
@@ -21,7 +66,7 @@ export const getuserData = (token: string): Promise<AxiosResponse> => {
   return res;
 };
 
-export const createNewFolder = (token: string, data) => {
+export const createNewFolder = (token: string, data): Promise<AxiosResponse> => {
   const res = Axios.post(
     `${devUrl}/folders/create`,
     {
@@ -38,7 +83,7 @@ export const createNewFolder = (token: string, data) => {
   return res;
 };
 
-export const updateFolder = (token: string, folder) => {
+export const updateFolder = (token: string, folder): Promise<AxiosResponse> => {
   const res = Axios.patch(
     `${devUrl}/folders/update`,
     { ...folder },
@@ -47,11 +92,11 @@ export const updateFolder = (token: string, folder) => {
   return res;
 };
 
-export const updateMultiFolders = (token, folders, newFolderId) => {};
+// export const updateMultiFolders = (token, folders, newFolderId) => {};
 
-export const updateMultiNotes = (token, notes, newFolderId) => {};
+// export const updateMultiNotes = (token, notes, newFolderId) => {};
 
-export const deleteAFolder = (token, folderId) => {
+export const deleteAFolder = (token, folderId): Promise<AxiosResponse> => {
   const res = Axios.delete(`${devUrl}/folders/delete/${folderId}`, {
     headers: {
       Authorization: `Bearer ${token}`
@@ -60,7 +105,7 @@ export const deleteAFolder = (token, folderId) => {
   return res;
 };
 
-export const deleteMultipleFolders = (token, folderIds) => {
+export const deleteMultipleFolders = (token, folderIds): Promise<AxiosResponse> => {
   const res = Axios.delete(`${devUrl}/folders/multiple/delete`, {
     data: {
       folderIds: folderIds
@@ -70,7 +115,7 @@ export const deleteMultipleFolders = (token, folderIds) => {
   return res;
 };
 
-export const createNewNote = (token: string, note) => {
+export const createNewNote = (token: string, note): Promise<AxiosResponse> => {
   const res = Axios.post(
     `${devUrl}/notes/create`,
     { ...note },
@@ -83,7 +128,7 @@ export const createNewNote = (token: string, note) => {
   return res;
 };
 
-export const updateNote = (token: string, note) => {
+export const updateNote = (token: string, note): Promise<AxiosResponse> => {
   const res = Axios.patch(
     `${devUrl}/notes/update`,
     { ...note },
@@ -92,7 +137,7 @@ export const updateNote = (token: string, note) => {
   return res;
 };
 
-export const deleteANote = (token, noteId) => {
+export const deleteANote = (token, noteId): Promise<AxiosResponse> => {
   const res = Axios.delete(`${devUrl}/notes/delete/${noteId}`, {
     headers: {
       Authorization: `Bearer ${token}`

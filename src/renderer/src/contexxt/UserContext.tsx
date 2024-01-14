@@ -39,10 +39,15 @@ export const UserProvider = ({ children }: any): JSX.Element => {
       const defaultPreferences = {
         darkMode: true,
         theme: false,
-        commands: {
-          newFolder: "ctrl + f",
-          newNote: "ctrl + n"
-        }
+        lockPin: [1, 2, 3, 4],
+        commands: [
+          { text: "new folder", command: "ctrl + f", active: true },
+          { text: "new note", command: "ctrl + n", active: true },
+          { text: "open menu", command: "ctrl + m", active: true },
+          { text: "reorder notes", command: "ctrl + o", active: true },
+          { text: "edit", command: "ctrl + e", active: true },
+          { text: "search", command: "ctrl + s", active: true }
+        ]
       };
       localStorage.setItem("preferences", JSON.stringify(defaultPreferences));
       setUserPreferences(defaultPreferences);

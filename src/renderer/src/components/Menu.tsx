@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { FaShareAlt } from "react-icons/fa";
 import Tree from "./Tree";
 import UserContext from "@renderer/contexxt/UserContext";
+import { deleteUser } from "@renderer/utils/api";
 
 const Menu = () => {
   const {
@@ -15,7 +16,8 @@ const Menu = () => {
     setFolders,
     setMainTitle,
     setSystemNotif,
-    setSettings
+    setSettings,
+    token
   } = useContext(UserContext);
 
   const confirmLogout = (): void => {
@@ -36,7 +38,9 @@ const Menu = () => {
   const logout = (): void => {
     setToken(null);
     setUser(null);
+    localStorage.removeItem("signedup");
     localStorage.removeItem("authToken");
+    localStorage.removeItem("pin");
     setSystemNotif({ show: false });
   };
 
@@ -70,7 +74,27 @@ const Menu = () => {
     setMenu(false);
   };
 
-  const deleteAccount = (): void => {};
+  const deleteAccount = (): void => {
+    setSystemNotif({ show: false });
+    try {
+      deleteUser(token)
+        .then((res) => {
+          console.log(res);
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem("signedup");
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("pin");
+        })
+        .catch((err) => {
+          console.log(err);
+          const newError = {};
+        });
+    } catch (err) {
+      console.log(err);
+      const newError = {};
+    }
+  };
 
   return (
     <>

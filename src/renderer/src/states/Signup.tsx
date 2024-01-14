@@ -1,5 +1,7 @@
 import UserContext from "@renderer/contexxt/UserContext";
-import { useContext, useState } from "react";
+import { signupUser } from "@renderer/utils/api";
+import { useContext, useEffect, useState } from "react";
+import { ClipLoader } from "react-spinners";
 
 const Signup = ({ setSignup }) => {
   const { setSystemNotif, systemNotif } = useContext(UserContext);
@@ -7,9 +9,20 @@ const Signup = ({ setSignup }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loadingState, setLoadingState] = useState(false);
 
-  const handleSignup = (e): void => {
+  useEffect(() => {
+    const signupCreds = localStorage.getItem("signupCreds");
+    if (signupCreds) {
+      const mySignupCreds = JSON.parse(signupCreds);
+      setEmail(mySignupCreds.email);
+      setUsername(mySignupCreds.username);
+    }
+  }, []);
+
+  const handleSignup = async (e): Promise<boolean> => {
     e.preventDefault();
+    setLoadingState(true);
     if (!validateEmail() || !validateUsername() || !validatePass()) {
       const newError = {
         show: true,
@@ -19,8 +32,67 @@ const Signup = ({ setSignup }) => {
         hasCancel: true,
         actions: [{ text: "close", func: (): void => setSystemNotif({ show: false }) }]
       };
-      return setSystemNotif(newError);
+      setSystemNotif(newError);
+      return false;
     }
+    try {
+      signupUser({ username, email, password })
+        .then((res) => {
+          console.log(res);
+          const newNotification = {
+            show: true,
+            title: "Login",
+            text: `Please login with your credentials to access your account for the first time, a new email with your credentials was sent to your email`,
+            color: "bg-cyan-300",
+            hasCancel: true,
+            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+          };
+          setSystemNotif(newNotification);
+          localStorage.removeItem("loginCreds");
+          localStorage.removeItem("signupCreds");
+          setSignup(false);
+          setLoadingState(false);
+          return true;
+        })
+        .catch((err) => {
+          console.log(err);
+          const newError = {
+            show: true,
+            title: "Issues Signing In",
+            text: `${
+              err.response.data.message ||
+              "It looks like there might be an issue with your internet connection, please check your network connection and try again"
+            }`,
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              { text: "retry", func: () => handleSignup(e) }
+            ]
+          };
+          setSystemNotif(newError);
+          setLoadingState(false);
+          return false;
+        });
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Signing In",
+        text: err,
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          { text: "close", func: () => setSystemNotif({ show: false }) },
+          { text: "retry", func: () => handleSignup(e) }
+        ]
+      };
+      setSystemNotif(newError);
+      setLoadingState(false);
+      return false;
+    }
+    localStorage.setItem("signedup", "yes");
+    return false;
   };
 
   const validateUsername = (): boolean => {
@@ -93,6 +165,40 @@ const Signup = ({ setSignup }) => {
     return false;
   };
 
+  const handleChangeUsername = (e): void => {
+    setUsername(e.target.value);
+    const signupCreds = localStorage.getItem("signupCreds");
+    if (signupCreds) {
+      const mySignupCreds = JSON.parse(signupCreds);
+      mySignupCreds.username = e.target.value;
+      localStorage.setItem("signupCreds", JSON.stringify(mySignupCreds));
+    }
+    if (!signupCreds) {
+      const newSignupCreds = {
+        username: e.target.value,
+        email: ""
+      };
+      localStorage.setItem("signupCreds", JSON.stringify(newSignupCreds));
+    }
+  };
+
+  const handleChangeEmail = (e): void => {
+    setEmail(e.target.value);
+    const signupCreds = localStorage.getItem("signupCreds");
+    if (signupCreds) {
+      const mySignupCreds = JSON.parse(signupCreds);
+      mySignupCreds.email = e.target.value;
+      localStorage.setItem("signupCreds", JSON.stringify(mySignupCreds));
+    }
+    if (!signupCreds) {
+      const newSignupCreds = {
+        username: "",
+        email: e.target.value
+      };
+      localStorage.setItem("signupCreds", JSON.stringify(newSignupCreds));
+    }
+  };
+
   return (
     <section>
       <h1 className="text-7xl text-center font-bold mt-3">Sign Up</h1>
@@ -106,7 +212,7 @@ const Signup = ({ setSignup }) => {
           className="p-3 rounded-md shadow-md focus:outline-slate-300 w-full my-2 hover:bg-slate-100 duration-200 focus:bg-slate-100"
           placeholder="username"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => handleChangeUsername(e)}
           onKeyUp={validateUsername}
         />
         <input
@@ -114,7 +220,7 @@ const Signup = ({ setSignup }) => {
           className="p-3 focus:outline-slate-300 rounded-md shadow-md focus:border-none w-full my-2 hover:bg-slate-100 duration-200 focus:bg-slate-100"
           placeholder="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => handleChangeEmail(e)}
           onKeyUp={validateEmail}
         />
         <input
@@ -125,12 +231,19 @@ const Signup = ({ setSignup }) => {
           onChange={(e) => setPassword(e.target.value)}
           onKeyUp={validatePass}
         />
-        <button
-          type="submit"
-          className="py-2 px-4 rounded-md shadow-md bg-amber-300 text-black mt-3 font-semibold self-start hover:bg-slate-900 focus:bg-slate-900 focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
-        >
-          Signup &rarr;
-        </button>
+        {!loadingState ? (
+          <button
+            type="submit"
+            disabled={loadingState}
+            className="py-2 px-4 rounded-md shadow-md bg-amber-300 text-black mt-3 font-semibold self-start hover:bg-slate-900 focus:bg-slate-900 focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
+          >
+            Signup &rarr;
+          </button>
+        ) : (
+          <div className="pt-1 flex justify-center items-center rounded-md shadow-md bg-amber-300 mt-3 font-semibold self-start w-full">
+            <ClipLoader />
+          </div>
+        )}
         <hr className="my-5" />
         <p>already have an account?</p>
         <button onClick={() => setSignup(false)}>Login</button>

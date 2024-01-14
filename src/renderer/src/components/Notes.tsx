@@ -17,7 +17,8 @@ const Notes = (): JSX.Element => {
     setPosition,
     setSystemNotif,
     setNoteToEdit,
-    setMove
+    setMove,
+    userPreferences
   } = useContext(UserContext);
 
   const [pinInput, setPinInput] = useState(false);
@@ -40,13 +41,33 @@ const Notes = (): JSX.Element => {
     }
   }, [pinInput]);
 
+  useEffect(() => {
+    if (pin.fourth !== "") {
+      const validPin = checkPin();
+      if (validPin) {
+        return unlockNote();
+      }
+      const newError = {
+        show: true,
+        title: "Invalid Pin",
+        text: "Enter your valid pin to view your locked notes",
+        color: "bg-red-300",
+        hasCancel: false,
+        actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+      };
+      setSystemNotif(newError);
+      setPin({ first: "", second: "", third: "", fourth: "" });
+      firstInput.current.focus();
+    }
+  }, [pin.fourth]);
+
   const edit = (note): void => {
     setNoteToEdit(note);
     navigate("/newnote");
     setContextMenu({ show: false });
   };
 
-  const confirmDuplicate = (note) => {
+  const confirmDuplicate = (note): void => {
     setContextMenu({ show: false });
     const newConfirmation = {
       show: true,
@@ -247,6 +268,19 @@ const Notes = (): JSX.Element => {
     setAwaitingNote(null);
   };
 
+  const checkPin = (): boolean => {
+    const currentPin = userPreferences.lockPin;
+    if (
+      currentPin[0] === Number(pin.first) &&
+      currentPin[1] === Number(pin.second) &&
+      currentPin[2] === Number(pin.third) &&
+      currentPin[3] === Number(pin.fourth)
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   const handlePinInput = (e, level): void => {
     const newValue = e.target.value.replace(/[^0-9]/g, "").slice(0, 1);
     if (level === "first") {
@@ -271,7 +305,6 @@ const Notes = (): JSX.Element => {
       setPin((prev) => {
         return { ...prev, fourth: newValue };
       });
-      unlockNote();
     }
   };
 
