@@ -66,13 +66,13 @@ const SystemNotif = (): JSX.Element => {
             <p className="text-xs whitespace-pre-line">{systemNotif.text}</p>
             <div className="mt-3 p-1 border-t flex justify-between items-center">
               {systemNotif.actions?.map((action, index) => (
-                <div
+                <button
                   key={index}
                   onClick={() => action.func()}
-                  className="cursor-pointer hover:text-slate-300 duration-200"
+                  className="cursor-pointer hover:text-slate-300 duration-200 text-sm font-semibold"
                 >
-                  <p className="text-sm font-semibold">{action.text}</p>
-                </div>
+                  {action.text}
+                </button>
               ))}
             </div>
           </motion.div>

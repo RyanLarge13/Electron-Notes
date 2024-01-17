@@ -49,7 +49,7 @@ const Folders = (): JSX.Element => {
   const navigate = useNavigate();
 
   const openFolder = (folder: Folder): void => {
-    setNesting((prev) => [...prev, folder.title]);
+    setNesting((prev) => [...prev, { title: folder.title, id: folder.folderid }]);
     setFolder(folder);
   };
 
@@ -115,7 +115,7 @@ const Folders = (): JSX.Element => {
     });
   };
 
-  // const moveFolderCOntents = (folderId):void => {
+  // const moveFolderContents = (folderId):void => {
   //   const foldersOfFolder = allData.folders.filter((fold) => fold.parentFolderId === folderId);
   //   const notesOfFolder = allData.notes.filter((aNote) => aNote.folderid === folderId);
   //   setMove({

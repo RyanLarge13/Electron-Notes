@@ -4,6 +4,7 @@ import { FaShareAlt } from "react-icons/fa";
 import Tree from "./Tree";
 import UserContext from "@renderer/contexxt/UserContext";
 import { deleteUser } from "@renderer/utils/api";
+import { useNavigate } from "react-router-dom";
 
 const Menu = () => {
   const {
@@ -19,6 +20,8 @@ const Menu = () => {
     setSettings,
     token
   } = useContext(UserContext);
+
+  const navigate = useNavigate();
 
   const confirmLogout = (): void => {
     const newConfirmation = {
@@ -141,7 +144,10 @@ const Menu = () => {
             level={0}
             open={{ item: { title: null } }}
           />
-          <button className="p-2 mt-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200">
+          <button
+            onClick={() => navigate("/newfolder")}
+            className="p-2 mt-3 rounded-md bg-amber-300 text-black shadow-md hover:bg-amber-200 duration-200"
+          >
             Create Folder +
           </button>
         </div>

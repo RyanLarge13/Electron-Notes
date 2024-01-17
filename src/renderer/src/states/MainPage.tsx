@@ -33,7 +33,7 @@ const MainPage = (): JSX.Element => {
   const navigate = useNavigate();
 
   const handleKeyPress = (e): void => {
-    const key = e.key;
+    const key: string = e.key;
     if (keyPresses.hasOwnProperty(key)) {
       setKeyPressed((prevPresses) => {
         return {
@@ -45,7 +45,7 @@ const MainPage = (): JSX.Element => {
   };
 
   const handleKeyUp = (e): void => {
-    const key = e.key;
+    const key: string = e.key;
     if (keyPresses.hasOwnProperty(key)) {
       setKeyPressed((prevPresses) => {
         return {
@@ -87,6 +87,7 @@ const MainPage = (): JSX.Element => {
 
   const openOptions = (e): void => {
     e.preventDefault();
+    if (!user || loading) return;
     const { clientX, clientY } = e;
     setPosition({ top: clientY, left: clientX });
     const newMenu = {
@@ -98,53 +99,53 @@ const MainPage = (): JSX.Element => {
       options: [
         {
           title: "new folder",
-          func: () => {
+          func: (): void => {
             setContextMenu({ show: false });
             navigate("/newfolder");
           }
         },
         {
           title: "new note",
-          func: () => {
+          func: (): void => {
             setContextMenu({ show: false });
             navigate("/newnote");
           }
         },
         {
           title: "menu",
-          func: () => {
+          func: (): void => {
             setContextMenu({ show: false });
             setMenu(true);
           }
         },
         {
           title: "edit",
-          func: () => {
+          func: (): void => {
             setContextMenu({ show: false });
             setEdit(true);
           }
         },
         {
           title: "change view",
-          func: () => {
+          func: (): void => {
             setContextMenu({ show: false });
             setView((prevView) => (prevView === "list" ? "grid" : "list"));
           }
         },
         {
           title: "change order",
-          func: () => {
+          func: (): void => {
             setContextMenu({ show: false });
             setOrder((prevOrder) => !prevOrder);
           }
         },
         {
           title: "edit current folder",
-          func: () => {}
+          func: (): void => {}
         },
         {
           title: "settings",
-          func: () => {
+          func: (): void => {
             setContextMenu({ show: false });
             setMenu(true);
             setSettings(true);

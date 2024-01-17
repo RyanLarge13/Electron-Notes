@@ -3,20 +3,10 @@ import UserContext from "@renderer/contexxt/UserContext";
 import { BsArrowsExpand } from "react-icons/bs";
 import { PiArrowsInLineVertical } from "react-icons/pi";
 
-const NestedFolder = ({
-  moving,
-  setPickFolder,
-  setSelectedFolder,
-  childFolders,
-  parentId,
-  level,
-  open
-}) => {
+const NestedFolder = ({ moving, childFolders, parentId, level, open }) => {
   return (
     <TreeSelect
       moving={moving}
-      setPickFolder={setPickFolder}
-      setSelectedFolder={setSelectedFolder}
       folders={childFolders}
       parentId={parentId}
       level={level}
@@ -26,7 +16,7 @@ const NestedFolder = ({
 };
 
 const TreeSelect = ({ moving, folders, parentId, level, open }) => {
-  const { setFolder, setPickFolder, setSelectedFolder } = useContext(UserContext);
+  const { setFolder, setSelectedFolder } = useContext(UserContext);
 
   const childFolders = folders.filter((fold) => fold.parentFolderId !== parentId);
   const topFolders = folders.filter((fold) => fold.parentFolderId === parentId);
@@ -82,8 +72,6 @@ const TreeSelect = ({ moving, folders, parentId, level, open }) => {
                 {folderStates[fold.folderid] && (
                   <NestedFolder
                     moving={moving}
-                    setPickFolder={setPickFolder}
-                    setSelectedFolder={setSelectedFolder}
                     childFolders={childFolders}
                     parentId={fold.folderid}
                     level={level + 1}

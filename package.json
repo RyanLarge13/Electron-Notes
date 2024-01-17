@@ -1,9 +1,9 @@
 {
   "name": "notes",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "Ryan Large",
   "homepage": "https://www.electronjs.org",
   "scripts": {
     "format": "prettier --write .",

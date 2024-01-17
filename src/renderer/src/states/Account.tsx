@@ -12,11 +12,12 @@ import NoteView from "@renderer/components/NoteView";
 import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
 import Tree from "@renderer/components/Tree";
-import { FaFolderPlus } from "react-icons/fa";
+import { FaFolderPlus, FaHome } from "react-icons/fa";
 import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { deleteMultipleFolders } from "@renderer/utils/api";
+import { Folder } from "@renderer/types/types";
 
 const Account = (): JSX.Element => {
   const {
@@ -26,6 +27,7 @@ const Account = (): JSX.Element => {
     folders,
     menu,
     filter,
+    setNesting,
     setFilter,
     folder,
     order,
@@ -41,7 +43,9 @@ const Account = (): JSX.Element => {
     setEdit,
     settings,
     move,
-    setMove
+    setMove,
+    nesting,
+    setFolder
   } = useContext(UserContext);
 
   const [filterOptions, setFilterOptions] = useState(false);
@@ -62,14 +66,14 @@ const Account = (): JSX.Element => {
     setEdit(false);
   };
 
-  const moveAllSelected = () => {};
+  const moveAllSelected = (): void => {};
 
-  const deleteAllSelected = () => {
+  const deleteAllSelected = (): void => {
     deleteMultipleFolders(token, selectedForEdit)
-      .then((res) => {
+      .then(() => {
         setAllData((prevData) => {
           const newFoldersArray = prevData.folders.filter(
-            (fold) => !selectedForEdit.includes(fold.folderid)
+            (fold: Folder) => !selectedForEdit.includes(fold.folderid)
           );
           const newData = { ...prevData, folders: newFoldersArray };
           return newData;
@@ -85,7 +89,7 @@ const Account = (): JSX.Element => {
       });
   };
 
-  const moveItem = () => {
+  const moveItem = (): void => {
     if (move.type === "note") {
       const noteMoving = move.item;
       const newNote = {
@@ -157,13 +161,40 @@ const Account = (): JSX.Element => {
           console.log(err);
         })
         .finally(() => {
-          console.log("Finished moving folder atttempt");
+          console.log("Finished moving folder attempt");
         });
     }
   };
 
+  const navigateFolder = (folderId: number, index: number): void => {
+    const folderToSet = allData.folders.filter((fold: Folder) => fold.folderid === folderId)[0];
+    setNesting((prev: { title: string; id: number }[]) => {
+      const length = nesting.length;
+      const diff = length - index + 1;
+      const copyArr = [...prev];
+      copyArr.splice(index + 1, diff);
+      return copyArr;
+    });
+    setFolder(folderToSet);
+  };
+
   return (
     <section className="flex justify-center items-center flex-col mt-20 mx-10 lg:mx-60">
+      {nesting.length > 0 && (
+        <div className="flex justify-end items-center font-semibold gap-x-3 fixed top-5 left-5">
+          {nesting.map((folderMeta: { title: string; id: number }, index: number) => (
+            <motion.button
+              initial={{ opacity: 0, x: 10 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              key={index}
+              className="text-xs inline whitespace-nowrap"
+              onClick={() => navigateFolder(folderMeta.id, index)}
+            >
+              {folderMeta.title}
+            </motion.button>
+          ))}
+        </div>
+      )}
       <AnimatePresence>
         {edit && (
           <motion.div
@@ -278,7 +309,7 @@ const Account = (): JSX.Element => {
             className="rounded-md shadow-md fixed bottom-10 right-10 bg-slate-700 flex flex-col justify-center items-center text-amber-300 font-bold w-40"
           >
             <button
-              className="flex justify-between items-center w-full px-3 py-2 hover:bg-slate-600"
+              className="flex justify-between items-center w-full py-3 px-4 hover:bg-slate-600"
               onClick={() => {
                 setOptions(false);
                 addNewFolder();
@@ -288,7 +319,7 @@ const Account = (): JSX.Element => {
               <FaFolderPlus />
             </button>
             <button
-              className="flex justify-between items-center w-full px-3 py-2 hover:bg-slate-600"
+              className="flex justify-between items-center w-full py-3 px-4 hover:bg-slate-600"
               onClick={() => {
                 setOptions(false);
                 addNewNote();
@@ -323,28 +354,31 @@ const Account = (): JSX.Element => {
               level={0}
               open={{ item: { title: null } }}
             />
-            <button className="p-2 mt-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200">
-              Create Folder +
-            </button>
+            <div className="flex justify-start items-center gap-x-5">
+              <button
+                onClick={() => setSelectedFolder(null)}
+                className="p-2 mt-3 flex  justify-center items-center gap-x-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200"
+              >
+                Move <FaHome />
+              </button>
+              <button
+                onClick={() => navigate("/newfolder")}
+                className="p-2 mt-3 rounded-md bg-amber-300 shadow-md hover:bg-amber-200 text-black duration-200"
+              >
+                Create Folder +
+              </button>
+            </div>
             <div className="mt-3">
               <p>
                 Move {move.itemTitle} from {folder ? folder.title : "Home"} &rarr;{" "}
                 {selectedFolder ? selectedFolder.title : "Home"}
               </p>
-              <div className="flex justify-start items-start gap-x-5">
-                <button
-                  onClick={() => moveItem()}
-                  className="p-2 mt-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200"
-                >
-                  Move &rarr;
-                </button>
-                <button
-                  onClick={() => setSelectedFolder(null)}
-                  className="p-2 mt-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200"
-                >
-                  Move to home
-                </button>
-              </div>
+              <button
+                onClick={() => moveItem()}
+                className="py-2 px-3 mt-3 rounded-md bg-green-300 shadow-md text-black hover:bg-green-200 duration-200"
+              >
+                Move &rarr;
+              </button>
             </div>
           </motion.div>
         </>

@@ -248,7 +248,7 @@ const Settings = (): JSX.Element => {
       <motion.div
         initial={{ x: -10, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        className="fixed overflow-y-auto no-scroll-bar flex flex-col justify-start z-40 right-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 bg-slate-900 rounded-r-md overflow-y-auto no-scroll-bar"
+        className="fixed no-scroll-bar flex flex-col justify-start z-40 right-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 bg-slate-900 rounded-r-md overflow-y-auto no-scroll-bar"
       >
         <button
           onClick={() => setDarkModeTheme()}

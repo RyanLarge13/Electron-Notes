@@ -66,7 +66,10 @@ export const getuserData = (token: string): Promise<AxiosResponse> => {
   return res;
 };
 
-export const createNewFolder = (token: string, data): Promise<AxiosResponse> => {
+export const createNewFolder = (
+  token: string,
+  data: { title: string; color: string; parentFolderId: string }
+): Promise<AxiosResponse> => {
   const res = Axios.post(
     `${devUrl}/folders/create`,
     {
@@ -96,7 +99,7 @@ export const updateFolder = (token: string, folder): Promise<AxiosResponse> => {
 
 // export const updateMultiNotes = (token, notes, newFolderId) => {};
 
-export const deleteAFolder = (token, folderId): Promise<AxiosResponse> => {
+export const deleteAFolder = (token: string, folderId: string): Promise<AxiosResponse> => {
   const res = Axios.delete(`${devUrl}/folders/delete/${folderId}`, {
     headers: {
       Authorization: `Bearer ${token}`
@@ -105,7 +108,10 @@ export const deleteAFolder = (token, folderId): Promise<AxiosResponse> => {
   return res;
 };
 
-export const deleteMultipleFolders = (token, folderIds): Promise<AxiosResponse> => {
+export const deleteMultipleFolders = (
+  token: string,
+  folderIds: string[]
+): Promise<AxiosResponse> => {
   const res = Axios.delete(`${devUrl}/folders/multiple/delete`, {
     data: {
       folderIds: folderIds
@@ -115,7 +121,10 @@ export const deleteMultipleFolders = (token, folderIds): Promise<AxiosResponse> 
   return res;
 };
 
-export const createNewNote = (token: string, note): Promise<AxiosResponse> => {
+export const createNewNote = (
+  token: string,
+  note: { title: string; htmlNotes: string; folderId: string }
+): Promise<AxiosResponse> => {
   const res = Axios.post(
     `${devUrl}/notes/create`,
     { ...note },
@@ -128,7 +137,10 @@ export const createNewNote = (token: string, note): Promise<AxiosResponse> => {
   return res;
 };
 
-export const updateNote = (token: string, note): Promise<AxiosResponse> => {
+export const updateNote = (
+  token: string,
+  note: { notesId: string; htmlNotes: string; locked: boolean; title: string; folderId: string }
+): Promise<AxiosResponse> => {
   const res = Axios.patch(
     `${devUrl}/notes/update`,
     { ...note },
@@ -137,7 +149,7 @@ export const updateNote = (token: string, note): Promise<AxiosResponse> => {
   return res;
 };
 
-export const deleteANote = (token, noteId): Promise<AxiosResponse> => {
+export const deleteANote = (token: string, noteId: string): Promise<AxiosResponse> => {
   const res = Axios.delete(`${devUrl}/notes/delete/${noteId}`, {
     headers: {
       Authorization: `Bearer ${token}`

@@ -21,7 +21,7 @@ const Login = () => {
       setEmail(myLoginCreds.email);
       setUsername(myLoginCreds.username);
     }
-    if (hasSignedUp) {
+    if (!hasSignedUp) {
       return setSignup(true);
     }
   }, []);

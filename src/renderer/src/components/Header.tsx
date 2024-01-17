@@ -50,13 +50,14 @@ const Header = (): JSX.Element => {
     }
   }, [searchText]);
 
-  const takeUserHome = () => {
+  const takeUserHome = (): void => {
     if (checkFolder()) {
       setNesting([]);
       setFolders(allData.folders.filter((fold) => fold.parentFolderId === null));
       setNotes(allData.notes.filter((aNote) => aNote.folderId === null));
       setMainTitle("Folders");
-      return setFolder(null);
+      setFolder(null);
+      return;
     }
     setFolder(null);
   };
@@ -104,20 +105,6 @@ const Header = (): JSX.Element => {
           <button onClick={() => setMenu(true)}>
             <BiMenuAltLeft />
           </button>
-          {nesting.length > 0 && (
-            <div className="w-[70px] overflow-x-clip flex justify-end items-center font-semibold gap-x-3 nesting-div relative">
-              {nesting.map((folderTitle, index: number) => (
-                <motion.p
-                  initial={{ opacity: 0, x: 10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  key={index}
-                  className="text-xs inline whitespace-nowrap"
-                >
-                  {folderTitle}
-                </motion.p>
-              ))}
-            </div>
-          )}
           {checkFolder() && (
             <div>
               <button className="ml-3" onClick={() => goBack()}>

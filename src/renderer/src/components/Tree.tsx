@@ -3,16 +3,9 @@ import UserContext from "@renderer/contexxt/UserContext";
 import { BsArrowsExpand } from "react-icons/bs";
 import { PiArrowsInLineVertical } from "react-icons/pi";
 
-const NestedFolder = ({ moving, setSelectedFolder, childFolders, parentId, level, open }) => {
+const NestedFolder = ({ moving, childFolders, parentId, level, open }) => {
   return (
-    <Tree
-      moving={moving}
-      setSelectedFolder={setSelectedFolder}
-      folders={childFolders}
-      parentId={parentId}
-      level={level}
-      open={open}
-    />
+    <Tree moving={moving} folders={childFolders} parentId={parentId} level={level} open={open} />
   );
 };
 
@@ -66,7 +59,6 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
                 {folderStates[fold.folderid] && (
                   <NestedFolder
                     moving={moving}
-                    setSelectedFolder={setSelectedFolder}
                     childFolders={childFolders}
                     parentId={fold.folderid}
                     level={level + 1}
