@@ -15,6 +15,8 @@ const MainPage = (): JSX.Element => {
     setEdit,
     setMenu,
     setContextMenu,
+    note,
+    editNote,
     setPosition,
     setView,
     setSettings
@@ -87,7 +89,7 @@ const MainPage = (): JSX.Element => {
 
   const openOptions = (e): void => {
     e.preventDefault();
-    if (!user || loading) return;
+    if (!user || loading || note || editNote) return;
     const { clientX, clientY } = e;
     setPosition({ top: clientY, left: clientX });
     const newMenu = {

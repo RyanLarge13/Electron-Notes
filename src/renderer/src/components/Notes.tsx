@@ -62,6 +62,11 @@ const Notes = (): JSX.Element => {
   }, [pin.fourth]);
 
   const edit = (note): void => {
+    if (note.locked) {
+      setContextMenu({ show: false });
+      setAwaitingNote(note);
+      return setPinInput(true);
+    }
     setNoteToEdit(note);
     navigate("/newnote");
     setContextMenu({ show: false });
@@ -363,27 +368,27 @@ const Notes = (): JSX.Element => {
               value={pin.first}
               type="password"
               onChange={(e) => handlePinInput(e, "first")}
-              className="w-10 h-10 p-3 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className="w-10 h-10 p-3 bg-slate-700 text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
             />
             <input
               ref={secondInput}
               value={pin.second}
               type="password"
-              className="w-10 h-10 p-3 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className="w-10 h-10 p-3 bg-slate-700 text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
               onChange={(e) => handlePinInput(e, "second")}
             />
             <input
               ref={thirdInput}
               value={pin.third}
               type="password"
-              className="w-10 h-10 p-3 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className="w-10 h-10 p-3 bg-slate-700 text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
               onChange={(e) => handlePinInput(e, "third")}
             />
             <input
               ref={fourthInput}
               value={pin.fourth}
               type="password"
-              className="w-10 h-10 p-3 bg-slate-700 text-4xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className="w-10 h-10 p-3 bg-slate-700 text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
               onChange={(e) => handlePinInput(e, "fourth")}
             />
           </form>

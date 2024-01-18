@@ -306,7 +306,7 @@ const Account = (): JSX.Element => {
           <motion.div
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-md shadow-md fixed bottom-10 right-10 bg-slate-700 flex flex-col justify-center items-center text-amber-300 font-bold w-40"
+            className="rounded-md shadow-md fixed bottom-10 right-10 bg-slate-700 flex flex-col justify-center items-center font-bold w-40"
           >
             <button
               className="flex justify-between items-center w-full py-3 px-4 hover:bg-slate-600"

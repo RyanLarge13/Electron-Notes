@@ -497,9 +497,9 @@ const Folders = (): JSX.Element => {
                 <Colors setColor={setNewColor} />
                 <button
                   onClick={() => changeColor()}
-                  className="py-1 px-3 mt-2 duration-200 hover:bg-slate-700 rounded-md"
+                  className="py-1 px-3 mt-3 duration-200 hover:bg-amber-200 rounded-md bg-amber-300 text-black"
                 >
-                  Change Color on {folderToChangeColor.title}
+                  Change Color &rarr;
                 </button>
               </motion.div>
             </>

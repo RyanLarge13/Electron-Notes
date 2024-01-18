@@ -23,8 +23,10 @@ const Settings = (): JSX.Element => {
   const [lockPin, setLockPin] = useState(false);
   const [newLockPin, setNewLockPin] = useState({ first: "", second: "", third: "", fourth: "" });
   const [createNewPin, setCreateNewPin] = useState(false);
-  const [theme, setTheme] = useState(false);
-  const [newTheme, setNewTheme] = useState("bg-amber-300");
+  const [theme, setTheme] = useState(userPreferences.theme);
+  const [newTheme, setNewTheme] = useState(
+    userPreferences.theme ? userPreferences.theme : "bg-amber-300"
+  );
 
   const firstInput = useRef(null);
   const secondInput = useRef(null);

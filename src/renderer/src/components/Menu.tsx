@@ -41,7 +41,6 @@ const Menu = () => {
   const logout = (): void => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem("signedup");
     localStorage.removeItem("authToken");
     localStorage.removeItem("pin");
     setSystemNotif({ show: false });
