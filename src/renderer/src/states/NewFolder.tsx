@@ -71,6 +71,7 @@ const NewFolder = (): JSX.Element => {
         <form onSubmit={createFolder}>
           <input
             placeholder="title"
+            autoFocus={true}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="focus:outline-none p-2 text-xl text-white bg-transparent"

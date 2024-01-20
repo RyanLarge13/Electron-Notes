@@ -4,6 +4,12 @@ import { TbFilters } from "react-icons/tb";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
 import { updateNote, updateFolder } from "@renderer/utils/api";
 import { FiEdit } from "react-icons/fi";
+import { FaFolderPlus, FaHome } from "react-icons/fa";
+import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { deleteMultipleFolders } from "@renderer/utils/api";
+import { Folder } from "@renderer/types/types";
 import Folders from "@renderer/components/Folders";
 import Header from "@renderer/components/Header";
 import Notes from "@renderer/components/Notes";
@@ -12,12 +18,7 @@ import NoteView from "@renderer/components/NoteView";
 import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
 import Tree from "@renderer/components/Tree";
-import { FaFolderPlus, FaHome } from "react-icons/fa";
-import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
-import { Outlet } from "react-router-dom";
-import { deleteMultipleFolders } from "@renderer/utils/api";
-import { Folder } from "@renderer/types/types";
+import Colors from "@renderer/components/Colors";
 
 const Account = (): JSX.Element => {
   const {
@@ -38,6 +39,8 @@ const Account = (): JSX.Element => {
     edit,
     selectedForEdit,
     setSelectedForEdit,
+    editCurrentFolder,
+    setEditCurrentFolder,
     selectedFolder,
     setSelectedFolder,
     setEdit,
@@ -50,6 +53,8 @@ const Account = (): JSX.Element => {
 
   const [filterOptions, setFilterOptions] = useState(false);
   const [options, setOptions] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newColor, setNewColor] = useState(folder ? folder.color : "bg-amber-300");
 
   const navigate = useNavigate();
 
@@ -166,6 +171,52 @@ const Account = (): JSX.Element => {
     }
   };
 
+  const editMyFolder = (): void => {
+    const folderUpdate = {
+      folderId: folder.folderid,
+      title: newTitle,
+      color: newColor,
+      parentFolderId: folder.parentFolderId
+    };
+    updateFolder(token, folderUpdate)
+      .then((res) => {
+        const resFolder = res.data.data[0];
+        const folderToPush = {
+          title: resFolder.title,
+          color: resFolder.color,
+          folderid: resFolder.folderid,
+          parentFolderId: resFolder.parentfolderid
+        };
+        setNewTitle("");
+        setNewColor(folderToPush.color);
+        setFolder(folderToPush);
+        setNesting((prev) => {
+          const nestCopy = [...prev];
+          nestCopy.pop();
+          nestCopy.push({ title: folderToPush.title, id: folderToPush.folderid });
+          return nestCopy;
+        });
+        setAllData((prevData) => {
+          const newFolders = prevData.folders.filter(
+            (fold) => fold.folderid !== resFolder.folderid
+          );
+          newFolders.push(folderToPush);
+          const newData = {
+            ...prevData,
+            folders: newFolders
+          };
+          return newData;
+        });
+        setEditCurrentFolder(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        console.log("Finished moving folder atttempt");
+      });
+  };
+
   const navigateFolder = (folderId: number, index: number): void => {
     const folderToSet = allData.folders.filter((fold: Folder) => fold.folderid === folderId)[0];
     setNesting((prev: { title: string; id: number }[]) => {
@@ -231,13 +282,40 @@ const Account = (): JSX.Element => {
           </motion.div>
         )}
       </AnimatePresence>
-      <h2 className="text-3xl font-semibold">{mainTitle}</h2>
+      {editCurrentFolder ? (
+        <input
+          placeholder={mainTitle}
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          className="text-3xl font-semibold focus:outline-none text-white text-center bg-transparent"
+          autoFocus={true}
+        />
+      ) : (
+        <h2 className="text-3xl font-semibold">{mainTitle}</h2>
+      )}
       <div className="mt-3">
         <p className="font-semibold">
           {folders.length} {folders.length === 1 ? "folder" : "folders"}, {notes.length}{" "}
           {notes.length === 1 ? "note" : "notes"}
         </p>
       </div>
+      {editCurrentFolder && (
+        <div>
+          <Colors setColor={setNewColor} />
+          <div className={`${newColor} w-full h-1 rounded-md mt-2`}></div>
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => setEditCurrentFolder(false)}
+              className="hover:text-slate-200 duration-200"
+            >
+              Cancel
+            </button>
+            <button onClick={() => editMyFolder()} className="hover:text-slate-200 duration-200">
+              Submit
+            </button>
+          </div>
+        </div>
+      )}
       <Header />
       <Folders />
       <div className="flex justify-end items-center w-full mt-5 gap-x-3 relative">

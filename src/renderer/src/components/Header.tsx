@@ -19,6 +19,8 @@ const Header = (): JSX.Element => {
     setMenu,
     view,
     setView,
+    setEditCurrentFolder,
+    editCurrentFolder,
     setNotes,
     nesting,
     setNesting,
@@ -51,6 +53,9 @@ const Header = (): JSX.Element => {
   }, [searchText]);
 
   const takeUserHome = (): void => {
+    if (editCurrentFolder) {
+      setEditCurrentFolder(false);
+    }
     if (checkFolder()) {
       setNesting([]);
       setFolders(allData.folders.filter((fold) => fold.parentFolderId === null));
@@ -63,6 +68,9 @@ const Header = (): JSX.Element => {
   };
 
   const goBack = (): void => {
+    if (editCurrentFolder) {
+      setEditCurrentFolder(false);
+    }
     if (checkFolder() && !folder) {
       setNesting([]);
       setFolders(allData.folders.filter((fold) => fold.parentFolderId === null));

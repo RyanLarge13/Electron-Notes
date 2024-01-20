@@ -15,8 +15,10 @@ const MainPage = (): JSX.Element => {
     setEdit,
     setMenu,
     setContextMenu,
+    setEditCurrentFolder,
     note,
     editNote,
+    folder,
     setPosition,
     setView,
     setSettings
@@ -87,6 +89,14 @@ const MainPage = (): JSX.Element => {
     };
   }, []);
 
+  const editCurrentFolder = (): void => {
+    setContextMenu({ show: false });
+    if (!folder) {
+      return;
+    }
+    setEditCurrentFolder(true);
+  };
+
   const openOptions = (e): void => {
     e.preventDefault();
     if (!user || loading || note || editNote) return;
@@ -143,7 +153,7 @@ const MainPage = (): JSX.Element => {
         },
         {
           title: "edit current folder",
-          func: (): void => {}
+          func: (): void => editCurrentFolder()
         },
         {
           title: "settings",

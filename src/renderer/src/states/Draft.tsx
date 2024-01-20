@@ -104,6 +104,7 @@ const Draft = () => {
           <input
             type="text"
             placeholder="Title"
+            autoFocus={true}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="p-3 text-xl bg-black focus:outline-none"

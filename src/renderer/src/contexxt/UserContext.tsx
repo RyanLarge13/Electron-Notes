@@ -31,6 +31,7 @@ export const UserProvider = ({ children }: any): JSX.Element => {
   const [settings, setSettings] = useState(false);
   const [userPreferences, setUserPreferences] = useState({});
   const [move, setMove] = useState(null);
+  const [editCurrentFolder, setEditCurrentFolder] = useState(false);
 
   useEffect(() => {
     //preferences settings
@@ -176,6 +177,8 @@ export const UserProvider = ({ children }: any): JSX.Element => {
         contextMenu,
         setContextMenu,
         menu,
+        editCurrentFolder,
+        setEditCurrentFolder,
         setMenu,
         systemNotif,
         setSystemNotif,
