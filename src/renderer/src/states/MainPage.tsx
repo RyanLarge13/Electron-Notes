@@ -101,7 +101,15 @@ const MainPage = (): JSX.Element => {
     e.preventDefault();
     if (!user || loading || note || editNote) return;
     const { clientX, clientY } = e;
-    setPosition({ top: clientY, left: clientX });
+    let dynamicTop = clientY;
+    let dynamicLeft = clientX;
+    if (clientY + 250 > window.innerHeight) {
+      dynamicTop -= 270;
+    }
+    if (clientX + 200 > window.innerWidth) {
+      dynamicLeft -= 250;
+    }
+    setPosition({ top: dynamicTop, left: dynamicLeft });
     const newMenu = {
       show: true,
       meta: {

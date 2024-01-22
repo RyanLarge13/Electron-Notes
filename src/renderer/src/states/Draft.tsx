@@ -5,6 +5,7 @@ import { createNewNote, updateNote } from "@renderer/utils/api";
 import "react-quill/dist/quill.snow.css";
 import ReactQuill from "react-quill";
 import UserContext from "@renderer/contexxt/UserContext";
+import { ClipLoader } from "react-spinners";
 
 const Draft = () => {
   const { token, folder, setAllData, noteToEdit, setNoteToEdit } = useContext(UserContext);
@@ -12,11 +13,14 @@ const Draft = () => {
   const [title, setTitle] = useState(noteToEdit ? noteToEdit.title : "");
   const [value, setValue] = useState(noteToEdit ? noteToEdit.htmlText : "");
   const [locked, setLocked] = useState(noteToEdit ? noteToEdit.locked : false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const saveNote = () => {
+    setLoading(true);
     if (!token) {
+      setLoading(false);
       return;
     }
     const newNote = {
@@ -53,13 +57,12 @@ const Draft = () => {
             };
             return newData;
           });
+          setLoading(false);
           navigate("/");
         })
         .catch((err) => {
+          setLoading(false);
           console.log(err);
-        })
-        .finally(() => {
-          console.log("Finished updating");
         });
     }
     createNewNote(token, newNote)
@@ -80,13 +83,12 @@ const Draft = () => {
           };
           return newData;
         });
+        setLoading(false);
         navigate("/");
       })
       .catch((err) => {
+        setLoading(false);
         console.log(err);
-      })
-      .finally(() => {
-        console.log("Finished note upload attempt");
       });
   };
 
@@ -114,7 +116,7 @@ const Draft = () => {
               {locked ? <FaLock className="text-amber-300" /> : <FaUnlock />}
             </button>
             <button onClick={() => saveNote()} className="text-slate-200">
-              <FaSave />
+              {loading ? <ClipLoader size={16} color="#fff" /> : <FaSave />}
             </button>
           </div>
         </div>

@@ -40,6 +40,7 @@ export const UserProvider = ({ children }: any): JSX.Element => {
       const defaultPreferences = {
         darkMode: true,
         theme: false,
+        confirm: true,
         lockPin: [1, 2, 3, 4],
         commands: [
           { text: "new folder", command: "ctrl + f", active: true },

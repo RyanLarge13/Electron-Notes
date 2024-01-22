@@ -34,6 +34,10 @@ const Header = (): JSX.Element => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!search) {
+      const topLevelNotes = allData.notes.filter((aNote) => aNote.folderId === null);
+      return setNotes(topLevelNotes);
+    }
     if (folder) {
       const folderNotes = allData.notes.filter((aNote) => aNote.folderId === folder.folderid);
       if (!searchText) {
@@ -50,7 +54,7 @@ const Header = (): JSX.Element => {
       const searchedNotes = allData.notes.filter((aNote) => aNote.title.includes(searchText));
       setNotes(searchedNotes);
     }
-  }, [searchText]);
+  }, [searchText, search]);
 
   const takeUserHome = (): void => {
     if (editCurrentFolder) {

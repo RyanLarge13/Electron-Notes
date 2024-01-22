@@ -1,3 +1,4 @@
+import { Folder } from "@renderer/types/types";
 import Axios from "axios";
 import { AxiosResponse } from "axios";
 // const devUrl = "http://localhost:8080";
@@ -86,10 +87,19 @@ export const createNewFolder = (
   return res;
 };
 
-export const updateFolder = (token: string, folder): Promise<AxiosResponse> => {
+export const updateFolder = (token: string, folder: Folder): Promise<AxiosResponse> => {
   const res = Axios.patch(
     `${devUrl}/folders/update`,
     { ...folder },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
+
+export const updateManyFolders = (token: string, foldersArr: Folder[]): Promise<AxiosResponse> => {
+  const res = Axios.patch(
+    `${devUrl}/folders/update`,
+    { folderArray: foldersArr },
     { headers: { Authorization: `Bearer ${token}` } }
   );
   return res;

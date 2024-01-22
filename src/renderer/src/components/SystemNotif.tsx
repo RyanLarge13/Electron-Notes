@@ -1,13 +1,16 @@
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "@renderer/contexxt/UserContext";
+import { ClipLoader } from "react-spinners";
 
 const SystemNotif = (): JSX.Element => {
   const { systemNotif, setSystemNotif } = useContext(UserContext);
 
+  const [loading, setLoading] = useState(false);
+
   const notifTimeoutRef = useRef(null);
 
-  const handleDrag = (e) => {
+  const handleDrag = (e): void => {
     const end = e.clientX;
     const minDistance = window.innerWidth / 1.4;
     if (end > minDistance) {
@@ -25,6 +28,7 @@ const SystemNotif = (): JSX.Element => {
     }
 
     return () => {
+      setLoading(false);
       clearTimeout(notifTimeoutRef.current);
     };
   }, [systemNotif, setSystemNotif]);
@@ -68,10 +72,17 @@ const SystemNotif = (): JSX.Element => {
               {systemNotif.actions?.map((action, index) => (
                 <button
                   key={index}
-                  onClick={() => action.func()}
+                  onClick={() => {
+                    setLoading(action.text);
+                    action.func();
+                  }}
                   className="cursor-pointer hover:text-slate-300 duration-200 text-sm font-semibold"
                 >
-                  {action.text}
+                  {loading && loading === action.text ? (
+                    <ClipLoader color="#fff" size={10} />
+                  ) : (
+                    action.text
+                  )}
                 </button>
               ))}
             </div>

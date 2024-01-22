@@ -6,7 +6,7 @@ import { FaLock } from "react-icons/fa";
 import { createNewFolder } from "@renderer/utils/api";
 import Colors from "@renderer/components/Colors";
 import UserContext from "@renderer/contexxt/UserContext";
-import { findFolder } from "@renderer/utils/helpers";
+import { ClipLoader } from "react-spinners";
 
 const NewFolder = (): JSX.Element => {
   const { folder, token, setAllData, setSelectedFolder, selectedFolder } = useContext(UserContext);
@@ -16,9 +16,11 @@ const NewFolder = (): JSX.Element => {
   const [color, setColor] = useState(selectedFolder ? selectedFolder.color : "bg-amber-300");
   const [title, setTitle] = useState(selectedFolder ? selectedFolder.foldertitle : "");
   const [lock, setLock] = useState(selectedFolder ? selectedFolder.locked : false);
+  const [loading, setLoading] = useState(false);
 
   const createFolder = (e): void => {
     e.preventDefault();
+    setLoading(true);
     const newFolder = {
       title: title,
       color: color,
@@ -40,13 +42,12 @@ const NewFolder = (): JSX.Element => {
           };
           return newData;
         });
+        setLoading(false);
         navigate("/");
       })
       .catch((err) => {
+        setLoading(false);
         console.log(err);
-      })
-      .finally(() => {
-        console.log("Finished");
       });
   };
 
@@ -82,7 +83,13 @@ const NewFolder = (): JSX.Element => {
           onClick={(e) => createFolder(e)}
           className="mt-5 py-2 px-3 rounded-md shadow-md bg-amber-300 text-black font-bold"
         >
-          Create &rarr;
+          {loading ? (
+            <div className="w-20">
+              <ClipLoader color="#000" size={15} />
+            </div>
+          ) : (
+            "Create Folder"
+          )}
         </button>
         <button onClick={() => setLock((prev) => !prev)} className="absolute bottom-5 right-5">
           {!lock ? <FaLockOpen /> : <FaLock className="text-amber-300" />}

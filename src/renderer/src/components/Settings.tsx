@@ -27,6 +27,7 @@ const Settings = (): JSX.Element => {
   const [newTheme, setNewTheme] = useState(
     userPreferences.theme ? userPreferences.theme : "bg-amber-300"
   );
+  const [confirmOps, setConfirmOps] = useState(userPreferences.confirm);
 
   const firstInput = useRef(null);
   const secondInput = useRef(null);
@@ -239,6 +240,44 @@ const Settings = (): JSX.Element => {
     }
   };
 
+  const confirmChangeOperation = (): void => {
+    const newConfirmation = {
+      show: true,
+      title: "Are You Sure?",
+      text: "When you turn off this functionality you will NOT be prompted before completing any delete, logout, move, or other operations on your data. Are you sure you want to turn this functionality off? Once data is deleted you can not get it back",
+      color: "bg-red-300",
+      hasCancel: true,
+      actions: [
+        { text: "CANCEL", func: () => setSystemNotif({ show: false }) },
+        { text: "confirm", func: () => changeConfirmationOnOperations() }
+      ]
+    };
+    setSystemNotif(newConfirmation);
+  };
+
+  const changeConfirmationOnOperations = (): void => {
+    setConfirmOps((prev) => !prev);
+    const newPreferences = {
+      ...userPreferences,
+      confirm: !userPreferences.confirm
+    };
+    try {
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+    } catch (err) {
+      console.log(err);
+      setConfirmOps((prev) => !prev);
+      const newError = {
+        show: true,
+        title: "Issues updating preferences",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem updating your preferences. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [{ text: "cloese", func: () => setSystemNotif({ show: false }) }]
+      };
+      setSystemNotif(newError);
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -288,6 +327,23 @@ const Settings = (): JSX.Element => {
             <Colors setColor={setNewTheme} />
           </div>
         )}
+        <button
+          onClick={() => {
+            confirmOps ? confirmChangeOperation() : changeConfirmationOnOperations();
+          }}
+          className="flex justify-between items-center my-3"
+        >
+          <p>Confirm Ops</p>
+          <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+            <div
+              className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                confirmOps
+                  ? "right-[1px] left-[50%] bg-green-200"
+                  : "left-[1px] right-[50%] bg-red-200"
+              } rounded-full`}
+            ></div>
+          </div>
+        </button>
         <button
           onClick={() => setLockPin((prev) => !prev)}
           className="flex justify-between items-center my-3"

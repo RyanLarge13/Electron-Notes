@@ -224,7 +224,15 @@ const Notes = (): JSX.Element => {
     event.preventDefault();
     event.stopPropagation();
     const { clientX, clientY } = event;
-    setPosition({ top: clientY, left: clientX });
+    let dynamicTop = clientY;
+    let dynamicLeft = clientX;
+    if (clientY + 185 > window.innerHeight) {
+      dynamicTop -= 185;
+    }
+    if (clientX + 200 > window.innerWidth) {
+      dynamicLeft -= 245;
+    }
+    setPosition({ top: dynamicTop, left: dynamicLeft });
     const newMenu = {
       show: true,
       meta: {

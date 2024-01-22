@@ -252,7 +252,7 @@ const Account = (): JSX.Element => {
             initial={{ opacity: 0, y: -10 }}
             exit={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="fixed top-5 left-5 padding-3 bg-slate-900 rounded-md shadow-md flex justify-evenly items-center gap-3"
+            className="fixed top-5 left-5 padding-3 z-50 bg-slate-900 rounded-md shadow-md flex justify-evenly items-center gap-3"
           >
             <button
               onClick={() => cancelEdit()}

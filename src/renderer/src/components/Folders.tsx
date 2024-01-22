@@ -322,11 +322,19 @@ const Folders = (): JSX.Element => {
       });
   };
 
-  const openOptions = (event, folder) => {
+  const openOptions = (event, folder): void => {
     event.preventDefault();
     event.stopPropagation();
     const { clientX, clientY } = event;
-    setPosition({ top: clientY, left: clientX });
+    let dynamicTop = clientY;
+    let dynamicLeft = clientX;
+    if (clientY + 270 > window.innerHeight) {
+      dynamicTop -= 270;
+    }
+    if (clientX + 200 > window.innerWidth) {
+      dynamicLeft -= 250;
+    }
+    setPosition({ top: dynamicTop, left: dynamicLeft });
     const newMenu = {
       show: true,
       meta: {
@@ -460,6 +468,13 @@ const Folders = (): JSX.Element => {
       });
   };
 
+  const listenForRenameCancel = (e) => {
+    if (e.key === "Escape" || e.key === "Delete") {
+      setRenameText("");
+      setFolderToRename(null);
+    }
+  };
+
   return (
     <div className="flex flex-wrap justify-start items-start gap-5 w-full mt-5">
       {folders.map((folder: Folder) => (
@@ -521,6 +536,7 @@ const Folders = (): JSX.Element => {
             <form onSubmit={handleRename}>
               <input
                 ref={renameRef}
+                onKeyUp={(e) => listenForRenameCancel(e)}
                 placeholder={folder.title}
                 value={renameText}
                 onChange={(e) => setRenameText(e.target.value)}
