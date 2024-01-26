@@ -1,20 +1,10 @@
 import { SetStateAction, Dispatch } from "react";
 
-export type typeUser = {
-  name: string;
-  id: string;
-} | null;
-
-export type typeFolder = {
-  title: string;
-  color: string;
-  id: string;
-};
-
 export type Folder = {
   folderid: number;
   title: string;
   color: string;
+  folders: 
 };
 
 export type Note = {

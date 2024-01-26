@@ -170,6 +170,7 @@ const Account = (): JSX.Element => {
   const moveItem = (): void => {
     if (move.type === "note") {
       const noteMoving = move.item;
+      const prevIdFolderId = noteMoving.folderId;
       const newNote = {
         notesId: noteMoving.noteid,
         htmlNotes: noteMoving.htmlText,
@@ -178,9 +179,12 @@ const Account = (): JSX.Element => {
         folderId: selectedFolder ? selectedFolder.folderid : null
       };
       setAllData((prevUser) => {
-        const newNotes = prevUser.notes.filter((note) => note.noteid !== noteMoving.notesId);
-        newNotes.push(noteToPush);
-        //This is where i left off at
+        const newNotes = prevUser.notes.map((note) => {
+          if (note.noteid === noteMoving.notesId) {
+            return { ...note, folderId: selectedFolder ? selectedFolder.folderid : null };
+          }
+          return note;
+        });
         const newData = {
           ...prevUser,
           notes: newNotes
@@ -188,7 +192,7 @@ const Account = (): JSX.Element => {
         return newData;
       });
       updateNote(token, newNote)
-        .then((res) => {
+        .then(() => {
           const newSuccess = {
             show: true,
             title: "Successfully Moved",
@@ -203,78 +207,180 @@ const Account = (): JSX.Element => {
             ]
           };
           setSystemNotif(newSuccess);
-          const resNote = res.data.data[0];
-          const noteToPush = {
-            title: resNote.title,
-            createdAt: resNote.createdat,
-            noteid: resNote.notesid,
-            htmlText: resNote.htmlnotes,
-            locked: resNote.locked,
-            folderId: resNote.folderid
-          };
-          // setAllData((prevUser) => {
-          //   const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
-          //   newNotes.push(noteToPush);
-          //   const newData = {
-          //     ...prevUser,
-          //     notes: newNotes
-          //   };
-          //   return newData;
-          // });
           setMove(null);
           setSelectedFolder(null);
         })
         .catch((err) => {
           console.log(err);
+          setAllData((prevUser) => {
+            const newNotes = prevUser.notes.maap((note) => {
+              if (note.noteid === noteMoving.notesId) {
+                return { ...note, folderId: prevIdFolderId };
+              }
+              return note;
+            });
+            const newData = {
+              ...prevUser,
+              notes: newNotes
+            };
+            return newData;
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Moving Note",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "re-try", func: () => moveItem() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "re-try", func: () => moveItem() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
         });
     }
     if (move.type === "folder") {
       const folderMoving = move.item;
+      const prevIdFolderId = folderMoving.folderid;
       const newFolder = {
         folderId: folderMoving.folderid,
         title: folderMoving.title,
         color: folderMoving.color,
         parentFolderId: selectedFolder ? selectedFolder.folderid : null
       };
-      updateFolder(token, newFolder)
-        .then((res) => {
-          const resFolder = res.data.data[0];
-          const folderToPush = {
-            title: resFolder.title,
-            color: resFolder.color,
-            folderid: resFolder.folderid,
-            parentFolderId: resFolder.parentfolderid
-          };
-          setAllData((prevData) => {
-            const newFolders = prevData.folders.filter(
-              (fold) => fold.folderid !== resFolder.folderid
-            );
-            newFolders.push(folderToPush);
-            const newData = {
-              ...prevData,
-              folders: newFolders
+      setAllData((prevUser) => {
+        const newFolders = prevUser.folders.map((fold) => {
+          if (fold.folderid === folderMoving.folderid) {
+            const updatedFold = {
+              ...fold,
+              parentFolderId: selectedFolder ? selectedFolder.folderid : null
             };
-            return newData;
-          });
-          setMove(null);
+            return updatedFold;
+          }
+          return note;
+        });
+        const newData = {
+          ...prevUser,
+          folders: newFolders
+        };
+        return newData;
+      });
+      setMove(null);
+      updateFolder(token, newFolder)
+        .then(() => {
+          const newSuccess = {
+            show: true,
+            title: "Successfully Moved",
+            text: `${move.item.title} was successfully moved to ${
+              selectedFolder ? selectedFolder.title : "home"
+            }`,
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              { text: "undo", func: () => undoMove() }
+            ]
+          };
+          setSystemNotif(newSuccess);
           setSelectedFolder(null);
         })
         .catch((err) => {
           console.log(err);
-        })
-        .finally(() => {
-          console.log("Finished moving folder attempt");
+          setAllData((prevUser) => {
+            const newFolders = prevUser.folders.map((fold) => {
+              if (fold.folderid === folderMoving.folderid) {
+                return { ...fold, folderId: prevIdFolderId };
+              }
+              return note;
+            });
+            const newData = {
+              ...prevUser,
+              folders: newFolders
+            };
+            return newData;
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Moving Folder",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "re-try", func: () => moveItem() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "re-try", func: () => moveItem() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
         });
     }
   };
 
   const editMyFolder = (): void => {
+    const prevTitle = folder.title;
+    const prevColor = folder.color;
     const folderUpdate = {
       folderId: folder.folderid,
       title: newTitle,
       color: newColor,
       parentFolderId: folder.parentFolderId
     };
+    setAllData((prevData) => {
+      const newFolders = prevData.folders.map((fold) => {
+        if (fold.folderid === folder.folderid) {
+          return { ...fold, title: newTitle, color: newColor };
+        }
+        return fold;
+      });
+      const newData = {
+        ...prevData,
+        folders: newFolders
+      };
+      return newData;
+    });
+    setFolder({ ...folder, title: newTitle, color: newColor });
+    // setNesting((prev) => {
+    //   const nestCopy = [...prev];
+    //   nestCopy.pop();
+    //   nestCopy.push({ title: folderToPush.title, id: folderToPush.folderid });
+    //   return nestCopy;
+    // });
+    setEditCurrentFolder(false);
     updateFolder(token, folderUpdate)
       .then((res) => {
         const resFolder = res.data.data[0];
@@ -286,31 +392,61 @@ const Account = (): JSX.Element => {
         };
         setNewTitle("");
         setNewColor(folderToPush.color);
-        setFolder(folderToPush);
+        // setFolder(folderToPush);
         setNesting((prev) => {
           const nestCopy = [...prev];
           nestCopy.pop();
           nestCopy.push({ title: folderToPush.title, id: folderToPush.folderid });
           return nestCopy;
         });
+        // setEditCurrentFolder(false);
+      })
+      .catch((err) => {
+        console.log(err);
         setAllData((prevData) => {
-          const newFolders = prevData.folders.filter(
-            (fold) => fold.folderid !== resFolder.folderid
-          );
-          newFolders.push(folderToPush);
+          const newFolders = prevData.folders.map((fold) => {
+            if (fold.folderid === folder.folderid) {
+              return { ...fold, title: prevTitle, color: prevColor };
+            }
+            return fold;
+          });
           const newData = {
             ...prevData,
             folders: newFolders
           };
           return newData;
         });
-        setEditCurrentFolder(false);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        console.log("Finished moving folder atttempt");
+        setFolder({ ...folder, title: prevTitle, color: prevColor });
+        if (err.response) {
+          const newError = {
+            show: true,
+            title: "Issues Updating Folder",
+            text: err.response.message,
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              { text: "re-try", func: () => editMyFolder() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
+        if (err.request) {
+          const newError = {
+            show: true,
+            title: "Network Error",
+            text: "Our application was not able to reach the server, please check your internet connection and try again",
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              { text: "re-try", func: () => editMyFolder() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
       });
   };
 
