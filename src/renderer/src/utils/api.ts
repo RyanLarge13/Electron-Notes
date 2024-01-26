@@ -96,10 +96,14 @@ export const updateFolder = (token: string, folder: Folder): Promise<AxiosRespon
   return res;
 };
 
-export const updateManyFolders = (token: string, foldersArr: Folder[]): Promise<AxiosResponse> => {
+export const moveMultipleFolders = (
+  token: string,
+  foldersArr: Folder[],
+  newParentId: string
+): Promise<AxiosResponse> => {
   const res = Axios.patch(
-    `${devUrl}/folders/update`,
-    { folderArray: foldersArr },
+    `${devUrl}/folders/moveall`,
+    { folderArray: foldersArr, newParentId: newParentId },
     { headers: { Authorization: `Bearer ${token}` } }
   );
   return res;

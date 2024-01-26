@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TbFilters } from "react-icons/tb";
+import { TbFilters, TbSquareLetterA } from "react-icons/tb";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
-import { updateNote, updateFolder } from "@renderer/utils/api";
+import { updateNote, updateFolder, moveMultipleFolders } from "@renderer/utils/api";
 import { FiEdit } from "react-icons/fi";
 import { FaFolderPlus, FaHome } from "react-icons/fa";
 import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-icons/md";
@@ -19,6 +19,7 @@ import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
 import Tree from "@renderer/components/Tree";
 import Colors from "@renderer/components/Colors";
+import { ClipLoader } from "react-spinners";
 
 const Account = (): JSX.Element => {
   const {
@@ -48,7 +49,8 @@ const Account = (): JSX.Element => {
     move,
     setMove,
     nesting,
-    setFolder
+    setFolder,
+    setSystemNotif
   } = useContext(UserContext);
 
   const [filterOptions, setFilterOptions] = useState(false);
@@ -71,28 +73,99 @@ const Account = (): JSX.Element => {
     setEdit(false);
   };
 
-  const moveAllSelected = (): void => {};
+  const moveAllSelected = (): void => {
+    // setMove({
+    //   isMoving: true,
+    //   from: selectedForEdit,
+    //   itemTitle: "Many",
+    //   item: null,
+    //   type: "folder"
+    // });
+    // try {
+    //   moveMultipleFolders(token, selectedForEdit, 1)
+    //     .then((res) => {
+    //       console.log(res);
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     });
+    // } catch (err) {
+    //   console.log(err);
+    // }
+  };
+
+  const undoDeleteMany = (folders: Folder[]): void => {};
 
   const deleteAllSelected = (): void => {
+    setAllData((prevData) => {
+      const newFoldersArray = prevData.folders.filter(
+        (fold: Folder) => !selectedForEdit.includes(fold.folderid)
+      );
+      const newData = { ...prevData, folders: newFoldersArray };
+      return newData;
+    });
+    const temp = allData.folders.filter((fold: Folder) =>
+      selectedForEdit.some((foldId: number) => fold.folderid === foldId)
+    );
+    setEdit(false);
     deleteMultipleFolders(token, selectedForEdit)
-      .then(() => {
-        setAllData((prevData) => {
-          const newFoldersArray = prevData.folders.filter(
-            (fold: Folder) => !selectedForEdit.includes(fold.folderid)
-          );
-          const newData = { ...prevData, folders: newFoldersArray };
-          return newData;
-        });
+      .then((res) => {
+        const deletedFoldersString = temp.map((fold: Folder) => `${fold.title}`).join("\n");
+        const newSuccess = {
+          show: true,
+          title: "Successfully Deleted",
+          text: `Deleted folders: \n ${deletedFoldersString} \n\n ${res.data.message}`,
+          color: "bg-green-300",
+          hasCancel: false,
+          actions: [
+            { text: "close", func: () => setSystemNotif({ show: false }) },
+            { text: "undo", func: () => undoDeleteMany(temp) }
+          ]
+        };
+        setSystemNotif(newSuccess);
         setSelectedForEdit([]);
-        setEdit(false);
       })
       .catch((err) => {
         console.log(err);
-      })
-      .finally(() => {
-        console.log("Attempted to delete multiple folders");
+        setAllData((prevData) => {
+          const newFoldersArray = [...prevData.folders, ...temp];
+          const newData = { ...prevData, folders: newFoldersArray };
+          return newData;
+        });
+        if (err.response) {
+          const newError = {
+            show: true,
+            title: "Issues Deleting Folders",
+            text: err.response.message,
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              { text: "re-try", func: () => deleteAllSelected() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
+        if (err.request) {
+          const newError = {
+            show: true,
+            title: "Network Error",
+            text: "Our application was not able to reach the server, please check your internet connection and try again",
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              { text: "re-try", func: () => deleteAllSelected() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
       });
   };
+
+  const undoMove = (): void => {};
 
   const moveItem = (): void => {
     if (move.type === "note") {
@@ -104,8 +177,32 @@ const Account = (): JSX.Element => {
         title: noteMoving.title,
         folderId: selectedFolder ? selectedFolder.folderid : null
       };
+      setAllData((prevUser) => {
+        const newNotes = prevUser.notes.filter((note) => note.noteid !== noteMoving.notesId);
+        newNotes.push(noteToPush);
+        //This is where i left off at
+        const newData = {
+          ...prevUser,
+          notes: newNotes
+        };
+        return newData;
+      });
       updateNote(token, newNote)
         .then((res) => {
+          const newSuccess = {
+            show: true,
+            title: "Successfully Moved",
+            text: `${move.item.title} was successfully moved to ${
+              selectedFolder ? selectedFolder.title : "home"
+            }`,
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              { text: "undo", func: () => undoMove() }
+            ]
+          };
+          setSystemNotif(newSuccess);
           const resNote = res.data.data[0];
           const noteToPush = {
             title: resNote.title,
@@ -115,15 +212,15 @@ const Account = (): JSX.Element => {
             locked: resNote.locked,
             folderId: resNote.folderid
           };
-          setAllData((prevUser) => {
-            const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
-            newNotes.push(noteToPush);
-            const newData = {
-              ...prevUser,
-              notes: newNotes
-            };
-            return newData;
-          });
+          // setAllData((prevUser) => {
+          //   const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
+          //   newNotes.push(noteToPush);
+          //   const newData = {
+          //     ...prevUser,
+          //     notes: newNotes
+          //   };
+          //   return newData;
+          // });
           setMove(null);
           setSelectedFolder(null);
         })
@@ -428,6 +525,7 @@ const Account = (): JSX.Element => {
             <Tree
               moving={true}
               folders={allData.folders.filter((fold) => fold.folderid !== move.from)}
+              // folders={allData.folders.filter((fold) => move.from.some((f) => f !== fold.folderid))}
               parentId={null}
               level={0}
               open={{ item: { title: null } }}

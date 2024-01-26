@@ -13,9 +13,11 @@ const MainPage = (): JSX.Element => {
     loading,
     setOrder,
     setEdit,
+    edit,
     setMenu,
     setContextMenu,
     setEditCurrentFolder,
+    setSelectedForEdit,
     note,
     editNote,
     folder,
@@ -31,7 +33,8 @@ const MainPage = (): JSX.Element => {
     Alt: false,
     m: false,
     e: false,
-    o: false
+    o: false,
+    Escape: false
   });
 
   const navigate = useNavigate();
@@ -61,7 +64,7 @@ const MainPage = (): JSX.Element => {
   };
 
   useEffect(() => {
-    const { Alt, Control, f, n, e, o, m } = keyPresses;
+    const { Alt, Control, f, n, e, o, m, Escape } = keyPresses;
 
     if (Alt && Control && n) {
       navigate("/newnote");
@@ -77,6 +80,10 @@ const MainPage = (): JSX.Element => {
     }
     if (Control && m) {
       setMenu((prev) => !prev);
+    }
+    if (edit && Escape) {
+      setEdit(false);
+      setSelectedForEdit([]);
     }
   }, [keyPresses]);
 

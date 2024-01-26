@@ -104,7 +104,7 @@ const Folders = (): JSX.Element => {
     setContextMenu({ show: false });
   };
 
-  const moveFolder = (folder) => {
+  const moveFolder = (folder): void => {
     setContextMenu({ show: false });
     setMove({
       isMoving: true,
@@ -127,7 +127,7 @@ const Folders = (): JSX.Element => {
   //   })
   // };
 
-  const confirmDup = (folder): void => {
+  const confirmDup = (folder: Folder): void => {
     setContextMenu({ show: false });
     const newConfirmation = {
       show: true,
@@ -144,9 +144,9 @@ const Folders = (): JSX.Element => {
     setSystemNotif(newConfirmation);
   };
 
-  const dupAll = (folder) => {};
+  const dupAll = (folder: Folder): void => {};
 
-  const dupFolder = (folder) => {
+  const dupFolder = (folder: Folder): void => {
     setSystemNotif({ show: false });
     const newFolder = {
       title: folder.title,
