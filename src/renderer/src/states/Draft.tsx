@@ -135,6 +135,7 @@ const Draft = () => {
   };
 
   const updateEditNote = (): void => {
+    const prevHtml = noteToEdit.htmlText;
     const updatedNote = {
       notesId: noteToEdit.noteid,
       title: title,
@@ -142,32 +143,85 @@ const Draft = () => {
       locked: locked,
       folderId: noteToEdit.folderId
     };
+    setAllData((prevData) => {
+      const newNotes = prevData.notes.map((aNote) => {
+        if (aNote.noteid === noteToEdit.noteid) {
+          return { ...aNote, htmlText: value };
+        }
+        return aNote;
+      });
+      return { ...prevData, notes: newNotes };
+    });
+    navigate("/");
     updateNote(token, updatedNote)
       .then((res) => {
-        const resNote = res.data.data[0];
-        const noteToPush = {
-          title: resNote.title,
-          createdAt: resNote.createdat,
-          noteid: resNote.notesid,
-          htmlText: resNote.htmlnotes,
-          locked: resNote.locked,
-          folderId: resNote.folderid
+        const newSuccess = {
+          show: true,
+          title: "Saved",
+          text: "Your note is saved",
+          color: "bg-green-300",
+          hasCancel: false,
+          actions: [
+            { text: "close", func: () => setSystemNotif({ show: false }) },
+            { text: "undo", func: () => {} }
+          ]
         };
-        setAllData((prevUser) => {
-          const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
-          newNotes.push(noteToPush);
-          const newData = {
-            ...prevUser,
-            notes: newNotes
-          };
-          return newData;
-        });
+        setSystemNotif(newSuccess);
         setLoading(false);
-        navigate("/");
       })
       .catch((err) => {
+        setAllData((prevData) => {
+          const newNotes = prevData.notes.map((aNote) => {
+            if (aNote.noteid === noteToEdit.noteid) {
+              return { ...aNote, htmlTet: prevHtml };
+            }
+            return aNote;
+          });
+          return { ...prevData, notes: newNotes };
+        });
         setLoading(false);
-        console.log(err);
+        if (err.response) {
+          const newError = {
+            show: true,
+            title: "Issues Updating Folder",
+            text: err.response.message,
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "open note",
+                func: () => {
+                  setSystemNotif({ show: false });
+                  navigate("/newnote");
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
+        if (err.request) {
+          const newError = {
+            show: true,
+            title: "Network Error",
+            text: "Our application was not able to reach the server, please check your internet connection and try again",
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "open note",
+                func: () => {
+                  setSystemNotif({ show: false });
+                  navigate("/newnote");
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
       });
   };
 
