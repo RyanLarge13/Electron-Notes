@@ -180,7 +180,7 @@ const Account = (): JSX.Element => {
       };
       setAllData((prevUser) => {
         const newNotes = prevUser.notes.map((note) => {
-          if (note.noteid === noteMoving.notesId) {
+          if (note.noteid === noteMoving.noteid) {
             return { ...note, folderId: selectedFolder ? selectedFolder.folderid : null };
           }
           return note;
@@ -191,6 +191,8 @@ const Account = (): JSX.Element => {
         };
         return newData;
       });
+      setMove(null);
+      setSelectedFolder(null);
       updateNote(token, newNote)
         .then(() => {
           const newSuccess = {
@@ -207,14 +209,12 @@ const Account = (): JSX.Element => {
             ]
           };
           setSystemNotif(newSuccess);
-          setMove(null);
-          setSelectedFolder(null);
         })
         .catch((err) => {
           console.log(err);
           setAllData((prevUser) => {
             const newNotes = prevUser.notes.maap((note) => {
-              if (note.noteid === noteMoving.notesId) {
+              if (note.noteid === noteMoving.noteid) {
                 return { ...note, folderId: prevIdFolderId };
               }
               return note;
@@ -275,7 +275,7 @@ const Account = (): JSX.Element => {
             };
             return updatedFold;
           }
-          return note;
+          return fold;
         });
         const newData = {
           ...prevUser,
@@ -374,12 +374,6 @@ const Account = (): JSX.Element => {
       return newData;
     });
     setFolder({ ...folder, title: newTitle, color: newColor });
-    // setNesting((prev) => {
-    //   const nestCopy = [...prev];
-    //   nestCopy.pop();
-    //   nestCopy.push({ title: folderToPush.title, id: folderToPush.folderid });
-    //   return nestCopy;
-    // });
     setEditCurrentFolder(false);
     updateFolder(token, folderUpdate)
       .then((res) => {
@@ -391,15 +385,12 @@ const Account = (): JSX.Element => {
           parentFolderId: resFolder.parentfolderid
         };
         setNewTitle("");
-        setNewColor(folderToPush.color);
-        // setFolder(folderToPush);
         setNesting((prev) => {
           const nestCopy = [...prev];
           nestCopy.pop();
           nestCopy.push({ title: folderToPush.title, id: folderToPush.folderid });
           return nestCopy;
         });
-        // setEditCurrentFolder(false);
       })
       .catch((err) => {
         console.log(err);

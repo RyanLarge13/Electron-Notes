@@ -2,13 +2,15 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLock, FaSave, FaUnlock } from "react-icons/fa";
 import { createNewNote, updateNote } from "@renderer/utils/api";
-import "react-quill/dist/quill.snow.css";
+import { ClipLoader } from "react-spinners";
+import { v4 as uuidv4 } from "uuid";
 import ReactQuill from "react-quill";
 import UserContext from "@renderer/contexxt/UserContext";
-import { ClipLoader } from "react-spinners";
+import "react-quill/dist/quill.snow.css";
 
 const Draft = () => {
-  const { token, folder, setAllData, noteToEdit, setNoteToEdit } = useContext(UserContext);
+  const { token, folder, setAllData, noteToEdit, setNoteToEdit, setSystemNotif } =
+    useContext(UserContext);
 
   const [title, setTitle] = useState(noteToEdit ? noteToEdit.title : "");
   const [value, setValue] = useState(noteToEdit ? noteToEdit.htmlText : "");
@@ -17,69 +19,146 @@ const Draft = () => {
 
   const navigate = useNavigate();
 
-  const saveNote = () => {
+  const saveNote = (): void => {
     setLoading(true);
     if (!token) {
       setLoading(false);
       return;
     }
+    const tempId = uuidv4();
     const newNote = {
       title: title,
       htmlNotes: value,
       folderId: folder ? folder.folderid : null,
       locked: locked
     };
+    const newStaticNote = {
+      noteid: tempId,
+      createdAt: new Date(),
+      title: title,
+      htmlText: value,
+      folderId: folder ? folder.folderid : null,
+      locked: locked
+    };
     if (noteToEdit) {
-      const updatedNote = {
-        notesId: noteToEdit.noteid,
-        title: title,
-        htmlNotes: value,
-        locked: locked,
-        folderId: noteToEdit.folderId
-      };
-      return updateNote(token, updatedNote)
-        .then((res) => {
-          const resNote = res.data.data[0];
-          const noteToPush = {
-            title: resNote.title,
-            createdAt: resNote.createdat,
-            noteid: resNote.notesid,
-            htmlText: resNote.htmlnotes,
-            locked: resNote.locked,
-            folderId: resNote.folderid
-          };
-          setAllData((prevUser) => {
-            const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
-            newNotes.push(noteToPush);
-            const newData = {
-              ...prevUser,
-              notes: newNotes
-            };
-            return newData;
-          });
-          setLoading(false);
-          navigate("/");
-        })
-        .catch((err) => {
-          setLoading(false);
-          console.log(err);
-        });
+      return updateEditNote();
     }
+    setAllData((prevData) => {
+      const newData = {
+        ...prevData,
+        notes: [...prevData.notes, newStaticNote]
+      };
+      return newData;
+    });
+    setLoading(false);
+    navigate("/");
     createNewNote(token, newNote)
       .then((res) => {
         const returnedNote = res.data.data[0];
-        const noteToPush = {
-          title: returnedNote.title,
-          createdAt: returnedNote.createdat,
-          noteid: returnedNote.notesid,
-          htmlText: returnedNote.htmlnotes,
-          locked: returnedNote.locked,
-          folderId: returnedNote.folderid
-        };
+        const newId = returnedNote.notesid;
         setAllData((prevData) => {
+          const newNotes = prevData.notes.map((note) => {
+            if (note.noteid === tempId) {
+              return { ...note, noteid: newId };
+            }
+            return note;
+          });
           const newData = {
             ...prevData,
-            notes: [...prevData.notes, noteToPush]
+            notes: newNotes
+          };
+          return newData;
+        });
+        const newSuccess = {
+          show: true,
+          title: "New Note",
+          text: "Your new note has been created!",
+          color: "bg-green-300",
+          hasCancel: false,
+          actions: [
+            { text: "close", func: () => setSystemNotif({ show: false }) },
+            { text: "undo", func: () => {} }
+          ]
+        };
+        setSystemNotif(newSuccess);
+      })
+      .catch((err) => {
+        setLoading(false);
+        console.log(err);
+        setAllData((prevData) => {
+          const newNotes = prevData.notes.filter((aNote) => aNote.noteid !== tempId);
+          return { ...prevData, notes: newNotes };
+        });
+        if (err.response) {
+          const newError = {
+            show: true,
+            title: "Issues Updating Folder",
+            text: err.response.message,
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "open note",
+                func: () => {
+                  navigate("/newnote");
+                  setSystemNotif({ show: false });
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
+        if (err.request) {
+          const newError = {
+            show: true,
+            title: "Network Error",
+            text: "Our application was not able to reach the server, please check your internet connection and try again",
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "open note",
+                func: () => {
+                  navigate("/newnote");
+                  setSystemNotif({ show: false });
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
+      });
+  };
+
+  const updateEditNote = (): void => {
+    const updatedNote = {
+      notesId: noteToEdit.noteid,
+      title: title,
+      htmlNotes: value,
+      locked: locked,
+      folderId: noteToEdit.folderId
+    };
+    updateNote(token, updatedNote)
+      .then((res) => {
+        const resNote = res.data.data[0];
+        const noteToPush = {
+          title: resNote.title,
+          createdAt: resNote.createdat,
+          noteid: resNote.notesid,
+          htmlText: resNote.htmlnotes,
+          locked: resNote.locked,
+          folderId: resNote.folderid
+        };
+        setAllData((prevUser) => {
+          const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
+          newNotes.push(noteToPush);
+          const newData = {
+            ...prevUser,
+            notes: newNotes
           };
           return newData;
         });
