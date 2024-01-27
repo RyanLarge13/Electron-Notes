@@ -1,9 +1,10 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, ReactNode } from "react";
+import { ContextProps } from "@renderer/types/types";
 import { getuserData } from "@renderer/utils/api";
 
-const UserContext = createContext({});
+const UserContext = createContext({} as ContextProps);
 
-export const UserProvider = ({ children }: any): JSX.Element => {
+export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [allData, setAllData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -16,22 +17,38 @@ export const UserProvider = ({ children }: any): JSX.Element => {
   const [note, setNote] = useState(null);
   const [mainTitle, setMainTitle] = useState("Folders");
   const [token, setToken] = useState(localStorage.getItem("authToken"));
-  const [contextMenu, setContextMenu] = useState({ show: false });
   const [position, setPosition] = useState({ top: 0, right: 0 });
   const [menu, setMenu] = useState(false);
-  const [systemNotif, setSystemNotif] = useState({ show: false });
   const [view, setView] = useState("list");
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [nesting, setNesting] = useState([]);
   const [edit, setEdit] = useState(false);
   const [selectedForEdit, setSelectedForEdit] = useState([]);
-  const [open, setOpen] = useState({ show: false, folder: null });
   const [draggedOverFolder, setDraggedOverFolder] = useState(null);
   const [noteToEdit, setNoteToEdit] = useState(null);
   const [settings, setSettings] = useState(false);
-  const [userPreferences, setUserPreferences] = useState({});
   const [move, setMove] = useState(null);
   const [editCurrentFolder, setEditCurrentFolder] = useState(false);
+  const [systemNotif, setSystemNotif] = useState({
+    show: false,
+    title: "",
+    text: "",
+    color: "",
+    hasCancel: false,
+    actions: []
+  });
+  const [contextMenu, setContextMenu] = useState({
+    show: false,
+    meta: { title: "", color: "" },
+    options: []
+  });
+  const [userPreferences, setUserPreferences] = useState({
+    confirm: true,
+    darkMode: true,
+    lockPin: [1, 2, 3, 4],
+    theme: "bg-amber-300",
+    commands: []
+  });
 
   useEffect(() => {
     //preferences settings
@@ -39,7 +56,7 @@ export const UserProvider = ({ children }: any): JSX.Element => {
     if (!preferences) {
       const defaultPreferences = {
         darkMode: true,
-        theme: false,
+        theme: "",
         confirm: true,
         lockPin: [1, 2, 3, 4],
         commands: [
@@ -130,7 +147,18 @@ export const UserProvider = ({ children }: any): JSX.Element => {
             color: "bg-red-300",
             hasCancel: true,
             actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
               { text: "reload", func: () => window.location.reload() }
             ]
           };
@@ -144,7 +172,20 @@ export const UserProvider = ({ children }: any): JSX.Element => {
             text: "Please login again to confirm your identity",
             color: "bg-red-300",
             hasCancel: false,
-            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              }
+            ]
           };
           return setSystemNotif(newError);
         }
@@ -199,7 +240,6 @@ export const UserProvider = ({ children }: any): JSX.Element => {
         setEdit,
         selectedForEdit,
         setSelectedForEdit,
-        open,
         draggedOverFolder,
         setDraggedOverFolder,
         noteToEdit,
