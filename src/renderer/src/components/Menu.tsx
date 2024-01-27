@@ -90,11 +90,52 @@ const Menu = () => {
         })
         .catch((err) => {
           console.log(err);
-          const newError = {};
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Delete Account Failed",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "re-try", func: () => deleteAccount() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "re-try", func: () => deleteAccount() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
         });
     } catch (err) {
       console.log(err);
-      const newError = {};
+      const newError = {
+        show: true,
+        title: "Delete Account Failed",
+        text: "There was an error with the application when trying to delete your account, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          { text: "close", func: () => setSystemNotif({ show: false }) },
+          { text: "re-try", func: () => deleteAccount() },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
     }
   };
 
