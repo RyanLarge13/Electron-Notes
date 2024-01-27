@@ -12,7 +12,8 @@ const Settings = (): JSX.Element => {
     setSystemNotif,
     token,
     setToken,
-    setUser
+    setUser,
+    user
   } = useContext(UserContext);
 
   const [username, setUsername] = useState(false);
@@ -165,20 +166,22 @@ const Settings = (): JSX.Element => {
 
   const changeUsername = async (e): Promise<void> => {
     e.preventDefault();
+    const prevUsername = user.username;
+    setUser((prevUser) => {
+      return { ...prevUser, username: newUsername };
+    });
+    setUsername(false);
     try {
       updateUsername(newUsername, token)
         .then((res) => {
           console.log(res);
           const newToken = res.data.data.token;
-          const newUser = res.data.data.user;
           localStorage.setItem("authToken", newToken);
-          setUser(newUser);
-          setUsername(false);
           setNewUsername("");
           const newSuccess = {
             show: true,
             title: "New Username",
-            text: `Your new username is now ${newUser.username}`,
+            text: `Your new username is now ${newUsername}`,
             color: "bg-green-300",
             hasCancel: false,
             actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
@@ -187,9 +190,55 @@ const Settings = (): JSX.Element => {
         })
         .catch((err) => {
           console.log(err);
+          setUser((prevUser) => {
+            return { ...prevUser, username: prevUsername };
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Username Update Failed",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "re-try", func: () => changeUsername(e) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "re-try", func: () => changeUsername(e) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
         });
     } catch (err) {
       console.log(err);
+      const newError = {
+        show: true,
+        title: "Update Username Failed",
+        text: "There was an error with the application when trying to update your username, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          { text: "close", func: () => setSystemNotif({ show: false }) },
+          { text: "re-try", func: () => changeUsername(e) },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
     }
   };
 
