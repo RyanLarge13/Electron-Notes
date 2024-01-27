@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import UserContext from "@renderer/contexxt/UserContext";
 import Colors from "./Colors";
 import { updatePassword, updateUsername } from "@renderer/utils/api";
+import { ClipLoader } from "react-spinners";
 
 const Settings = (): JSX.Element => {
   const {
@@ -29,6 +30,7 @@ const Settings = (): JSX.Element => {
     userPreferences.theme ? userPreferences.theme : "bg-amber-300"
   );
   const [confirmOps, setConfirmOps] = useState(userPreferences.confirm);
+  const [newPassLoading, setNewPassLoading] = useState(false);
 
   const firstInput = useRef(null);
   const secondInput = useRef(null);
@@ -82,13 +84,30 @@ const Settings = (): JSX.Element => {
       ...userPreferences,
       darkMode: !userPreferences.darkMode
     };
-    localStorage.setItem("preferences", JSON.stringify(newPreferences));
-    setUserPreferences(newPreferences);
+    try {
+      const stringifiedPreferences = JSON.stringify(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(stringifiedPreferences));
+      setUserPreferences(newPreferences);
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Update Dark Mode Failed",
+        text: "There was an error with the application when trying to update dark mode, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          { text: "close", func: () => setSystemNotif({ show: false }) },
+          { text: "re-try", func: () => setDarkModeTheme() },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const checkCurrentPin = () => {
     const currentPin = userPreferences.lockPin;
-    console.log(newLockPin);
     if (
       currentPin[0] === Number(newLockPin.first) &&
       currentPin[1] === Number(newLockPin.second) &&
@@ -96,6 +115,7 @@ const Settings = (): JSX.Element => {
       currentPin[3] === Number(newLockPin.fourth)
     ) {
       setNewLockPin({ first: "", second: "", third: "", fourth: "" });
+      firstInput.current.focus();
       return setCreateNewPin(true);
     }
     const newError = {
@@ -122,19 +142,37 @@ const Settings = (): JSX.Element => {
       ...userPreferences,
       lockPin: newPinArr
     };
-    localStorage.setItem("preferences", JSON.stringify(newPreferences));
-    setUserPreferences(newPreferences);
-    setLockPin(false);
-    setCreateNewPin(false);
-    const newConfirmation = {
-      show: true,
-      title: "New Lock Pin",
-      text: "Your new lock pin was created, don't forget this pin or you wont be able to view your locked notes",
-      color: "bg-green-300",
-      hasCancel: true,
-      actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
-    };
-    setSystemNotif(newConfirmation);
+    try {
+      const stringifiedPreferences = JSON.stringify(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(stringifiedPreferences));
+      setUserPreferences(newPreferences);
+      setLockPin(false);
+      setCreateNewPin(false);
+      const newConfirmation = {
+        show: true,
+        title: "New Lock Pin",
+        text: "Your new lock pin was created, don't forget this pin or you wont be able to view your locked notes",
+        color: "bg-green-300",
+        hasCancel: true,
+        actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+      };
+      setSystemNotif(newConfirmation);
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Update Pin Failed",
+        text: "There was an error with the application when trying to update your pin, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          { text: "close", func: () => setSystemNotif({ show: false }) },
+          { text: "re-try", func: () => createANewPin() },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const handlePinInput = (e, level): void => {
@@ -244,6 +282,7 @@ const Settings = (): JSX.Element => {
 
   const changePass = async (e): Promise<void> => {
     e.preventDefault();
+    setNewPassLoading(true);
     try {
       updatePassword(currentPass, newPass, token)
         .then((res) => {
@@ -262,30 +301,56 @@ const Settings = (): JSX.Element => {
             actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
           };
           setSystemNotif(newSuccess);
+          setNewPassLoading(false);
         })
         .catch((err) => {
           console.log(err);
-          const newError = {
-            show: true,
-            title: "Updating Password",
-            text: err.response.data.message,
-            color: "bg-red-300",
-            hasCancel: true,
-            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
-          };
-          setSystemNotif(newError);
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Password update Failed",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                { text: "close", func: () => setSystemNotif({ show: false }) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+            setSystemNotif(newError);
+          }
+          setNewPassLoading(false);
         });
     } catch (err) {
       console.log(err);
       const newError = {
         show: true,
-        title: "Updating Password",
-        text: "There was a problem updating your password. Please try refreshing or checking your internet connection before trying again",
+        title: "Update Password Failed",
+        text: "There was an error with the application when trying to update your password, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
         color: "bg-red-300",
         hasCancel: true,
-        actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+        actions: [
+          { text: "close", func: () => setSystemNotif({ show: false }) },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
       };
       setSystemNotif(newError);
+      setNewPassLoading(false);
     }
   };
 
@@ -514,7 +579,7 @@ const Settings = (): JSX.Element => {
                 type="submit"
                 className="bg-amber-300 text-sm w-[195px] text-black p-2 font-semibold duration-200 hover:bg-black hover:text-white focus:bg-black focus:text-white focus:outline-none"
               >
-                Submit
+                {newPassLoading ? <ClipLoader size={18} /> : "Submit"}
               </button>
             </form>
           </div>
