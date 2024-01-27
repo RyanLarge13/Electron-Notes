@@ -4,12 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { FaLockOpen } from "react-icons/fa";
 import { FaLock } from "react-icons/fa";
 import { createNewFolder } from "@renderer/utils/api";
+import { ClipLoader } from "react-spinners";
+import { v4 as uuidv4 } from "uuid";
 import Colors from "@renderer/components/Colors";
 import UserContext from "@renderer/contexxt/UserContext";
-import { ClipLoader } from "react-spinners";
 
 const NewFolder = (): JSX.Element => {
-  const { folder, token, setAllData, setSelectedFolder, selectedFolder } = useContext(UserContext);
+  const { folder, token, setAllData, setSelectedFolder, selectedFolder, setSystemNotif } =
+    useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -21,33 +23,87 @@ const NewFolder = (): JSX.Element => {
   const createFolder = (e): void => {
     e.preventDefault();
     setLoading(true);
+    const tempId = uuidv4();
     const newFolder = {
       title: title,
       color: color,
       parentFolderId: selectedFolder ? selectedFolder.folderid : folder ? folder.folderid : null
     };
+    setAllData((prevData) => {
+      const newFolders = [...prevData.folders, { ...newFolder, folderid: tempId }];
+      const newData = { ...prevData, folders: newFolders };
+      return newData;
+    });
+    navigate("/");
     createNewFolder(token, newFolder)
-      .then((res) => {
+      .then(() => {
+        const newSuccess = {
+          show: true,
+          title: "New Folder",
+          text: "Your new folder was successfully created!!",
+          color: "bg-green-300",
+          hasCancel: false,
+          actions: [
+            { text: "close", func: () => setSystemNotif({ show: false }) },
+            { text: "undo", func: () => {} }
+          ]
+        };
+        setSystemNotif(newSuccess);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
         setAllData((prevData) => {
-          const resFolder = res.data.data[0];
-          const folderToPush = {
-            folderid: resFolder.folderid,
-            title: resFolder.foldertitle,
-            color: resFolder.foldercolor,
-            parentFolderId: resFolder.parentfolderid
-          };
+          const newFolders = prevData.folders.filter((fold) => fold.folderid !== tempId);
           const newData = {
             ...prevData,
-            folders: [...prevData.folders, folderToPush]
+            folders: newFolders
           };
           return newData;
         });
-        setLoading(false);
-        navigate("/");
-      })
-      .catch((err) => {
-        setLoading(false);
-        console.log(err);
+        if (err.response) {
+          const newError = {
+            show: true,
+            title: "Issues Creating Folder",
+            text: err.response.message,
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "open note",
+                func: () => {
+                  setSystemNotif({ show: false });
+                  navigate("/newfolder");
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
+        if (err.request) {
+          const newError = {
+            show: true,
+            title: "Network Error",
+            text: "Our application was not able to reach the server, please check your internet connection and try again",
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "open note",
+                func: () => {
+                  setSystemNotif({ show: false });
+                  navigate("/newfolder");
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]
+          };
+          setSystemNotif(newError);
+        }
       });
   };
 

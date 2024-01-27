@@ -173,7 +173,7 @@ const Draft = () => {
         setAllData((prevData) => {
           const newNotes = prevData.notes.map((aNote) => {
             if (aNote.noteid === noteToEdit.noteid) {
-              return { ...aNote, htmlTet: prevHtml };
+              return { ...aNote, htmlText: prevHtml };
             }
             return aNote;
           });
