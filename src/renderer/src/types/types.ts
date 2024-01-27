@@ -2,20 +2,28 @@ import { SetStateAction, Dispatch } from "react";
 
 // Public
 export type Folder = {
-  folderid: number;
+  folderid: string;
   title: string;
   color: string;
-  folders: Folder[];
+  parentFolderId: string;
 };
 
 export type apiFolder = {
   folderid: string;
   title: string;
   color: string;
-  folders: Folder[];
 };
 
 export type Note = {
+  title: string;
+  noteid: number;
+  locked: boolean;
+  htmlText: string;
+  folderId: string;
+};
+
+export type apiNote = {
+  title: string;
   noteid: number;
   notetitle: string;
   htmlnotes: string;
@@ -27,10 +35,20 @@ export type User = {
   username: string;
 };
 
+export type ContextMenuOption = {
+  title: string;
+  func: CallableFunction;
+};
+
+export type SystemNotifAction = {
+  text: string;
+  func: () => void;
+};
+
 // Private
 type Position = {
   top: number;
-  right: number;
+  left: number;
 };
 
 type ContextMenuMeta = {
@@ -38,15 +56,10 @@ type ContextMenuMeta = {
   color: string;
 };
 
-type ContextMenuOptions = {
-  title: string;
-  func: CallableFunction;
-};
-
 type ContextMenu = {
   show: boolean;
   meta: ContextMenuMeta;
-  options: ContextMenuOptions[];
+  options: ContextMenuOption[];
 };
 
 type AllData = {
@@ -55,18 +68,13 @@ type AllData = {
   notes: Note[];
 };
 
-type SystemNotifActions = {
-  text: string;
-  func: () => void;
-};
-
 type SystemNotif = {
   show: boolean;
   title: string;
   text: string;
   color: string;
   hasCancel: boolean;
-  actions: SystemNotifActions[];
+  actions: SystemNotifAction[];
 };
 
 type Commands = {
@@ -91,6 +99,11 @@ type Move = {
   type: string;
 };
 
+type Nesting = {
+  title: string;
+  id: string;
+};
+
 export interface ContextProps {
   setFolders: Dispatch<SetStateAction<Folder[]>>;
   setNotes: Dispatch<SetStateAction<Note[]>>;
@@ -106,7 +119,7 @@ export interface ContextProps {
   setEdit: Dispatch<SetStateAction<boolean>>;
   setFilter: Dispatch<SetStateAction<string>>;
   setView: Dispatch<SetStateAction<string>>;
-  setNesting: Dispatch<SetStateAction<string[]>>;
+  setNesting: Dispatch<SetStateAction<Nesting[]>>;
   setSelectedForEdit: Dispatch<SetStateAction<string[]>>;
   setUser: Dispatch<SetStateAction<User>>;
   setFolder: Dispatch<SetStateAction<Folder>>;
@@ -142,7 +155,7 @@ export interface ContextProps {
   allData: AllData;
   systemNotif: SystemNotif;
   view: string;
-  nesting: string[];
+  nesting: Nesting[];
   notesToRender: Note[];
   selectedForEdit: string[];
   draggedOverFolder: Folder | null;

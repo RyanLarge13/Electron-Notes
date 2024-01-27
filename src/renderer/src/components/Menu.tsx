@@ -6,11 +6,9 @@ import UserContext from "@renderer/contexxt/UserContext";
 import { deleteUser } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
 
-const Menu = () => {
+const Menu = (): JSX.Element => {
   const {
     setMenu,
-    user,
-    allData,
     setUser,
     setNotes,
     setToken,
@@ -18,6 +16,8 @@ const Menu = () => {
     setMainTitle,
     setSystemNotif,
     setSettings,
+    user,
+    allData,
     token
   } = useContext(UserContext);
 
@@ -31,7 +31,18 @@ const Menu = () => {
       color: "bg-amber-300",
       hasCancel: false,
       actions: [
-        { text: "cancel", func: (): void => setSystemNotif({ show: false }) },
+        {
+          text: "cancel",
+          func: (): void =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
         { text: "logout", func: (): void => logout() }
       ]
     };
@@ -43,7 +54,7 @@ const Menu = () => {
     setUser(null);
     localStorage.removeItem("authToken");
     localStorage.removeItem("pin");
-    setSystemNotif({ show: false });
+    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
   };
 
   const confirmDeleteAccount = (): void => {
@@ -54,7 +65,18 @@ const Menu = () => {
       color: "bg-red-600",
       hasCancel: false,
       actions: [
-        { text: "CANCEL", func: (): void => setSystemNotif({ show: false }) },
+        {
+          text: "CANCEL",
+          func: (): void =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
         { text: "delete", func: (): void => deleteAccount() }
       ]
     };
@@ -77,7 +99,7 @@ const Menu = () => {
   };
 
   const deleteAccount = (): void => {
-    setSystemNotif({ show: false });
+    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
     try {
       deleteUser(token)
         .then((res) => {
@@ -98,7 +120,18 @@ const Menu = () => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "re-try", func: () => deleteAccount() },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -113,7 +146,18 @@ const Menu = () => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "re-try", func: () => deleteAccount() },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -130,7 +174,18 @@ const Menu = () => {
         color: "bg-red-300",
         hasCancel: true,
         actions: [
-          { text: "close", func: () => setSystemNotif({ show: false }) },
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
           { text: "re-try", func: () => deleteAccount() },
           { text: "reload app", func: () => window.location.reload() }
         ]

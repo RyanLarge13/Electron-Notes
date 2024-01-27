@@ -1,10 +1,10 @@
 import { useContext } from "react";
-import UserContext from "@renderer/contexxt/UserContext";
-import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { FaEdit } from "react-icons/fa";
+import UserContext from "@renderer/contexxt/UserContext";
 
 const NoteView = (): JSX.Element => {
-  const { note, setNote, setNoteToEdit } = useContext(UserContext);
+  const { setNote, setNoteToEdit, note } = useContext(UserContext);
 
   const navigate = useNavigate();
 

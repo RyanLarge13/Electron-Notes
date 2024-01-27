@@ -38,16 +38,10 @@ const Settings = (): JSX.Element => {
   const fourthInput = useRef(null);
 
   useEffect(() => {
-    if (userPreferences.theme) {
-      setTheme(true);
-    }
-  }, []);
-
-  useEffect(() => {
     if (!theme) {
       const newPreferences = {
         ...userPreferences,
-        theme: false
+        theme: ""
       };
       localStorage.setItem("preferences", JSON.stringify(newPreferences));
       setUserPreferences(newPreferences);
@@ -97,7 +91,18 @@ const Settings = (): JSX.Element => {
         color: "bg-red-300",
         hasCancel: true,
         actions: [
-          { text: "close", func: () => setSystemNotif({ show: false }) },
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
           { text: "re-try", func: () => setDarkModeTheme() },
           { text: "reload app", func: () => window.location.reload() }
         ]
@@ -106,7 +111,7 @@ const Settings = (): JSX.Element => {
     }
   };
 
-  const checkCurrentPin = () => {
+  const checkCurrentPin = (): void => {
     const currentPin = userPreferences.lockPin;
     if (
       currentPin[0] === Number(newLockPin.first) &&
@@ -124,7 +129,20 @@ const Settings = (): JSX.Element => {
       text: "Enter your current valid pin to change it",
       color: "bg-red-300",
       hasCancel: false,
-      actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+      actions: [
+        {
+          text: "close",
+          func: () =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        }
+      ]
     };
     setSystemNotif(newError);
     setNewLockPin({ first: "", second: "", third: "", fourth: "" });
@@ -154,7 +172,20 @@ const Settings = (): JSX.Element => {
         text: "Your new lock pin was created, don't forget this pin or you wont be able to view your locked notes",
         color: "bg-green-300",
         hasCancel: true,
-        actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
       };
       setSystemNotif(newConfirmation);
     } catch (err) {
@@ -166,7 +197,18 @@ const Settings = (): JSX.Element => {
         color: "bg-red-300",
         hasCancel: true,
         actions: [
-          { text: "close", func: () => setSystemNotif({ show: false }) },
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
           { text: "re-try", func: () => createANewPin() },
           { text: "reload app", func: () => window.location.reload() }
         ]
@@ -222,7 +264,20 @@ const Settings = (): JSX.Element => {
             text: `Your new username is now ${newUsername}`,
             color: "bg-green-300",
             hasCancel: false,
-            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              }
+            ]
           };
           setSystemNotif(newSuccess);
         })
@@ -239,7 +294,18 @@ const Settings = (): JSX.Element => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "re-try", func: () => changeUsername(e) },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -254,7 +320,18 @@ const Settings = (): JSX.Element => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "re-try", func: () => changeUsername(e) },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -271,7 +348,18 @@ const Settings = (): JSX.Element => {
         color: "bg-red-300",
         hasCancel: true,
         actions: [
-          { text: "close", func: () => setSystemNotif({ show: false }) },
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
           { text: "re-try", func: () => changeUsername(e) },
           { text: "reload app", func: () => window.location.reload() }
         ]
@@ -298,7 +386,20 @@ const Settings = (): JSX.Element => {
             text: "Be sure to write down your new password so you do not forget it. An email was sent to you containing your new credentials. Please log back in to your account with your new credentials",
             color: "bg-green-300",
             hasCancel: true,
-            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              }
+            ]
           };
           setSystemNotif(newSuccess);
           setNewPassLoading(false);
@@ -313,7 +414,18 @@ const Settings = (): JSX.Element => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "reload app", func: () => window.location.reload() }
               ]
             };
@@ -327,7 +439,18 @@ const Settings = (): JSX.Element => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "reload app", func: () => window.location.reload() }
               ]
             };
@@ -345,7 +468,18 @@ const Settings = (): JSX.Element => {
         color: "bg-red-300",
         hasCancel: true,
         actions: [
-          { text: "close", func: () => setSystemNotif({ show: false }) },
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
           { text: "reload app", func: () => window.location.reload() }
         ]
       };
@@ -362,7 +496,18 @@ const Settings = (): JSX.Element => {
       color: "bg-red-300",
       hasCancel: true,
       actions: [
-        { text: "CANCEL", func: () => setSystemNotif({ show: false }) },
+        {
+          text: "CANCEL",
+          func: () =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
         { text: "confirm", func: () => changeConfirmationOnOperations() }
       ]
     };
@@ -386,7 +531,20 @@ const Settings = (): JSX.Element => {
         text: "Please contact the developer if this issue persists. We seemed to have a problem updating your preferences. Please close the application, reload it and try the operation again.",
         color: "bg-red-300",
         hasCancel: true,
-        actions: [{ text: "cloese", func: () => setSystemNotif({ show: false }) }]
+        actions: [
+          {
+            text: "cloese",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
       };
       setSystemNotif(newError);
     }
@@ -421,7 +579,14 @@ const Settings = (): JSX.Element => {
           </div>
         </button>
         <button
-          onClick={() => setTheme((prev) => !prev)}
+          onClick={() =>
+            setTheme((prev) => {
+              if (prev !== "") {
+                return "";
+              }
+              return "bg-amber-300";
+            })
+          }
           className="flex justify-between items-center my-3"
         >
           <p>Theme</p>

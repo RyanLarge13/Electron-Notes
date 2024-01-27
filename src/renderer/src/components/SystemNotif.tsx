@@ -2,11 +2,12 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserContext from "@renderer/contexxt/UserContext";
 import { ClipLoader } from "react-spinners";
+import { SystemNotifAction } from "@renderer/types/types";
 
 const SystemNotif = (): JSX.Element => {
   const { systemNotif, setSystemNotif } = useContext(UserContext);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState("");
 
   const notifTimeoutRef = useRef(null);
 
@@ -14,21 +15,35 @@ const SystemNotif = (): JSX.Element => {
     const end = e.clientX;
     const minDistance = window.innerWidth / 1.4;
     if (end > minDistance) {
-      setSystemNotif({ show: false });
+      setSystemNotif({
+        show: false,
+        title: "",
+        text: "",
+        color: "",
+        hasCancel: false,
+        actions: []
+      });
     }
   };
 
   useEffect(() => {
     if (systemNotif.show === true && systemNotif.hasCancel === false) {
       notifTimeoutRef.current = setTimeout(() => {
-        setSystemNotif({ show: false });
+        setSystemNotif({
+          show: false,
+          title: "",
+          text: "",
+          color: "",
+          hasCancel: false,
+          actions: []
+        });
       }, 5000);
     } else {
       clearTimeout(notifTimeoutRef.current);
     }
 
     return () => {
-      setLoading(false);
+      setLoading("");
       clearTimeout(notifTimeoutRef.current);
     };
   }, [systemNotif, setSystemNotif]);
@@ -38,7 +53,16 @@ const SystemNotif = (): JSX.Element => {
       {systemNotif.show && (
         <>
           <div
-            onClick={() => setSystemNotif({ show: false })}
+            onClick={() =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+            }
             className="fixed bg-transparent inset-0 z-40"
           ></div>
           <motion.div
@@ -69,7 +93,7 @@ const SystemNotif = (): JSX.Element => {
             <p className="text-lg font-semibold">{systemNotif.title}</p>
             <p className="text-xs whitespace-pre-line">{systemNotif.text}</p>
             <div className="mt-3 p-1 border-t flex justify-between items-center">
-              {systemNotif.actions?.map((action, index) => (
+              {systemNotif.actions?.map((action: SystemNotifAction, index: number) => (
                 <button
                   key={index}
                   onClick={() => {

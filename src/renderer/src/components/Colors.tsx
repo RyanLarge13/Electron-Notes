@@ -1,7 +1,8 @@
 import colors from "@renderer/constants/colors";
 import { motion } from "framer-motion";
+import { Dispatch, SetStateAction } from "react";
 
-const Colors = ({ setColor }) => {
+const Colors = ({ setColor }: { setColor: Dispatch<SetStateAction<string>> }): JSX.Element => {
   return (
     <div className="mt-2 flex flex-wrap gap-3">
       {colors.map((color) => (

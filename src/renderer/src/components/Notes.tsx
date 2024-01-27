@@ -1,16 +1,12 @@
 import { useContext, useState, useRef, useEffect } from "react";
-import UserContext from "@renderer/contexxt/UserContext";
-import { TbNotes } from "react-icons/tb";
 import { createNewNote, deleteANote, updateNote } from "@renderer/utils/api";
-import { FaLock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { FaLock } from "react-icons/fa";
+import { TbNotes } from "react-icons/tb";
+import UserContext from "@renderer/contexxt/UserContext";
 
 const Notes = (): JSX.Element => {
   const {
-    notesToRender,
-    token,
-    view,
-    allData,
     setNote,
     setAllData,
     setContextMenu,
@@ -18,6 +14,10 @@ const Notes = (): JSX.Element => {
     setSystemNotif,
     setNoteToEdit,
     setMove,
+    notesToRender,
+    token,
+    allData,
+    view,
     userPreferences
   } = useContext(UserContext);
 
@@ -53,7 +53,20 @@ const Notes = (): JSX.Element => {
         text: "Enter your valid pin to view your locked notes",
         color: "bg-red-300",
         hasCancel: false,
-        actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
       };
       setSystemNotif(newError);
       setPin({ first: "", second: "", third: "", fourth: "" });
@@ -63,17 +76,21 @@ const Notes = (): JSX.Element => {
 
   const edit = (note): void => {
     if (note.locked) {
-      setContextMenu({ show: false });
+      setContextMenu({
+        show: false,
+        meta: { title: "", color: "" },
+        options: []
+      });
       setAwaitingNote(note);
       return setPinInput(true);
     }
     setNoteToEdit(note);
     navigate("/newnote");
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
 
   const confirmDuplicate = (note): void => {
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const newConfirmation = {
       show: true,
       title: `Duplicate ${note.title}`,
@@ -81,7 +98,18 @@ const Notes = (): JSX.Element => {
       color: "bg-green-400",
       hasCancel: true,
       actions: [
-        { text: "cancel", func: () => setSystemNotif({ show: false }) },
+        {
+          text: "cancel",
+          func: () =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
         { text: "duplicate", func: () => duplicate(note) }
       ]
     };
@@ -112,7 +140,14 @@ const Notes = (): JSX.Element => {
           };
           return newData;
         });
-        setSystemNotif({ show: false });
+        setSystemNotif({
+          show: false,
+          title: "",
+          text: "",
+          color: "",
+          hasCancel: false,
+          actions: []
+        });
       })
       .catch((err) => {
         console.log(err);
@@ -124,7 +159,7 @@ const Notes = (): JSX.Element => {
 
   const rename = (note): void => {
     setRenameANote(note);
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     if (renameRef.current) {
       renameRef.current.focus();
     }
@@ -172,7 +207,7 @@ const Notes = (): JSX.Element => {
   };
 
   const move = (note): void => {
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     setMove({
       isMoving: true,
       from: note.folderId,
@@ -183,7 +218,7 @@ const Notes = (): JSX.Element => {
   };
 
   const confirmDelete = (note): void => {
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const newConfirmation = {
       show: true,
       title: `Delete ${note.title}`,
@@ -191,7 +226,18 @@ const Notes = (): JSX.Element => {
       color: "bg-red-400",
       hasCancel: true,
       actions: [
-        { text: "cancel", func: () => setSystemNotif({ show: false }) },
+        {
+          text: "cancel",
+          func: () =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
         { text: "delete", func: () => deleteNote(note) }
       ]
     };
@@ -210,7 +256,14 @@ const Notes = (): JSX.Element => {
           };
           return newData;
         });
-        setSystemNotif({ show: false });
+        setSystemNotif({
+          show: false,
+          title: "",
+          text: "",
+          color: "",
+          hasCancel: false,
+          actions: []
+        });
       })
       .catch((err) => {
         console.log(err);

@@ -1,13 +1,12 @@
 import { useContext, useState } from "react";
+import { updateNote, updateFolder } from "@renderer/utils/api";
+import { useNavigate, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { TbFilters, TbSquareLetterA } from "react-icons/tb";
+import { TbFilters } from "react-icons/tb";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
-import { updateNote, updateFolder, moveMultipleFolders } from "@renderer/utils/api";
+import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 import { FaFolderPlus, FaHome } from "react-icons/fa";
-import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
-import { Outlet } from "react-router-dom";
 import { deleteMultipleFolders } from "@renderer/utils/api";
 import { Folder } from "@renderer/types/types";
 import Folders from "@renderer/components/Folders";
@@ -19,38 +18,37 @@ import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
 import Tree from "@renderer/components/Tree";
 import Colors from "@renderer/components/Colors";
-import { ClipLoader } from "react-spinners";
 
 const Account = (): JSX.Element => {
   const {
+    setNesting,
+    setFilter,
+    setAllData,
+    setOrder,
+    setSelectedForEdit,
+    setEditCurrentFolder,
+    setSelectedFolder,
+    setEdit,
+    setMove,
+    setFolder,
+    setSystemNotif,
+    token,
+    edit,
+    editCurrentFolder,
+    selectedForEdit,
+    selectedFolder,
+    settings,
+    move,
+    nesting,
+    folder,
+    order,
+    allData,
     mainTitle,
     note,
     notes,
     folders,
     menu,
-    filter,
-    setNesting,
-    setFilter,
-    folder,
-    order,
-    allData,
-    setAllData,
-    token,
-    setOrder,
-    edit,
-    selectedForEdit,
-    setSelectedForEdit,
-    editCurrentFolder,
-    setEditCurrentFolder,
-    selectedFolder,
-    setSelectedFolder,
-    setEdit,
-    settings,
-    move,
-    setMove,
-    nesting,
-    setFolder,
-    setSystemNotif
+    filter
   } = useContext(UserContext);
 
   const [filterOptions, setFilterOptions] = useState(false);
@@ -94,7 +92,7 @@ const Account = (): JSX.Element => {
     // }
   };
 
-  const undoDeleteMany = (folders: Folder[]): void => {};
+  // const undoDeleteMany = (folders: Folder[]): void => {};
 
   const deleteAllSelected = (): void => {
     setAllData((prevData) => {
@@ -105,7 +103,7 @@ const Account = (): JSX.Element => {
       return newData;
     });
     const temp = allData.folders.filter((fold: Folder) =>
-      selectedForEdit.some((foldId: number) => fold.folderid === foldId)
+      selectedForEdit.some((foldId: string) => fold.folderid === foldId)
     );
     setEdit(false);
     deleteMultipleFolders(token, selectedForEdit)
@@ -118,8 +116,19 @@ const Account = (): JSX.Element => {
           color: "bg-green-300",
           hasCancel: false,
           actions: [
-            { text: "close", func: () => setSystemNotif({ show: false }) },
-            { text: "undo", func: () => undoDeleteMany(temp) }
+            {
+              text: "close",
+              func: (): void =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            },
+            { text: "undo", func: (): void => {} }
           ]
         };
         setSystemNotif(newSuccess);
@@ -140,7 +149,18 @@ const Account = (): JSX.Element => {
             color: "bg-red-300",
             hasCancel: true,
             actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
               { text: "re-try", func: () => deleteAllSelected() },
               { text: "reload app", func: () => window.location.reload() }
             ]
@@ -155,7 +175,18 @@ const Account = (): JSX.Element => {
             color: "bg-red-300",
             hasCancel: true,
             actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
               { text: "re-try", func: () => deleteAllSelected() },
               { text: "reload app", func: () => window.location.reload() }
             ]
@@ -204,7 +235,18 @@ const Account = (): JSX.Element => {
             color: "bg-green-300",
             hasCancel: false,
             actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
               { text: "undo", func: () => undoMove() }
             ]
           };
@@ -213,7 +255,7 @@ const Account = (): JSX.Element => {
         .catch((err) => {
           console.log(err);
           setAllData((prevUser) => {
-            const newNotes = prevUser.notes.maap((note) => {
+            const newNotes = prevUser.notes.map((note) => {
               if (note.noteid === noteMoving.noteid) {
                 return { ...note, folderId: prevIdFolderId };
               }
@@ -233,7 +275,18 @@ const Account = (): JSX.Element => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "re-try", func: () => moveItem() },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -248,7 +301,18 @@ const Account = (): JSX.Element => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "re-try", func: () => moveItem() },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -295,7 +359,18 @@ const Account = (): JSX.Element => {
             color: "bg-green-300",
             hasCancel: false,
             actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
               { text: "undo", func: () => undoMove() }
             ]
           };
@@ -325,7 +400,18 @@ const Account = (): JSX.Element => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "re-try", func: () => moveItem() },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -340,7 +426,18 @@ const Account = (): JSX.Element => {
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 { text: "re-try", func: () => moveItem() },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -416,7 +513,18 @@ const Account = (): JSX.Element => {
             color: "bg-red-300",
             hasCancel: true,
             actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
               { text: "re-try", func: () => editMyFolder() },
               { text: "reload app", func: () => window.location.reload() }
             ]
@@ -431,7 +539,18 @@ const Account = (): JSX.Element => {
             color: "bg-red-300",
             hasCancel: true,
             actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
               { text: "re-try", func: () => editMyFolder() },
               { text: "reload app", func: () => window.location.reload() }
             ]
@@ -441,9 +560,9 @@ const Account = (): JSX.Element => {
       });
   };
 
-  const navigateFolder = (folderId: number, index: number): void => {
+  const navigateFolder = (folderId: string, index: number): void => {
     const folderToSet = allData.folders.filter((fold: Folder) => fold.folderid === folderId)[0];
-    setNesting((prev: { title: string; id: number }[]) => {
+    setNesting((prev) => {
       const length = nesting.length;
       const diff = length - index + 1;
       const copyArr = [...prev];
@@ -457,7 +576,7 @@ const Account = (): JSX.Element => {
     <section className="flex justify-center items-center flex-col mt-20 mx-10 lg:mx-60">
       {nesting.length > 0 && (
         <div className="flex justify-end items-center font-semibold gap-x-3 fixed top-5 left-5">
-          {nesting.map((folderMeta: { title: string; id: number }, index: number) => (
+          {nesting.map((folderMeta: { title: string; id: string }, index: number) => (
             <motion.button
               initial={{ opacity: 0, x: 10 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -642,7 +761,7 @@ const Account = (): JSX.Element => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="fixed z-40 inset-0 bg-black backdrop-blur-sm bg-opacity-20"
-            onClick={() => setMove(false)}
+            onClick={() => setMove(null)}
           ></motion.div>
           <motion.div
             initial={{ x: -10, opacity: 0 }}

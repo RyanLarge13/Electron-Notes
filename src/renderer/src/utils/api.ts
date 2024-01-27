@@ -87,7 +87,7 @@ export const createNewFolder = (
   return res;
 };
 
-export const updateFolder = (token: string, folder: Folder): Promise<AxiosResponse> => {
+export const updateFolder = (token: string, folder): Promise<AxiosResponse> => {
   const res = Axios.patch(
     `${devUrl}/folders/update`,
     { ...folder },

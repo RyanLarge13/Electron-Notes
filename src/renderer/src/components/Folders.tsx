@@ -1,40 +1,40 @@
 import { useContext, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Folder } from "@renderer/types/types";
-import {
-  createNewFolder,
-  createNewNote,
-  updateFolder,
-  updateMultiFolders,
-  updateMultiNotes,
-  deleteAFolder
-} from "@renderer/utils/api";
 import { CiFolderOn } from "react-icons/ci";
 import { TbNotes } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaRegCheckCircle } from "react-icons/fa";
+import {
+  createNewFolder,
+  createNewNote,
+  updateFolder,
+  // updateMultiFolders,
+  // updateMultiNotes,
+  deleteAFolder
+} from "@renderer/utils/api";
 import Colors from "./Colors";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const Folders = (): JSX.Element => {
   const {
-    folders,
-    allData,
-    setFolder,
     setPosition,
+    setFolder,
     setSystemNotif,
     setContextMenu,
     setSelectedFolder,
-    token,
     setAllData,
     setNesting,
-    edit,
     setNote,
-    selectedForEdit,
     setSelectedForEdit,
-    draggedOverFolder,
     setDraggedOverFolder,
-    setMove
+    setMove,
+    folders,
+    token,
+    edit,
+    selectedForEdit,
+    draggedOverFolder,
+    allData
   } = useContext(UserContext);
 
   const [dragging, setDragging] = useState(false);
@@ -53,8 +53,8 @@ const Folders = (): JSX.Element => {
     setFolder(folder);
   };
 
-  const confirmDelete = (folder) => {
-    setContextMenu({ show: false });
+  const confirmDelete = (folder): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const newConfirmation = {
       show: true,
       title: `Delete ${folder.title}`,
@@ -62,20 +62,31 @@ const Folders = (): JSX.Element => {
       color: "bg-red-400",
       hasCancel: true,
       actions: [
-        { text: "cancel", func: () => setSystemNotif({ show: false }) },
+        {
+          text: "cancel",
+          func: () =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
         { text: "delete", func: () => deleteFolder(folder.folderid) }
       ]
     };
     setSystemNotif(newConfirmation);
   };
 
-  const createNestedFolder = (folder) => {
-    setContextMenu({ show: false });
+  const createNestedFolder = (folder): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     setSelectedFolder(folder);
     navigate("/newfolder");
   };
 
-  const createNestedNote = (folder) => {
+  const createNestedNote = (folder): void => {
     setFolder(folder);
     const newNote = {
       folderId: folder.folderid,
@@ -101,11 +112,11 @@ const Folders = (): JSX.Element => {
       });
       setNote(noteToPush);
     });
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
 
   const moveFolder = (folder): void => {
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     setMove({
       isMoving: true,
       from: folder.folderid,
@@ -128,7 +139,7 @@ const Folders = (): JSX.Element => {
   // };
 
   const confirmDup = (folder: Folder): void => {
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const newConfirmation = {
       show: true,
       title: `Duplicate ${folder.title}`,
@@ -136,18 +147,36 @@ const Folders = (): JSX.Element => {
       color: folder.color,
       hasCancel: true,
       actions: [
-        { text: "cancel", func: () => setSystemNotif({ show: false }) },
-        { text: "duplicate all", func: () => dupAll(folder) },
-        { text: "du[plicate folder", func: () => dupFolder(folder) }
+        {
+          text: "cancel",
+          func: () =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
+        { text: "duplicate all", func: (): void => {} },
+        { text: "du[plicate folder", func: (): void => dupFolder(folder) }
       ]
     };
     setSystemNotif(newConfirmation);
   };
 
-  const dupAll = (folder: Folder): void => {};
+  // const dupAll = (folder: Folder): void => {};
 
   const dupFolder = (folder: Folder): void => {
-    setSystemNotif({ show: false });
+    setSystemNotif({
+      show: false,
+      title: "",
+      text: "",
+      color: "",
+      hasCancel: false,
+      actions: []
+    });
     const newFolder = {
       title: folder.title,
       color: folder.color,
@@ -179,7 +208,18 @@ const Folders = (): JSX.Element => {
           color: "bg-red-300",
           hasCancel: true,
           actions: [
-            { text: "close", func: () => setSystemNotif({ show: false }) },
+            {
+              text: "close",
+              func: () =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            },
             { text: "retry", func: () => dupFolder(folder) }
           ]
         };
@@ -189,7 +229,7 @@ const Folders = (): JSX.Element => {
 
   const renameFolder = (folder): void => {
     setFolderToRename(folder);
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     if (renameRef.current) {
       renameRef.current.focus();
     }
@@ -199,7 +239,7 @@ const Folders = (): JSX.Element => {
   };
 
   const handleRename = (e): void => {
-    setSystemNotif({ show: false });
+    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
     e.preventDefault();
     const newFolder = {
       folderId: folderToRename.folderid,
@@ -239,7 +279,18 @@ const Folders = (): JSX.Element => {
           color: "bg-red-300",
           hasCancel: true,
           actions: [
-            { text: "close", func: () => setSystemNotif({ show: false }) },
+            {
+              text: "close",
+              func: () =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            },
             { text: "retry", func: () => handleRename(e) }
           ]
         };
@@ -247,13 +298,13 @@ const Folders = (): JSX.Element => {
       });
   };
 
-  const changeFolderColor = (folder) => {
+  const changeFolderColor = (folder): void => {
     setFolderToChangeColor(folder);
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
 
   const changeColor = (): void => {
-    setSystemNotif({ show: false });
+    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
     const newFolder = {
       folderId: folderToChangeColor.folderid,
       title: folderToChangeColor.title,
@@ -292,15 +343,26 @@ const Folders = (): JSX.Element => {
           color: "bg-red-300",
           hasCancel: true,
           actions: [
-            { text: "close", func: () => setSystemNotif({ show: false }) },
-            { text: "retry", func: () => handleRename(e) }
+            {
+              text: "close",
+              func: () =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            },
+            { text: "retry", func: () => changeColor() }
           ]
         };
         setSystemNotif(newError);
       });
   };
 
-  const deleteFolder = (folderId: number): void => {
+  const deleteFolder = (folderId: string): void => {
     deleteAFolder(token, folderId)
       .then((res) => {
         const folderIdToDelete = res.data.data[0].folderid;
@@ -312,7 +374,14 @@ const Folders = (): JSX.Element => {
           };
           return newData;
         });
-        setSystemNotif({ show: false });
+        setSystemNotif({
+          show: false,
+          title: "",
+          text: "",
+          color: "",
+          hasCancel: false,
+          actions: []
+        });
       })
       .catch((err) => {
         console.log(err);
@@ -344,43 +413,43 @@ const Folders = (): JSX.Element => {
       options: [
         {
           title: "new folder",
-          func: () => createNestedFolder(folder)
+          func: (): void => createNestedFolder(folder)
         },
         {
           title: "new note",
-          func: () => createNestedNote(folder)
+          func: (): void => createNestedNote(folder)
         },
         {
           title: "move",
-          func: () => moveFolder(folder)
+          func: (): void => moveFolder(folder)
         },
         {
           title: "move contents",
           // func: () => moveFolderCOntents(folder.folderid);
-          func: () => {}
+          func: (): void => {}
         },
         {
           title: "duplicate",
-          func: () => confirmDup(folder)
+          func: (): void => confirmDup(folder)
         },
         {
           title: "rename",
-          func: () => renameFolder(folder)
+          func: (): void => renameFolder(folder)
         },
         {
           title: "change color",
-          func: () => changeFolderColor(folder)
+          func: (): void => changeFolderColor(folder)
         },
         {
           title: "delete",
-          func: () => confirmDelete(folder)
+          func: (): void => confirmDelete(folder)
         }
       ]
     };
     setContextMenu(newMenu);
   };
 
-  const select = (folderId: number): void => {
+  const select = (folderId: string): void => {
     if (selectedForEdit.length === 0) {
       return setSelectedForEdit([folderId]);
     }
@@ -391,24 +460,24 @@ const Folders = (): JSX.Element => {
     setSelectedForEdit((prev) => [...prev, folderId]);
   };
 
-  const onDragStart = (e, folder) => {
+  const onDragStart = (e, folder): void => {
     e.preventDefault();
     setFolderDragging(folder);
   };
 
-  const handleDragOver = (e, folder) => {
+  const handleDragOver = (e, folder): void => {
     e.preventDefault();
     e.stopPropagation();
     console.log("Drag over event triggered for folder:", folder);
     setDraggedOverFolder(folder);
   };
 
-  const handleDrag = (e) => {
+  const handleDrag = (e): void => {
     e.preventDefault();
     setDragging(true);
   };
 
-  const onDragEnd = (e) => {
+  const onDragEnd = (e): void => {
     e.preventDefault();
     setDragging(false);
     const newConfirmation = {
@@ -425,14 +494,14 @@ const Folders = (): JSX.Element => {
     setSystemNotif(newConfirmation);
   };
 
-  const cancelMove = () => {
-    setSystemNotif({ show: false });
+  const cancelMove = (): void => {
+    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
     setDraggedOverFolder(null);
     setDragging(false);
     setFolderDragging(null);
   };
 
-  const moveFolderAndContents = () => {
+  const moveFolderAndContents = (): void => {
     const folderUpdate = {
       ...folderDragging,
       folderId: folderDragging.folderid,
@@ -458,17 +527,21 @@ const Folders = (): JSX.Element => {
           };
           return newData;
         });
-        setSystemNotif({ show: false });
+        setSystemNotif({
+          show: false,
+          title: "",
+          text: "",
+          color: "",
+          hasCancel: false,
+          actions: []
+        });
       })
       .catch((err) => {
         console.log(err);
-      })
-      .finally(() => {
-        console.log("Finished moving folder atttempt");
       });
   };
 
-  const listenForRenameCancel = (e) => {
+  const listenForRenameCancel = (e): void => {
     if (e.key === "Escape" || e.key === "Delete") {
       setRenameText("");
       setFolderToRename(null);

@@ -11,20 +11,20 @@ import UserContext from "@renderer/contexxt/UserContext";
 const Header = (): JSX.Element => {
   const {
     setFolder,
-    folder,
     setFolders,
     setMainTitle,
-    allData,
-    mainTitle,
     setMenu,
-    view,
     setView,
     setEditCurrentFolder,
-    editCurrentFolder,
     setNotes,
-    nesting,
     setNesting,
-    setEdit
+    setEdit,
+    allData,
+    view,
+    mainTitle,
+    editCurrentFolder,
+    folder,
+    nesting
   } = useContext(UserContext);
 
   const [search, setSearch] = useState(false);
