@@ -3,6 +3,8 @@ import { createNewNote, deleteANote, updateNote } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import { TbNotes } from "react-icons/tb";
+import { Note } from "@renderer/types/types";
+import { v4 as uuidv4 } from "uuid";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const Notes = (): JSX.Element => {
@@ -89,7 +91,7 @@ const Notes = (): JSX.Element => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
 
-  const confirmDuplicate = (note): void => {
+  const confirmDuplicate = (note: Note): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const newConfirmation = {
       show: true,
@@ -110,51 +112,155 @@ const Notes = (): JSX.Element => {
               actions: []
             })
         },
-        { text: "duplicate", func: () => duplicate(note) }
+        { text: "duplicate", func: (): void => duplicate(note) }
       ]
     };
     setSystemNotif(newConfirmation);
   };
 
-  const duplicate = (note): void => {
+  const duplicate = (note: Note): void => {
+    setSystemNotif({
+      show: false,
+      title: "",
+      text: "",
+      color: "",
+      hasCancel: false,
+      actions: []
+    });
+    const tempId = uuidv4();
     const noteToDuplicate = {
       title: note.title,
-      htmlNotes: note.htmltexxt,
+      htmlNotes: note.htmlText,
       folderId: note.folderId
     };
-    createNewNote(token, noteToDuplicate)
-      .then((res) => {
-        const returnedNote = res.data.data[0];
-        const noteToPush = {
-          title: returnedNote.title,
-          createdAt: returnedNote.createdat,
-          noteid: returnedNote.notesid,
-          htmlText: returnedNote.htmlnotes,
-          locked: returnedNote.locked,
-          folderId: returnedNote.folderid
-        };
-        setAllData((prevData) => {
-          const newData = {
-            ...prevData,
-            notes: [...prevData.notes, noteToPush]
+    setAllData((prevData) => {
+      const newNotes = [...prevData.notes, { ...note, noteid: tempId }];
+      return {
+        ...prevData,
+        notes: newNotes
+      };
+    });
+    try {
+      createNewNote(token, noteToDuplicate)
+        .then((res) => {
+          const returnedNoteId = res.data.data[0].notesid;
+          setAllData((prevData) => {
+            const newNotes = prevData.notes.map((aNote) => {
+              if (aNote.noteid === tempId) {
+                return { ...aNote, noteid: returnedNoteId };
+              }
+              return aNote;
+            });
+            return { ...prevData, notes: newNotes };
+          });
+          const newSuccess = {
+            show: true,
+            title: "Duplicated Note",
+            text: `You successfully duplicated your note: ${note.title}`,
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "undo", func: (): void => {} }
+            ]
           };
-          return newData;
+          setSystemNotif(newSuccess);
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const oldNotes = prevData.notes.filter((aNote) => aNote.noteid !== tempId);
+            return { ...prevData, notes: oldNotes };
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Duplicating Note",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => duplicate(note) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => duplicate(note) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
         });
-        setSystemNotif({
-          show: false,
-          title: "",
-          text: "",
-          color: "",
-          hasCancel: false,
-          actions: []
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        console.log("Finished note upload attempt");
-      });
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Duplicating Note",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem duplicating your note. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "cloese",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const rename = (note): void => {
