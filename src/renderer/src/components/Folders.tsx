@@ -275,54 +275,142 @@ const Folders = (): JSX.Element => {
       hasCancel: false,
       actions: []
     });
+    const tempId = uuidv4();
     const newFolder = {
       title: folder.title,
       color: folder.color,
       parentFolderId: folder.parentFolderId
     };
-    createNewFolder(token, newFolder)
-      .then((res) => {
-        setAllData((prevData) => {
-          const resFolder = res.data.data[0];
-          const folderToPush = {
-            folderid: resFolder.folderid,
-            title: resFolder.foldertitle,
-            color: resFolder.foldercolor,
-            parentFolderId: resFolder.parentfolderid
-          };
-          const newData = {
-            ...prevData,
-            folders: [...prevData.folders, folderToPush]
-          };
-          return newData;
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        const newError = {
-          show: true,
-          title: "Error duplicating",
-          text: err.response.message,
-          color: "bg-red-300",
-          hasCancel: true,
-          actions: [
-            {
-              text: "close",
-              func: () =>
-                setSystemNotif({
-                  show: false,
-                  title: "",
-                  text: "",
-                  color: "",
-                  hasCancel: false,
-                  actions: []
-                })
-            },
-            { text: "retry", func: () => dupFolder(folder) }
-          ]
-        };
-        setSystemNotif(newError);
+    try {
+      setAllData((prevData) => {
+        const newFolders = [prevData.folders, { ...newFolder, folderid: tempId }];
+        return { ...prevData, folders: newFolders };
       });
+      createNewFolder(token, newFolder)
+        .then((res) => {
+          const newId = res.data.data[0].folderid;
+          setAllData((prevData) => {
+            const updatedFolders = prevData.folders.map((fold) => {
+              if (fold.folderid === tempId) {
+                return { ...fold, folderid: newId };
+              }
+              return fold;
+            });
+            return {
+              ...prevData,
+              folders: updatedFolders
+            };
+          });
+          const newSuccess = {
+            show: true,
+            title: "Folder Duplicated",
+            text: "Successfully duplicated your folder",
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "undo", func: (): void => {} }
+            ]
+          };
+          setSystemNotif(newSuccess);
+        })
+        .catch((err) => {
+          setAllData((prevData) => {
+            const updatedFolders = prevData.folders.filter((fold) => fold.folderid !== tempId);
+            return {
+              ...prevData,
+              folders: updatedFolders
+            };
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Duplicating Note",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => dupFolder(folder) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => dupFolder(folder) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Duplicating Folder",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem duplicating your folder. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const renameFolder = (folder: Folder): void => {
@@ -337,63 +425,67 @@ const Folders = (): JSX.Element => {
   };
 
   const handleRename = (e): void => {
-    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
     e.preventDefault();
+    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
     const newFolder = {
       folderId: folderToRename.folderid,
       title: renameText,
       color: folderToRename.color,
       parentFolderId: folderToRename.parentFolderId
     };
-    updateFolder(token, newFolder)
-      .then((res) => {
-        const resFolder = res.data.data[0];
-        const folderToPush = {
-          folderid: resFolder.folderid,
-          title: resFolder.title,
-          color: resFolder.color,
-          parentFolderId: resFolder.parentfolderid
-        };
-        setAllData((prevUser) => {
-          const newFolders = prevUser.folders.filter(
-            (fold) => fold.folderid !== resFolder.folderid
-          );
-          newFolders.push(folderToPush);
-          const newData = {
-            ...prevUser,
-            folders: newFolders
+    try {
+      updateFolder(token, newFolder)
+        .then((res) => {
+          const resFolder = res.data.data[0];
+          const folderToPush = {
+            folderid: resFolder.folderid,
+            title: resFolder.title,
+            color: resFolder.color,
+            parentFolderId: resFolder.parentfolderid
           };
-          return newData;
+          // setAllData((prevUser) => {
+          //   const newFolders = prevUser.folders.filter(
+          //     (fold) => fold.folderid !== resFolder.folderid
+          //   );
+          //   newFolders.push(folderToPush);
+          //   const newData = {
+          //     ...prevUser,
+          //     folders: newFolders
+          //   };
+          //   return newData;
+          // });
+          setFolderToRename(null);
+          setRenameText("");
+        })
+        .catch((err) => {
+          console.log(err);
+          const newError = {
+            show: true,
+            title: "Error Renaming Folder",
+            text: err.response.data.message,
+            color: "bg-red-300",
+            hasCancel: true,
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "retry", func: () => handleRename(e) }
+            ]
+          };
+          setSystemNotif(newError);
         });
-        setFolderToRename(null);
-        setRenameText("");
-      })
-      .catch((err) => {
-        console.log(err);
-        const newError = {
-          show: true,
-          title: "Error Renaming Folder",
-          text: err.response.data.message,
-          color: "bg-red-300",
-          hasCancel: true,
-          actions: [
-            {
-              text: "close",
-              func: () =>
-                setSystemNotif({
-                  show: false,
-                  title: "",
-                  text: "",
-                  color: "",
-                  hasCancel: false,
-                  actions: []
-                })
-            },
-            { text: "retry", func: () => handleRename(e) }
-          ]
-        };
-        setSystemNotif(newError);
-      });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const changeFolderColor = (folder: Folder): void => {
