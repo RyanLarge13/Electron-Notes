@@ -634,32 +634,133 @@ const Folders = (): JSX.Element => {
   };
 
   const deleteFolder = (folderId: string): void => {
-    deleteAFolder(token, folderId)
-      .then((res) => {
-        const folderIdToDelete = res.data.data[0].folderid;
-        const newFolders = allData.folders.filter((fold) => fold.folderid !== folderIdToDelete);
-        setAllData((prevData) => {
-          const newData = {
-            ...prevData,
-            folders: newFolders
-          };
-          return newData;
-        });
-        setSystemNotif({
-          show: false,
-          title: "",
-          text: "",
-          color: "",
-          hasCancel: false,
-          actions: []
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        console.log("Finished attempting to delete a folder");
+    const oldFolder = allData.folders.filter((fold) => fold.folderid == folderId)[0];
+    setSystemNotif({
+      show: false,
+      title: "",
+      text: "",
+      color: "",
+      hasCancel: false,
+      actions: []
+    });
+    try {
+      setAllData((prevData) => {
+        const newFolders = prevData.folders.filter((fold) => fold.folderid !== folderId);
+        return { ...prevData, folders: newFolders };
       });
+      deleteAFolder(token, folderId)
+        .then(() => {
+          const newSuccess = {
+            show: true,
+            title: "Folder Deleted",
+            text: "Successfully deleted your folder!!",
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "undo", func: (): void => {} }
+            ]
+          };
+          setSystemNotif(newSuccess);
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const newFolders = [...prevData.folders, oldFolder];
+            return {
+              ...prevData,
+              folders: newFolders
+            };
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Deleting Folder",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => deleteFolder(folderId) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: (): void =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => deleteFolder(folderId) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Deleting Folder",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem deleting your folder. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const openOptions = (event, folder: Folder): void => {
@@ -871,7 +972,7 @@ const Folders = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
+                  func: (): void =>
                     setSystemNotif({
                       show: false,
                       title: "",
