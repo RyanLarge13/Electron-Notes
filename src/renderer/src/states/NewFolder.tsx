@@ -36,7 +36,20 @@ const NewFolder = (): JSX.Element => {
     });
     navigate("/");
     createNewFolder(token, newFolder)
-      .then(() => {
+      .then((res) => {
+        const newId = res.data.data[0].folderid;
+        setAllData((prevData) => {
+          const updatedFolders = prevData.folders.map((fold) => {
+            if (fold.folderid === tempId) {
+              return { ...fold, folderid: newId };
+            }
+            return fold;
+          });
+          return {
+            ...prevData,
+            folders: updatedFolders
+          };
+        });
         const newSuccess = {
           show: true,
           title: "New Folder",

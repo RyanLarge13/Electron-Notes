@@ -8,7 +8,7 @@ import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-ico
 import { FiEdit } from "react-icons/fi";
 import { FaFolderPlus, FaHome } from "react-icons/fa";
 import { deleteMultipleFolders } from "@renderer/utils/api";
-import { Folder } from "@renderer/types/types";
+import { Folder, Note } from "@renderer/types/types";
 import Folders from "@renderer/components/Folders";
 import Header from "@renderer/components/Header";
 import Notes from "@renderer/components/Notes";
@@ -200,7 +200,7 @@ const Account = (): JSX.Element => {
 
   const moveItem = (): void => {
     if (move.type === "note") {
-      const noteMoving = move.item;
+      const noteMoving: Note = move.item;
       const prevIdFolderId = noteMoving.folderId;
       const newNote = {
         notesId: noteMoving.noteid,
@@ -210,7 +210,7 @@ const Account = (): JSX.Element => {
         folderId: selectedFolder ? selectedFolder.folderid : null
       };
       setAllData((prevUser) => {
-        const newNotes = prevUser.notes.map((note) => {
+        const newNotes = prevUser.notes.map((note: Note) => {
           if (note.noteid === noteMoving.noteid) {
             return { ...note, folderId: selectedFolder ? selectedFolder.folderid : null };
           }
@@ -322,7 +322,7 @@ const Account = (): JSX.Element => {
         });
     }
     if (move.type === "folder") {
-      const folderMoving = move.item;
+      const folderMoving: Folder = move.item;
       const prevIdFolderId = folderMoving.folderid;
       const newFolder = {
         folderId: folderMoving.folderid,
