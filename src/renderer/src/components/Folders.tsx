@@ -90,7 +90,6 @@ const Folders = (): JSX.Element => {
   const createNestedNote = (folder: Folder): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     try {
-      setFolder(folder);
       const tempId = uuidv4();
       const newNote = {
         folderId: folder.folderid,
@@ -111,6 +110,7 @@ const Folders = (): JSX.Element => {
         };
         return newData;
       });
+      setFolder(folder);
       setNote(noteToPush);
       createNewNote(token, newNote)
         .then((res) => {
@@ -283,7 +283,7 @@ const Folders = (): JSX.Element => {
     };
     try {
       setAllData((prevData) => {
-        const newFolders = [prevData.folders, { ...newFolder, folderid: tempId }];
+        const newFolders = [...prevData.folders, { ...newFolder, folderid: tempId }];
         return { ...prevData, folders: newFolders };
       });
       createNewFolder(token, newFolder)
@@ -773,43 +773,146 @@ const Folders = (): JSX.Element => {
   };
 
   const moveFolderAndContents = (): void => {
+    setSystemNotif({
+      show: false,
+      title: "",
+      text: "",
+      color: "",
+      hasCancel: false,
+      actions: []
+    });
     const folderUpdate = {
       ...folderDragging,
       folderId: folderDragging.folderid,
       parentFolderId: draggedOverFolder.folderid
     };
-    updateFolder(token, folderUpdate)
-      .then((res) => {
-        const resFolder = res.data.data[0];
-        const folderToPush = {
-          title: resFolder.title,
-          color: resFolder.color,
-          folderid: resFolder.folderid,
-          parentFolderId: resFolder.parentfolderid
-        };
-        setAllData((prevData) => {
-          const newFolders = prevData.folders.filter(
-            (fold) => fold.folderid !== resFolder.folderid
-          );
-          newFolders.push(folderToPush);
-          const newData = {
-            ...prevData,
-            folders: newFolders
-          };
-          return newData;
+    try {
+      setAllData((prevData) => {
+        const newFolders = prevData.folders.map((fold: Folder): Folder => {
+          if (fold.folderid === folderDragging.folderid) {
+            return { ...fold, parentFolderId: draggedOverFolder.folderid };
+          }
+          return fold;
         });
-        setSystemNotif({
-          show: false,
-          title: "",
-          text: "",
-          color: "",
-          hasCancel: false,
-          actions: []
-        });
-      })
-      .catch((err) => {
-        console.log(err);
+        return { ...prevData, folders: newFolders };
       });
+      updateFolder(token, folderUpdate)
+        .then(() => {
+          const newSucces = {
+            show: true,
+            title: "Moved Folder",
+            text: "Successfully moved your folder",
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "undo", func: (): void => {} }
+            ]
+          };
+          setSystemNotif(newSucces);
+          setFolderDragging(null);
+          setDraggedOverFolder(null);
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const newFolders = prevData.folders.map((fold: Folder): Folder => {
+              if (fold.folderid === folderDragging.folderid) {
+                return { ...fold, parentFolderId: folderDragging.parentFolderId };
+              }
+              return fold;
+            });
+            return { ...prevData, folders: newFolders };
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Moving Folder",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => moveFolderAndContents() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => moveFolderAndContents() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Moving Folder",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem moving your folder. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const listenForRenameCancel = (e): void => {
