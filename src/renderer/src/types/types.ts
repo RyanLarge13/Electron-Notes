@@ -16,7 +16,7 @@ export type apiFolder = {
 
 export type Note = {
   title: string;
-  noteid: number;
+  noteid: string;
   locked: boolean;
   htmlText: string;
   folderId: string;

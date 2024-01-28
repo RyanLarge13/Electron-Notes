@@ -5,6 +5,7 @@ import { CiFolderOn } from "react-icons/ci";
 import { TbNotes } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaRegCheckCircle } from "react-icons/fa";
+import { v4 as uuidv4 } from "uuid";
 import {
   createNewFolder,
   createNewNote,
@@ -53,7 +54,7 @@ const Folders = (): JSX.Element => {
     setFolder(folder);
   };
 
-  const confirmDelete = (folder): void => {
+  const confirmDelete = (folder: Folder): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const newConfirmation = {
       show: true,
@@ -80,28 +81,28 @@ const Folders = (): JSX.Element => {
     setSystemNotif(newConfirmation);
   };
 
-  const createNestedFolder = (folder): void => {
+  const createNestedFolder = (folder: Folder): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     setSelectedFolder(folder);
     navigate("/newfolder");
   };
 
-  const createNestedNote = (folder): void => {
-    setFolder(folder);
-    const newNote = {
-      folderId: folder.folderid,
-      title: `New Note inside of the ${folder.title} folder`,
-      htmlNotes: "<p>Change me!!</p>"
-    };
-    createNewNote(token, newNote).then((res) => {
-      const returnedNote = res.data.data[0];
+  const createNestedNote = (folder: Folder): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    try {
+      setFolder(folder);
+      const tempId = uuidv4();
+      const newNote = {
+        folderId: folder.folderid,
+        title: `New Note inside of the ${folder.title} folder`,
+        htmlNotes: "<p>Change me!!</p>"
+      };
       const noteToPush = {
-        title: returnedNote.title,
-        createdAt: returnedNote.createdat,
-        noteid: returnedNote.notesid,
-        htmlText: returnedNote.htmlnotes,
-        locked: returnedNote.locked,
-        folderId: returnedNote.folderid
+        noteid: tempId,
+        folderId: folder.folderid,
+        title: `New Note inside of the ${folder.title} folder`,
+        htmlText: "<p>Change me!!</p>",
+        locked: false
       };
       setAllData((prevData) => {
         const newData = {
@@ -111,8 +112,105 @@ const Folders = (): JSX.Element => {
         return newData;
       });
       setNote(noteToPush);
-    });
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+      createNewNote(token, newNote)
+        .then((res) => {
+          const newId = res.data.data[0].noteid;
+          setAllData((prevData) => {
+            const newNotes = prevData.notes.map((aNote) => {
+              if (aNote.noteid === tempId) {
+                return { ...aNote, noteid: newId };
+              }
+              return aNote;
+            });
+            return { ...prevData, notes: newNotes };
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const newNotes = prevData.notes.filter((aNote) => aNote.noteid !== tempId);
+            return { ...prevData, notes: newNotes };
+          });
+          setNote(null);
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Creating Note",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => createNestedNote(folder) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => createNestedNote(folder) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      setNote(null);
+      const newError = {
+        show: true,
+        title: "Issues Creating Note",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem creating a new note. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const moveFolder = (folder): void => {
@@ -227,7 +325,7 @@ const Folders = (): JSX.Element => {
       });
   };
 
-  const renameFolder = (folder): void => {
+  const renameFolder = (folder: Folder): void => {
     setFolderToRename(folder);
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     if (renameRef.current) {
@@ -298,7 +396,7 @@ const Folders = (): JSX.Element => {
       });
   };
 
-  const changeFolderColor = (folder): void => {
+  const changeFolderColor = (folder: Folder): void => {
     setFolderToChangeColor(folder);
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
@@ -391,7 +489,7 @@ const Folders = (): JSX.Element => {
       });
   };
 
-  const openOptions = (event, folder): void => {
+  const openOptions = (event, folder: Folder): void => {
     event.preventDefault();
     event.stopPropagation();
     const { clientX, clientY } = event;
@@ -460,12 +558,12 @@ const Folders = (): JSX.Element => {
     setSelectedForEdit((prev) => [...prev, folderId]);
   };
 
-  const onDragStart = (e, folder): void => {
+  const onDragStart = (e, folder: Folder): void => {
     e.preventDefault();
     setFolderDragging(folder);
   };
 
-  const handleDragOver = (e, folder): void => {
+  const handleDragOver = (e, folder: Folder): void => {
     e.preventDefault();
     e.stopPropagation();
     console.log("Drag over event triggered for folder:", folder);

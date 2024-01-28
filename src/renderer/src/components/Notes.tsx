@@ -18,7 +18,6 @@ const Notes = (): JSX.Element => {
     setMove,
     notesToRender,
     token,
-    allData,
     view,
     userPreferences
   } = useContext(UserContext);
@@ -246,7 +245,7 @@ const Notes = (): JSX.Element => {
         hasCancel: true,
         actions: [
           {
-            text: "cloese",
+            text: "close",
             func: () =>
               setSystemNotif({
                 show: false,
@@ -276,6 +275,7 @@ const Notes = (): JSX.Element => {
 
   const changeTitle = (e): void => {
     e.preventDefault();
+    const oldTitle = renameANote.title;
     const newNote = {
       notesId: renameANote.noteid,
       htmlNotes: renameANote.htmlText,
@@ -283,33 +283,134 @@ const Notes = (): JSX.Element => {
       title: renameText,
       folderId: renameANote.folderId
     };
-    updateNote(token, newNote)
-      .then((res) => {
-        const resNote = res.data.data[0];
-        const noteToPush = {
-          title: resNote.title,
-          createdAt: resNote.createdat,
-          noteid: resNote.notesid,
-          htmlText: resNote.htmlnotes,
-          locked: resNote.locked,
-          folderId: resNote.folderid
-        };
-        setAllData((prevUser) => {
-          const newNotes = prevUser.notes.filter((note) => note.noteid !== resNote.notesid);
-          newNotes.push(noteToPush);
-          const newData = {
-            ...prevUser,
-            notes: newNotes
-          };
-          return newData;
+    try {
+      setAllData((prevData) => {
+        const newNotes = prevData.notes.map((aNote) => {
+          if (aNote.noteid === renameANote.noteid) {
+            return { ...aNote, title: renameText };
+          }
+          return aNote;
         });
-        setRenameANote(null);
-        setRenameText("");
-        navigate("/");
-      })
-      .catch((err) => {
-        console.log(err);
+        return { ...prevData, notes: newNotes };
       });
+      setRenameANote(null);
+      setRenameText("");
+      navigate("/");
+      updateNote(token, newNote)
+        .then(() => {
+          const newSuccess = {
+            show: true,
+            title: "Updated Note Title",
+            text: "Successfully renamed your note",
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "undo", func: (): void => {} }
+            ]
+          };
+          setSystemNotif(newSuccess);
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const newNotes = prevData.notes.map((aNote) => {
+              if (aNote.noteid === renameANote.noteid) {
+                return { ...aNote, title: oldTitle };
+              }
+              return aNote;
+            });
+            return { ...prevData, notes: newNotes };
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Updating Note",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => changeTitle(e) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => changeTitle(e) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Updating Title",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem updating your note. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const move = (note): void => {
@@ -350,33 +451,136 @@ const Notes = (): JSX.Element => {
     setSystemNotif(newConfirmation);
   };
 
-  const deleteNote = (note): void => {
-    deleteANote(token, note.noteid)
-      .then((res) => {
-        const noteIdToDelete = res.data.data[0].notesid;
-        const newNotes = allData.notes.filter((aNote) => aNote.noteid !== noteIdToDelete);
-        setAllData((prevData) => {
-          const newData = {
-            ...prevData,
-            notes: newNotes
-          };
-          return newData;
-        });
-        setSystemNotif({
-          show: false,
-          title: "",
-          text: "",
-          color: "",
-          hasCancel: false,
-          actions: []
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        console.log("attempted to delete a note");
+  const deleteNote = (note: Note): void => {
+    setSystemNotif({
+      show: false,
+      title: "",
+      text: "",
+      color: "",
+      hasCancel: false,
+      actions: []
+    });
+    try {
+      setAllData((prevData) => {
+        const newNotes = prevData.notes.filter((aNote: Note) => aNote.noteid !== note.noteid);
+        return {
+          ...prevData,
+          notes: newNotes
+        };
       });
+      deleteANote(token, note.noteid)
+        .then(() => {
+          const newSuccess = {
+            show: true,
+            title: `${note.title} Deleted`,
+            text: "successfully deleted your note",
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "undo", func: (): void => {} }
+            ]
+          };
+          setSystemNotif(newSuccess);
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const newNotes = [...prevData.notes, note];
+            return {
+              ...prevData,
+              notes: newNotes
+            };
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Deleting Note",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => deleteNote(note) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => deleteNote(note) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Deleting Note",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem deleting your note. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const openNotesOptions = (event, note): void => {
@@ -433,11 +637,38 @@ const Notes = (): JSX.Element => {
   };
 
   const unlockNote = (): void => {
-    localStorage.setItem("pin", JSON.stringify(pin));
-    setPinInput(false);
-    setPin({ first: "", second: "", third: "", fourth: "" });
-    setNote(awaitingNote);
-    setAwaitingNote(null);
+    try {
+      const stringifiedPin = JSON.stringify(pin);
+      localStorage.setItem("pin", stringifiedPin);
+      setPinInput(false);
+      setPin({ first: "", second: "", third: "", fourth: "" });
+      setNote(awaitingNote);
+      setAwaitingNote(null);
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Unlocking Note",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem reading your pin. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const checkPin = (): boolean => {
