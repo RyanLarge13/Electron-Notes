@@ -336,7 +336,7 @@ const Folders = (): JSX.Element => {
           if (err.response) {
             const newError = {
               show: true,
-              title: "Issues Duplicating Note",
+              title: "Issues Duplicating Folder",
               text: err.response.message,
               color: "bg-red-300",
               hasCancel: true,
@@ -427,6 +427,7 @@ const Folders = (): JSX.Element => {
   const handleRename = (e): void => {
     e.preventDefault();
     setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
+    const oldTitle = folderToRename.title;
     const newFolder = {
       folderId: folderToRename.folderid,
       title: renameText,
@@ -434,41 +435,32 @@ const Folders = (): JSX.Element => {
       parentFolderId: folderToRename.parentFolderId
     };
     try {
+      setAllData((prevData) => {
+        const newFolders = prevData.folders.map((fold: Folder): Folder => {
+          if (fold.folderid === folderToRename.folderid) {
+            return { ...fold, title: renameText };
+          }
+          return fold;
+        });
+        return {
+          ...prevData,
+          folders: newFolders
+        };
+      });
+      setFolderToRename(null);
+      setRenameText("");
       updateFolder(token, newFolder)
-        .then((res) => {
-          const resFolder = res.data.data[0];
-          const folderToPush = {
-            folderid: resFolder.folderid,
-            title: resFolder.title,
-            color: resFolder.color,
-            parentFolderId: resFolder.parentfolderid
-          };
-          // setAllData((prevUser) => {
-          //   const newFolders = prevUser.folders.filter(
-          //     (fold) => fold.folderid !== resFolder.folderid
-          //   );
-          //   newFolders.push(folderToPush);
-          //   const newData = {
-          //     ...prevUser,
-          //     folders: newFolders
-          //   };
-          //   return newData;
-          // });
-          setFolderToRename(null);
-          setRenameText("");
-        })
-        .catch((err) => {
-          console.log(err);
-          const newError = {
+        .then(() => {
+          const newSuccess = {
             show: true,
-            title: "Error Renaming Folder",
-            text: err.response.data.message,
-            color: "bg-red-300",
-            hasCancel: true,
+            title: "Folder Re-Named",
+            text: "Successfully renamed your folder",
+            color: "bg-green-300",
+            hasCancel: false,
             actions: [
               {
                 text: "close",
-                func: () =>
+                func: (): void =>
                   setSystemNotif({
                     show: false,
                     title: "",
@@ -478,13 +470,102 @@ const Folders = (): JSX.Element => {
                     actions: []
                   })
               },
-              { text: "retry", func: () => handleRename(e) }
+              { text: "undo", func: (): void => {} }
             ]
           };
-          setSystemNotif(newError);
+          setSystemNotif(newSuccess);
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const newFolders = prevData.folders.map((fold: Folder): Folder => {
+              if (fold.folderid === folderToRename.folderid) {
+                return { ...fold, title: oldTitle };
+              }
+              return fold;
+            });
+            return {
+              ...prevData,
+              folders: newFolders
+            };
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Renaming Folder",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => handleRename(e) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "re-try", func: () => handleRename(e) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
         });
     } catch (err) {
       console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Renaming Folder",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem renaming your folder. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
     }
   };
 
