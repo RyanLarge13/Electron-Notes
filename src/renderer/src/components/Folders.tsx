@@ -95,7 +95,8 @@ const Folders = (): JSX.Element => {
       const newNote = {
         folderId: folder.folderid,
         title: `New Note inside of the ${folder.title} folder`,
-        htmlNotes: "<p>Change me!!</p>"
+        htmlNotes: "<p>Change me!!</p>",
+        locked: false
       };
       const noteToPush = {
         noteid: tempId,
@@ -115,7 +116,7 @@ const Folders = (): JSX.Element => {
       setNote(noteToPush);
       createNewNote(token, newNote)
         .then((res) => {
-          const newId = res.data.data[0].noteid;
+          const newId = res.data.data[0].notesid;
           setAllData((prevData) => {
             const newNotes = prevData.notes.map((aNote) => {
               if (aNote.noteid === tempId) {
