@@ -576,61 +576,157 @@ const Folders = (): JSX.Element => {
 
   const changeColor = (): void => {
     setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
+    const tempId = folderToChangeColor.folderid;
+    const oldColor = folderToChangeColor.color;
     const newFolder = {
       folderId: folderToChangeColor.folderid,
       title: folderToChangeColor.title,
       color: newColor,
       parentFolderId: folderToChangeColor.parentFolderId
     };
-    updateFolder(token, newFolder)
-      .then((res) => {
-        const resFolder = res.data.data[0];
-        const folderToPush = {
-          folderid: resFolder.folderid,
-          title: resFolder.title,
-          color: resFolder.color,
-          parentFolderId: resFolder.parentfolderid
-        };
-        setAllData((prevUser) => {
-          const newFolders = prevUser.folders.filter(
-            (fold) => fold.folderid !== resFolder.folderid
-          );
-          newFolders.push(folderToPush);
-          const newData = {
-            ...prevUser,
-            folders: newFolders
-          };
-          return newData;
+    try {
+      setAllData((prevData) => {
+        const newFolders = prevData.folders.map((fold) => {
+          if (fold.folderid === tempId) {
+            return { ...fold, color: newColor };
+          }
+          return fold;
         });
-        setFolderToChangeColor(false);
-        setNewColor(null);
-      })
-      .catch((err) => {
-        console.log(err);
-        const newError = {
-          show: true,
-          title: "Error Renaming Folder",
-          text: err.response.data.message,
-          color: "bg-red-300",
-          hasCancel: true,
-          actions: [
-            {
-              text: "close",
-              func: () =>
-                setSystemNotif({
-                  show: false,
-                  title: "",
-                  text: "",
-                  color: "",
-                  hasCancel: false,
-                  actions: []
-                })
-            },
-            { text: "retry", func: () => changeColor() }
-          ]
+        return {
+          ...prevData,
+          folders: newFolders
         };
-        setSystemNotif(newError);
       });
+      setFolderToChangeColor(false);
+      setNewColor(null);
+      updateFolder(token, newFolder)
+        .then(() => {
+          const newSuccess = {
+            show: true,
+            title: "New Folder Color",
+            text: "Your folder color is now updated",
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "undo", func: (): void => {} }
+            ]
+          };
+          setSystemNotif(newSuccess);
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const newFolders = prevData.folders.map((fold) => {
+              if (fold.folderid === tempId) {
+                return { ...fold, color: oldColor };
+              }
+              return fold;
+            });
+            return {
+              ...prevData,
+              folders: newFolders
+            };
+          });
+          if (err.response) {
+            const newError = {
+              show: true,
+              title: "Issues Updating Folder",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+          if (err.request) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: (): void =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      setAllData((prevData) => {
+        const newFolders = prevData.folders.map((fold) => {
+          if (fold.folderid === tempId) {
+            return { ...fold, color: oldColor };
+          }
+          return fold;
+        });
+        return {
+          ...prevData,
+          folders: newFolders
+        };
+      });
+      const newError = {
+        show: true,
+        title: "Issues Updating Folder",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem changing your folders color. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
   };
 
   const deleteFolder = (folderId: string): void => {
