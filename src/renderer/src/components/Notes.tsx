@@ -425,7 +425,6 @@ const Notes = (): JSX.Element => {
   };
 
   const confirmDelete = (note): void => {
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const newConfirmation = {
       show: true,
       title: `Delete ${note.title}`,
@@ -452,6 +451,7 @@ const Notes = (): JSX.Element => {
   };
 
   const deleteNote = (note: Note): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     setSystemNotif({
       show: false,
       title: "",
@@ -613,7 +613,7 @@ const Notes = (): JSX.Element => {
         },
         {
           title: "duplicate",
-          func: () => confirmDuplicate(note)
+          func: () => (userPreferences.confirm ? confirmDuplicate(note) : duplicate(note))
         },
         {
           title: "rename",
@@ -621,7 +621,7 @@ const Notes = (): JSX.Element => {
         },
         {
           title: "delete",
-          func: () => confirmDelete(note)
+          func: () => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
         }
       ]
     };

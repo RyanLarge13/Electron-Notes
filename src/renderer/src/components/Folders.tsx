@@ -30,6 +30,7 @@ const Folders = (): JSX.Element => {
     setSelectedForEdit,
     setDraggedOverFolder,
     setMove,
+    userPreferences,
     folders,
     token,
     edit,
@@ -56,7 +57,6 @@ const Folders = (): JSX.Element => {
   };
 
   const confirmDelete = (folder: Folder): void => {
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const newConfirmation = {
       show: true,
       title: `Delete ${folder.title}`,
@@ -731,6 +731,7 @@ const Folders = (): JSX.Element => {
   };
 
   const deleteFolder = (folderId: string): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const oldFolder = allData.folders.filter((fold) => fold.folderid == folderId)[0];
     setSystemNotif({
       show: false,
@@ -899,7 +900,7 @@ const Folders = (): JSX.Element => {
         },
         {
           title: "duplicate",
-          func: (): void => confirmDup(folder)
+          func: (): void => (userPreferences.confirm ? confirmDup(folder) : dupFolder(folder))
         },
         {
           title: "rename",
@@ -911,7 +912,8 @@ const Folders = (): JSX.Element => {
         },
         {
           title: "delete",
-          func: (): void => confirmDelete(folder)
+          func: (): void =>
+            userPreferences.confirm ? confirmDelete(folder) : deleteFolder(folder.folderid)
         }
       ]
     };
@@ -949,6 +951,9 @@ const Folders = (): JSX.Element => {
   const onDragEnd = (e): void => {
     e.preventDefault();
     setDragging(false);
+    if (!userPreferences.confirm) {
+      return moveFolderAndContents();
+    }
     const newConfirmation = {
       show: true,
       title: `Move ${folderDragging.title} to ${draggedOverFolder.title}`,

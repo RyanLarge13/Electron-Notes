@@ -508,7 +508,20 @@ const Settings = (): JSX.Element => {
               actions: []
             })
         },
-        { text: "confirm", func: () => changeConfirmationOnOperations() }
+        {
+          text: "confirm",
+          func: (): void => {
+            changeConfirmationOnOperations();
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            });
+          }
+        }
       ]
     };
     setSystemNotif(newConfirmation);
@@ -533,7 +546,7 @@ const Settings = (): JSX.Element => {
         hasCancel: true,
         actions: [
           {
-            text: "cloese",
+            text: "close",
             func: () =>
               setSystemNotif({
                 show: false,
