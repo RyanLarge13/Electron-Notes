@@ -52,7 +52,7 @@ const SystemNotif = (): JSX.Element => {
     <AnimatePresence>
       {systemNotif.show && (
         <>
-          <div
+          {/* <div
             onClick={() =>
               setSystemNotif({
                 show: false,
@@ -64,7 +64,7 @@ const SystemNotif = (): JSX.Element => {
               })
             }
             className="fixed bg-transparent inset-0 z-40"
-          ></div>
+          ></div> */}
           <motion.div
             drag="x"
             dragSnapToOrigin={true}

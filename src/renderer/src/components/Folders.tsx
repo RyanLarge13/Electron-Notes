@@ -44,6 +44,7 @@ const Folders = (): JSX.Element => {
   const [renameText, setRenameText] = useState("");
   const [folderToChangeColor, setFolderToChangeColor] = useState(null);
   const [newColor, setNewColor] = useState(null);
+  const [draggedInto, setDraggedInto] = useState("");
 
   const renameRef = useRef(null);
 
@@ -955,14 +956,21 @@ const Folders = (): JSX.Element => {
       color: "bg-cyan-300",
       hasCancel: true,
       actions: [
-        { text: "cancel", func: () => cancelMove() },
-        { text: "move", func: () => moveFolderAndContents() }
+        {
+          text: "cancel",
+          func: (): void => {
+            setDraggedInto("");
+            cancelMove();
+          }
+        },
+        { text: "move", func: (): void => moveFolderAndContents() }
       ]
     };
     setSystemNotif(newConfirmation);
   };
 
   const cancelMove = (): void => {
+    setDraggedInto("");
     setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
     setDraggedOverFolder(null);
     setDragging(false);
@@ -993,6 +1001,7 @@ const Folders = (): JSX.Element => {
         });
         return { ...prevData, folders: newFolders };
       });
+      setDraggedInto("");
       updateFolder(token, folderUpdate)
         .then(() => {
           const newSucces = {
@@ -1129,11 +1138,21 @@ const Folders = (): JSX.Element => {
           whileDrag={{ zIndex: 900, pointerEvents: "none" }}
           onContextMenu={(e) => openOptions(e, folder)}
           onDragStart={(e) => onDragStart(e, folder)}
-          onDragEnd={onDragEnd}
+          onDragEnd={(e) => {
+            setDraggedInto(folder.folderid);
+            onDragEnd(e);
+          }}
+          animate={draggedInto == folder.folderid ? { scale: 0 } : { scale: 1 }}
           onMouseEnter={(e) => (dragging ? handleDragOver(e, folder) : null)}
-          whileHover={!folderToChangeColor && { scale: 1.1 }}
+          whileHover={
+            !folderToChangeColor
+              ? draggedInto === folder.folderid
+                ? { scale: 0 }
+                : { scale: 1.1 }
+              : { scale: 1.1 }
+          }
           key={folder.folderid}
-          className="relative w-60 h-40 bg-slate-900 rounded-md shadow-lg p-2 flex flex-col justify-between cursor-pointer"
+          className="relative w-60 h-40 bg-slate-900 will-change-transform rounded-md shadow-lg p-2 flex flex-col justify-between cursor-pointer"
           onClick={() => !edit && !folderToRename && !folderToChangeColor && openFolder(folder)}
         >
           {folderToChangeColor && folderToChangeColor.folderid === folder.folderid && (
