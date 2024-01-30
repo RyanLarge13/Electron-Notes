@@ -83,8 +83,15 @@ type Commands = {
   active: boolean;
 };
 
+type PreferencesNotify = {
+  notifyAll: boolean;
+  notifySuccess: boolean;
+  notifyErrors: boolean;
+};
+
 type UserPreferences = {
   confirm: boolean;
+  notify: PreferencesNotify;
   darkMode: boolean;
   lockPin: number[];
   theme: string;

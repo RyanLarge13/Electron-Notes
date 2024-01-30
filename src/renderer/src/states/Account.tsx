@@ -48,7 +48,8 @@ const Account = (): JSX.Element => {
     notes,
     folders,
     menu,
-    filter
+    filter,
+    userPreferences
   } = useContext(UserContext);
 
   const [filterOptions, setFilterOptions] = useState(false);
@@ -57,6 +58,7 @@ const Account = (): JSX.Element => {
   const [newColor, setNewColor] = useState(folder ? folder.color : "bg-amber-300");
 
   const navigate = useNavigate();
+  const themeStringText = userPreferences.theme.replace("bg", "text");
 
   const addNewFolder = (): void => {
     navigate("/newfolder");
@@ -715,8 +717,11 @@ const Account = (): JSX.Element => {
         </button>
       </div>
       <Notes />
+      {/* <div className="hover:bg-rose-200 hover:bg-red-200 hover:bg-amber-200 hover:bg-yellow-200 hover:bg-lime-200 hover:bg-green-200 hover:bg-cyan-200 hover:bg-sky-200 hover:bg-blue-200 hover:bg-indigo-200 hover:bg-violet-200 hover:bg-fuchsia-200 hover:bg-pink-200"></div> */}
       <button
-        className="fixed bottom-3 right-3 rounded-full bg-slate-600 text-amber-300 w-10 h-10 flex justify-center items-center shadow-sm"
+        className={`fixed bottom-3 right-3 rounded-full bg-slate-600 ${
+          userPreferences.theme ? themeStringText : "text-amber-300"
+        } w-10 h-10 flex justify-center items-center shadow-sm`}
         onClick={() => setOptions((prev) => !prev)}
       >
         <FiEdit />

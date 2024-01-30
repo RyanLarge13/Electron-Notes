@@ -58,6 +58,11 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         darkMode: true,
         theme: "",
         confirm: true,
+        notify: {
+          notifyAll: true,
+          success: true,
+          errors: true
+        },
         lockPin: [1, 2, 3, 4],
         commands: [
           { text: "new folder", command: "ctrl + f", active: true },

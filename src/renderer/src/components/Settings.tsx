@@ -25,11 +25,14 @@ const Settings = (): JSX.Element => {
   const [lockPin, setLockPin] = useState(false);
   const [newLockPin, setNewLockPin] = useState({ first: "", second: "", third: "", fourth: "" });
   const [createNewPin, setCreateNewPin] = useState(false);
-  const [theme, setTheme] = useState(userPreferences.theme);
+  const [theme, setTheme] = useState(userPreferences?.theme);
   const [newTheme, setNewTheme] = useState(
-    userPreferences.theme ? userPreferences.theme : "bg-amber-300"
+    userPreferences?.theme ? userPreferences?.theme : "bg-amber-300"
   );
-  const [confirmOps, setConfirmOps] = useState(userPreferences.confirm);
+  const [confirmOps, setConfirmOps] = useState(userPreferences?.confirm);
+  const [notifyAll, setNotifyAll] = useState(userPreferences?.notify?.notifyAll);
+  const [notifySuccess, setNotifySuccess] = useState(userPreferences?.notify?.notifySuccess);
+  const [notifyErrors, setNotifyErrors] = useState(userPreferences?.notify?.notifyErrors);
   const [newPassLoading, setNewPassLoading] = useState(false);
 
   const firstInput = useRef(null);
@@ -72,6 +75,168 @@ const Settings = (): JSX.Element => {
       checkCurrentPin();
     }
   }, [newLockPin.fourth, createNewPin]);
+
+  useEffect(() => {
+    const currentState = notifyAll;
+    try {
+      const newPreferences = {
+        ...userPreferences,
+        notify: {
+          notifySuccess: !notifyAll ? false : notifySuccess,
+          notifyErrors: !notifyAll ? false : notifyErrors,
+          notifyAll: notifyAll
+        }
+      };
+      setUserPreferences(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Error Updating Preferences",
+        text: "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
+          { text: "re-try", func: () => setNotifyAll(currentState) },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
+    }
+  }, [notifyAll]);
+
+  useEffect(() => {
+    const currentState = notifySuccess;
+    try {
+      const newPreferences = {
+        ...userPreferences,
+        notify: {
+          ...userPreferences.notify,
+          notifySuccess: notifySuccess
+        }
+      };
+      setUserPreferences(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Error Updating Preferences",
+        text: "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
+          { text: "re-try", func: () => setNotifySuccess(currentState) },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
+    }
+  }, [notifySuccess]);
+
+  useEffect(() => {
+    const currentState = notifyErrors;
+    try {
+      const newPreferences = {
+        ...userPreferences,
+        notify: {
+          ...userPreferences.notify,
+          notifyErrors: notifyErrors
+        }
+      };
+      setUserPreferences(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Error Updating Preferences",
+        text: "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
+          { text: "re-try", func: () => setNotifyErrors(currentState) },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
+    }
+  }, [notifyErrors]);
+
+  useEffect(() => {
+    const currentState = confirmOps;
+    try {
+      const newPreferences = {
+        ...userPreferences,
+        confirm: confirmOps
+      };
+      setUserPreferences(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Error Updating Preferences",
+        text: "There was an error with the application when trying to update your preferences to confirm operations, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
+          { text: "re-try", func: () => setConfirmOps(currentState) },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
+    }
+  }, [confirmOps]);
 
   const setDarkModeTheme = (): void => {
     const newPreferences = {
@@ -488,81 +653,6 @@ const Settings = (): JSX.Element => {
     }
   };
 
-  const confirmChangeOperation = (): void => {
-    const newConfirmation = {
-      show: true,
-      title: "Are You Sure?",
-      text: "When you turn off this functionality you will NOT be prompted before completing any delete, logout, move, or other operations on your data. Are you sure you want to turn this functionality off? Once data is deleted you can not get it back",
-      color: "bg-red-300",
-      hasCancel: true,
-      actions: [
-        {
-          text: "CANCEL",
-          func: () =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
-        },
-        {
-          text: "confirm",
-          func: (): void => {
-            changeConfirmationOnOperations();
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            });
-          }
-        }
-      ]
-    };
-    setSystemNotif(newConfirmation);
-  };
-
-  const changeConfirmationOnOperations = (): void => {
-    setConfirmOps((prev) => !prev);
-    const newPreferences = {
-      ...userPreferences,
-      confirm: !userPreferences.confirm
-    };
-    try {
-      localStorage.setItem("preferences", JSON.stringify(newPreferences));
-    } catch (err) {
-      console.log(err);
-      setConfirmOps((prev) => !prev);
-      const newError = {
-        show: true,
-        title: "Issues updating preferences",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem updating your preferences. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
-          }
-        ]
-      };
-      setSystemNotif(newError);
-    }
-  };
-
   return (
     <>
       <motion.div
@@ -620,9 +710,7 @@ const Settings = (): JSX.Element => {
           </div>
         )}
         <button
-          onClick={() => {
-            confirmOps ? confirmChangeOperation() : changeConfirmationOnOperations();
-          }}
+          onClick={() => setConfirmOps((prev) => !prev)}
           className="flex justify-between items-center my-3"
         >
           <p>Confirm Ops</p>
@@ -737,7 +825,7 @@ const Settings = (): JSX.Element => {
           </div>
         </button>
         {password && (
-          <div className="mt-1">
+          <div className="mt-1 mb-3">
             <form onSubmit={changePass} className="flex flex-col justify-start items-start gap-y-2">
               <input
                 type="password"
@@ -762,6 +850,55 @@ const Settings = (): JSX.Element => {
             </form>
           </div>
         )}
+        <div className="p-2 rounded-md bg-slate-800">
+          <button
+            onClick={() => setNotifyAll((prev) => !prev)}
+            className="flex justify-between items-center w-full"
+          >
+            <p className="font-semibold">All Notifications</p>
+            <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+              <div
+                className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                  notifyAll
+                    ? "right-[1px] left-[50%] bg-green-200"
+                    : "left-[1px] right-[50%] bg-red-200"
+                } rounded-full`}
+              ></div>
+            </div>
+          </button>
+          <div className="pl-5">
+            <button
+              onClick={() => setNotifySuccess((prev) => !prev)}
+              className="flex justify-between items-center my-3 w-full"
+            >
+              <p>Success Prompts</p>
+              <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+                <div
+                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                    notifyAll && notifySuccess
+                      ? "right-[1px] left-[50%] bg-green-200"
+                      : "left-[1px] right-[50%] bg-red-200"
+                  } rounded-full`}
+                ></div>
+              </div>
+            </button>
+            <button
+              onClick={() => setNotifyErrors((prev) => !prev)}
+              className="flex justify-between items-center my-3 w-full"
+            >
+              <p>Error Prompts</p>
+              <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+                <div
+                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                    notifyAll && notifyErrors
+                      ? "right-[1px] left-[50%] bg-green-200"
+                      : "left-[1px] right-[50%] bg-red-200"
+                  } rounded-full`}
+                ></div>
+              </div>
+            </button>
+          </div>
+        </div>
         <div className="flex flex-col justify-start items-start mt-3">
           <p className="mb-1">Short Cuts</p>
           {userPreferences.commands.map((command) => (

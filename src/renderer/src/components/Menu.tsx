@@ -18,10 +18,12 @@ const Menu = (): JSX.Element => {
     setSettings,
     user,
     allData,
-    token
+    token,
+    userPreferences
   } = useContext(UserContext);
 
   const navigate = useNavigate();
+  const hoverBgString = userPreferences.theme.replace("300", "200");
 
   const confirmLogout = (): void => {
     const newConfirmation = {
@@ -241,7 +243,11 @@ const Menu = (): JSX.Element => {
           />
           <button
             onClick={() => navigate("/newfolder")}
-            className="p-2 mt-3 rounded-md bg-amber-300 text-black shadow-md hover:bg-amber-200 duration-200"
+            className={`p-2 mt-3 rounded-md text-black shadow-md duration-200 ${
+              userPreferences.theme
+                ? `${userPreferences.theme} hover:${hoverBgString}`
+                : "bg-amber-300 hover:bg-amber-200 "
+            }`}
           >
             Create Folder +
           </button>
@@ -255,13 +261,17 @@ const Menu = (): JSX.Element => {
           </button>
           <button
             onClick={() => confirmLogout()}
-            className="p-2 rounded-md shadow-md bg-amber-300 my-3 text-black w-full hover:bg-amber-200 duration-200"
+            className={`p-2 rounded-md shadow-md ${
+              userPreferences.theme
+                ? `${userPreferences.theme} hover:${hoverBgString}`
+                : "bg-amber-300 hover:bg-amber-200"
+            } my-3 text-black w-full duration-200`}
           >
             Logout &rarr;
           </button>
           <button
             onClick={() => confirmDeleteAccount()}
-            className="p-2 rounded-md shadow-md bg-red-300 w-full hover:bg-red-200 duration-200"
+            className="p-2 text-slate-700 rounded-md shadow-md bg-red-300 w-full hover:bg-red-200 duration-200"
           >
             Delete Account
           </button>
