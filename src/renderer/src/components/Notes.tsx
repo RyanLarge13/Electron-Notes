@@ -152,29 +152,31 @@ const Notes = (): JSX.Element => {
             });
             return { ...prevData, notes: newNotes };
           });
-          const newSuccess = {
-            show: true,
-            title: "Duplicated Note",
-            text: `You successfully duplicated your note: ${note.title}`,
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
+              show: true,
+              title: "Duplicated Note",
+              text: `You successfully duplicated your note: ${note.title}`,
+              color: "bg-green-300",
+              hasCancel: false,
+              actions: [
+                {
+                  text: "close",
+                  func: (): void =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "undo", func: (): void => {} }
+              ]
+            };
+            setSystemNotif(newSuccess);
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -183,56 +185,60 @@ const Notes = (): JSX.Element => {
             return { ...prevData, notes: oldNotes };
           });
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Issues Duplicating Note",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => duplicate(note) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Duplicating Note",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => duplicate(note) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => duplicate(note) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => duplicate(note) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
         });
     } catch (err) {
@@ -298,29 +304,31 @@ const Notes = (): JSX.Element => {
       navigate("/");
       updateNote(token, newNote)
         .then(() => {
-          const newSuccess = {
-            show: true,
-            title: "Updated Note Title",
-            text: "Successfully renamed your note",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
+              show: true,
+              title: "Updated Note Title",
+              text: "Successfully renamed your note",
+              color: "bg-green-300",
+              hasCancel: false,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "undo", func: (): void => {} }
+              ]
+            };
+            setSystemNotif(newSuccess);
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -334,56 +342,60 @@ const Notes = (): JSX.Element => {
             return { ...prevData, notes: newNotes };
           });
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Issues Updating Note",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => changeTitle(e) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Updating Note",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => changeTitle(e) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => changeTitle(e) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => changeTitle(e) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
         });
     } catch (err) {
@@ -470,29 +482,31 @@ const Notes = (): JSX.Element => {
       });
       deleteANote(token, note.noteid)
         .then(() => {
-          const newSuccess = {
-            show: true,
-            title: `${note.title} Deleted`,
-            text: "successfully deleted your note",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
+              show: true,
+              title: `${note.title} Deleted`,
+              text: "successfully deleted your note",
+              color: "bg-green-300",
+              hasCancel: false,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "undo", func: (): void => {} }
+              ]
+            };
+            setSystemNotif(newSuccess);
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -504,56 +518,60 @@ const Notes = (): JSX.Element => {
             };
           });
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Issues Deleting Note",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => deleteNote(note) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Deleting Note",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => deleteNote(note) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => deleteNote(note) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => deleteNote(note) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
         });
     } catch (err) {

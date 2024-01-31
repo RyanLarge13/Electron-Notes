@@ -9,21 +9,20 @@ import UserContext from "@renderer/contexxt/UserContext";
 
 const MainPage = (): JSX.Element => {
   const {
-    user,
-    loading,
     setOrder,
     setEdit,
-    edit,
     setMenu,
     setContextMenu,
     setEditCurrentFolder,
     setSelectedForEdit,
-    note,
-    editNote,
-    folder,
     setPosition,
     setView,
-    setSettings
+    setSettings,
+    loading,
+    user,
+    edit,
+    folder,
+    note
   } = useContext(UserContext);
 
   const [keyPresses, setKeyPressed] = useState({
@@ -97,7 +96,7 @@ const MainPage = (): JSX.Element => {
   }, []);
 
   const editCurrentFolder = (): void => {
-    setContextMenu({ show: false });
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     if (!folder) {
       return;
     }
@@ -106,7 +105,7 @@ const MainPage = (): JSX.Element => {
 
   const openOptions = (e): void => {
     e.preventDefault();
-    if (!user || loading || note || editNote) return;
+    if (!user || loading || note) return;
     const { clientX, clientY } = e;
     let dynamicTop = clientY;
     let dynamicLeft = clientX;
@@ -127,42 +126,42 @@ const MainPage = (): JSX.Element => {
         {
           title: "new folder",
           func: (): void => {
-            setContextMenu({ show: false });
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             navigate("/newfolder");
           }
         },
         {
           title: "new note",
           func: (): void => {
-            setContextMenu({ show: false });
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             navigate("/newnote");
           }
         },
         {
           title: "menu",
           func: (): void => {
-            setContextMenu({ show: false });
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             setMenu(true);
           }
         },
         {
           title: "edit",
           func: (): void => {
-            setContextMenu({ show: false });
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             setEdit(true);
           }
         },
         {
           title: "change view",
           func: (): void => {
-            setContextMenu({ show: false });
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             setView((prevView) => (prevView === "list" ? "grid" : "list"));
           }
         },
         {
           title: "change order",
           func: (): void => {
-            setContextMenu({ show: false });
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             setOrder((prevOrder) => !prevOrder);
           }
         },
@@ -173,7 +172,7 @@ const MainPage = (): JSX.Element => {
         {
           title: "settings",
           func: (): void => {
-            setContextMenu({ show: false });
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             setMenu(true);
             setSettings(true);
           }

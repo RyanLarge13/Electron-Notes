@@ -60,8 +60,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         confirm: true,
         notify: {
           notifyAll: true,
-          success: true,
-          errors: true
+          notifySuccess: true,
+          notifyErrors: true
         },
         lockPin: [1, 2, 3, 4],
         commands: [

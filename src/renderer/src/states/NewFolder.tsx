@@ -10,8 +10,15 @@ import Colors from "@renderer/components/Colors";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const NewFolder = (): JSX.Element => {
-  const { folder, token, setAllData, setSelectedFolder, selectedFolder, setSystemNotif } =
-    useContext(UserContext);
+  const {
+    folder,
+    token,
+    selectedFolder,
+    userPreferences,
+    setAllData,
+    setSelectedFolder,
+    setSystemNotif
+  } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -50,18 +57,31 @@ const NewFolder = (): JSX.Element => {
             folders: updatedFolders
           };
         });
-        const newSuccess = {
-          show: true,
-          title: "New Folder",
-          text: "Your new folder was successfully created!!",
-          color: "bg-green-300",
-          hasCancel: false,
-          actions: [
-            { text: "close", func: () => setSystemNotif({ show: false }) },
-            { text: "undo", func: () => {} }
-          ]
-        };
-        setSystemNotif(newSuccess);
+        if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+          const newSuccess = {
+            show: true,
+            title: "New Folder",
+            text: "Your new folder was successfully created!!",
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "undo", func: (): void => {} }
+            ]
+          };
+          setSystemNotif(newSuccess);
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -76,46 +96,86 @@ const NewFolder = (): JSX.Element => {
           return newData;
         });
         if (err.response) {
-          const newError = {
-            show: true,
-            title: "Issues Creating Folder",
-            text: err.response.message,
-            color: "bg-red-300",
-            hasCancel: true,
-            actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
-              {
-                text: "open note",
-                func: () => {
-                  setSystemNotif({ show: false });
-                  navigate("/newfolder");
-                }
-              },
-              { text: "reload app", func: () => window.location.reload() }
-            ]
-          };
-          setSystemNotif(newError);
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+            const newError = {
+              show: true,
+              title: "Issues Creating Folder",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                {
+                  text: "open note",
+                  func: (): void => {
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    });
+                    navigate("/newfolder");
+                  }
+                },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
         }
         if (err.request) {
-          const newError = {
-            show: true,
-            title: "Network Error",
-            text: "Our application was not able to reach the server, please check your internet connection and try again",
-            color: "bg-red-300",
-            hasCancel: true,
-            actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
-              {
-                text: "open note",
-                func: () => {
-                  setSystemNotif({ show: false });
-                  navigate("/newfolder");
-                }
-              },
-              { text: "reload app", func: () => window.location.reload() }
-            ]
-          };
-          setSystemNotif(newError);
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                {
+                  text: "open note",
+                  func: (): void => {
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    });
+                    navigate("/newfolder");
+                  }
+                },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
         }
       });
   };

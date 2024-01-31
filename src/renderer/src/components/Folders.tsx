@@ -135,56 +135,60 @@ const Folders = (): JSX.Element => {
           });
           setNote(null);
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Issues Creating Note",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => createNestedNote(folder) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Creating Note",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => createNestedNote(folder) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => createNestedNote(folder) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => createNestedNote(folder) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
         });
     } catch (err) {
@@ -303,29 +307,31 @@ const Folders = (): JSX.Element => {
               folders: updatedFolders
             };
           });
-          const newSuccess = {
-            show: true,
-            title: "Folder Duplicated",
-            text: "Successfully duplicated your folder",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
+              show: true,
+              title: "Folder Duplicated",
+              text: "Successfully duplicated your folder",
+              color: "bg-green-300",
+              hasCancel: false,
+              actions: [
+                {
+                  text: "close",
+                  func: (): void =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "undo", func: (): void => {} }
+              ]
+            };
+            setSystemNotif(newSuccess);
+          }
         })
         .catch((err) => {
           setAllData((prevData) => {
@@ -336,56 +342,60 @@ const Folders = (): JSX.Element => {
             };
           });
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Issues Duplicating Folder",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => dupFolder(folder) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Duplicating Folder",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => dupFolder(folder) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => dupFolder(folder) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => dupFolder(folder) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
         });
     } catch (err) {
@@ -453,29 +463,31 @@ const Folders = (): JSX.Element => {
       setRenameText("");
       updateFolder(token, newFolder)
         .then(() => {
-          const newSuccess = {
-            show: true,
-            title: "Folder Re-Named",
-            text: "Successfully renamed your folder",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
+              show: true,
+              title: "Folder Re-Named",
+              text: "Successfully renamed your folder",
+              color: "bg-green-300",
+              hasCancel: false,
+              actions: [
+                {
+                  text: "close",
+                  func: (): void =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "undo", func: (): void => {} }
+              ]
+            };
+            setSystemNotif(newSuccess);
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -492,56 +504,60 @@ const Folders = (): JSX.Element => {
             };
           });
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Issues Renaming Folder",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => handleRename(e) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Renaming Folder",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => handleRename(e) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => handleRename(e) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => handleRename(e) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
         });
     } catch (err) {
@@ -603,29 +619,31 @@ const Folders = (): JSX.Element => {
       setNewColor(null);
       updateFolder(token, newFolder)
         .then(() => {
-          const newSuccess = {
-            show: true,
-            title: "New Folder Color",
-            text: "Your folder color is now updated",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
+              show: true,
+              title: "New Folder Color",
+              text: "Your folder color is now updated",
+              color: "bg-green-300",
+              hasCancel: false,
+              actions: [
+                {
+                  text: "close",
+                  func: (): void =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "undo", func: (): void => {} }
+              ]
+            };
+            setSystemNotif(newSuccess);
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -642,54 +660,58 @@ const Folders = (): JSX.Element => {
             };
           });
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Issues Updating Folder",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Updating Folder",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: (): void =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: (): void =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
         });
     } catch (err) {
@@ -749,72 +771,13 @@ const Folders = (): JSX.Element => {
       });
       deleteAFolder(token, folderId)
         .then(() => {
-          const newSuccess = {
-            show: true,
-            title: "Folder Deleted",
-            text: "Successfully deleted your folder!!",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const newFolders = [...prevData.folders, oldFolder];
-            return {
-              ...prevData,
-              folders: newFolders
-            };
-          });
-          if (err.response) {
-            const newError = {
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
               show: true,
-              title: "Issues Deleting Folder",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => deleteFolder(folderId) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
-          }
-          if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
+              title: "Folder Deleted",
+              text: "Successfully deleted your folder!!",
+              color: "bg-green-300",
+              hasCancel: false,
               actions: [
                 {
                   text: "close",
@@ -828,11 +791,76 @@ const Folders = (): JSX.Element => {
                       actions: []
                     })
                 },
-                { text: "re-try", func: () => deleteFolder(folderId) },
-                { text: "reload app", func: () => window.location.reload() }
+                { text: "undo", func: (): void => {} }
               ]
             };
-            setSystemNotif(newError);
+            setSystemNotif(newSuccess);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const newFolders = [...prevData.folders, oldFolder];
+            return {
+              ...prevData,
+              folders: newFolders
+            };
+          });
+          if (err.response) {
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Deleting Folder",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => deleteFolder(folderId) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
+          }
+          if (err.request) {
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: (): void =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => deleteFolder(folderId) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
         });
     } catch (err) {
@@ -1010,29 +1038,31 @@ const Folders = (): JSX.Element => {
       setDraggedInto("");
       updateFolder(token, folderUpdate)
         .then(() => {
-          const newSucces = {
-            show: true,
-            title: "Moved Folder",
-            text: "Successfully moved your folder",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSucces);
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
+              show: true,
+              title: "Moved Folder",
+              text: "Successfully moved your folder",
+              color: "bg-green-300",
+              hasCancel: false,
+              actions: [
+                {
+                  text: "close",
+                  func: (): void =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "undo", func: (): void => {} }
+              ]
+            };
+            setSystemNotif(newSuccess);
+          }
           setFolderDragging(null);
           setDraggedOverFolder(null);
         })
@@ -1048,56 +1078,60 @@ const Folders = (): JSX.Element => {
             return { ...prevData, folders: newFolders };
           });
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Issues Moving Folder",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => moveFolderAndContents() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Moving Folder",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => moveFolderAndContents() },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: (): void =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => moveFolderAndContents() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: (): void =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => moveFolderAndContents() },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
           }
         });
     } catch (err) {

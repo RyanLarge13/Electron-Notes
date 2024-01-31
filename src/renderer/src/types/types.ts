@@ -6,6 +6,7 @@ export type Folder = {
   title: string;
   color: string;
   parentFolderId: string;
+  createdAt: Date;
 };
 
 export type apiFolder = {
@@ -20,6 +21,7 @@ export type Note = {
   locked: boolean;
   htmlText: string;
   folderId: string;
+  createdAt: Date;
 };
 
 export type apiNote = {
