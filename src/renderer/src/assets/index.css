@@ -3,18 +3,18 @@
 @tailwind utilities;
 
 body {
-  background-color: #223;
-  color: #fff;
+  /* background-color: #223;
+  color: #fff; */
   font-family: Georgia, "Times New Roman", Times, serif;
 }
 
 body::-webkit-scrollbar {
-  width: 3px;
+  width: 0px;
   color: #aaa;
 }
 
 body::-webkit-scrollbar-thumb {
-  width: 3px;
+  width: 0px;
 }
 
 .no-scroll-bar::-webkit-scrollbar {
@@ -24,6 +24,15 @@ body::-webkit-scrollbar-thumb {
 
 .no-scroll-bar::-webkit-scrollbar-thumb {
   width: 3px;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  width: 0px;
+  display: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar-thumb {
+  width: 0px;
 }
 
 .radial-gradient {

@@ -597,7 +597,7 @@ const Account = (): JSX.Element => {
   };
 
   return (
-    <section className="flex justify-center items-center flex-col mt-20 mx-10 lg:mx-60">
+    <section className="flex justify-center items-center flex-col pt-20 mx-10 lg:mx-60">
       {nesting.length > 0 && (
         <div className="flex justify-end items-center font-semibold gap-x-3 fixed top-5 left-5">
           {nesting.map((folderMeta: { title: string; id: string }, index: number) => (

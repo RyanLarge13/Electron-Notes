@@ -1192,7 +1192,9 @@ const Folders = (): JSX.Element => {
               : { scale: 1.1 }
           }
           key={folder.folderid}
-          className="relative w-60 h-40 bg-slate-900 will-change-transform rounded-md shadow-lg p-2 flex flex-col justify-between cursor-pointer"
+          className={`relative w-60 h-40 ${
+            userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+          } will-change-transform rounded-md shadow-lg p-2 flex flex-col justify-between cursor-pointer`}
           onClick={() => !edit && !folderToRename && !folderToChangeColor && openFolder(folder)}
         >
           {folderToChangeColor && folderToChangeColor.folderid === folder.folderid && (
@@ -1207,7 +1209,9 @@ const Folders = (): JSX.Element => {
               <motion.div
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="absolute bottom-[110%] p-3 z-[990] rounded-md shadow-md bg-slate-900"
+                className={`absolute bottom-[110%] p-3 z-[990] rounded-md shadow-md ${
+                  userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+                }`}
               >
                 <div
                   className={`z-10 absolute top-0 right-0 w-[50%] h-3 rounded-bl-md rounded-tr-md ${newColor} bg-amber-300`}

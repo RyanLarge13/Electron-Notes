@@ -207,29 +207,51 @@ const Menu = (): JSX.Element => {
       <motion.div
         initial={{ x: -10, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        className="fixed flex flex-col justify-between z-40 left-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 bg-slate-900 rounded-r-md overflow-y-auto no-scroll-bar"
+        className={`fixed flex flex-col justify-between z-40 left-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 ${
+          userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+        } rounded-r-md overflow-y-auto no-scroll-bar`}
       >
         <div className="mb-10">
           <h1 className="text-3xl">{user.username}</h1>
           <button
             onClick={() => showAllNotes()}
-            className="p-3 rounded-md shadow-md my-3 bg-slate-700 w-full flex justify-between items-center hover:bg-slate-800 duration-200"
+            className={`p-3 rounded-md shadow-md my-3 ${
+              userPreferences.darkMode
+                ? "bg-slate-700 hover:bg-slate-800"
+                : "bg-slate-300 hover:bg-slate-400"
+            } w-full flex justify-between items-center duration-200`}
           >
             <p>All Notes</p>
             <p>{allData?.notes?.length}</p>
           </button>
           <button
             onClick={() => showAllLocked()}
-            className="p-3 rounded-md shadow-md my-3 bg-slate-700 w-full flex justify-between items-center hover:bg-slate-800 duration-200"
+            className={`p-3 rounded-md shadow-md my-3 ${
+              userPreferences.darkMode
+                ? "bg-slate-700 hover:bg-slate-800"
+                : "bg-slate-300 hover:bg-slate-400"
+            } w-full flex justify-between items-center duration-200`}
           >
             <p>Locked Notes</p>
             <p>{allData?.notes?.filter((note) => note.locked).length}</p>
           </button>
-          <button className="p-3 rounded-md shadow-md my-3 bg-slate-700 w-full flex justify-between items-center hover:bg-slate-800 duration-200">
+          <button
+            className={`p-3 rounded-md shadow-md my-3 w-full ${
+              userPreferences.darkMode
+                ? "bg-slate-700 hover:bg-slate-800"
+                : "bg-slate-300 hover:bg-slate-400"
+            } flex justify-between items-center duration-200`}
+          >
             <p>Shared Notes</p>
             <FaShareAlt className="text-amber-300" />
           </button>
-          <button className="p-3 rounded-md shadow-md my-3 bg-slate-700 w-full flex justify-between items-center hover:bg-slate-800 duration-200">
+          <button
+            className={`p-3 rounded-md shadow-md my-3 w-full ${
+              userPreferences.darkMode
+                ? "bg-slate-700 hover:bg-slate-800"
+                : "bg-slate-300 hover:bg-slate-400"
+            } flex justify-between items-center duration-200`}
+          >
             <p>Trash Notes</p>
             <p>0</p>
           </button>

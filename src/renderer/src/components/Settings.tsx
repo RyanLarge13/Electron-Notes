@@ -861,7 +861,7 @@ const Settings = (): JSX.Element => {
             onClick={() => setNotifyAll((prev) => !prev)}
             className="flex justify-between items-center w-full"
           >
-            <p className="font-semibold">All Notifications</p>
+            <p className="font-semibold">In App Notifications</p>
             <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
               <div
                 className={`absolute top-[1px] bottom-[1px] duration-200 ${

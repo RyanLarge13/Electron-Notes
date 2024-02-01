@@ -24,7 +24,8 @@ const Header = (): JSX.Element => {
     mainTitle,
     editCurrentFolder,
     folder,
-    nesting
+    nesting,
+    userPreferences
   } = useContext(UserContext);
 
   const [search, setSearch] = useState(false);
@@ -112,7 +113,11 @@ const Header = (): JSX.Element => {
       {optionMenu && (
         <div onClick={() => setOptionMenu(false)} className="fixed bg-transparent inset-0"></div>
       )}
-      <div className="flex justify-between items-center w-full text-xl mt-20 sticky top-0 py-3 bg-opacity-75 backdrop-blur-sm bg-[#223] z-20">
+      <div
+        className={`${
+          userPreferences.darkMode ? "bg-[#223]" : "bg-slate-100"
+        } flex justify-between items-center w-full text-xl mt-20 sticky top-0 py-3 bg-opacity-75 backdrop-blur-sm bg-[#223] z-20`}
+      >
         <div className="flex justify-start items-center gap-x-3">
           <button onClick={() => setMenu(true)}>
             <BiMenuAltLeft />
@@ -150,14 +155,18 @@ const Header = (): JSX.Element => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-slate-900 rounded-md shadow-md absolute top-0 right-5 flex flex-col justify-between items-start w-40 text-sm"
+              className={`${
+                userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+              } rounded-md shadow-md absolute top-0 right-5 flex flex-col justify-between items-start w-40 text-sm`}
             >
               <button
                 onClick={() => {
                   setOptionMenu(false);
                   setView((prev) => (prev === "list" ? "grid" : "list"));
                 }}
-                className="text-left p-3 hover:bg-slate-800 duration-200 w-full"
+                className={`text-left p-3 ${
+                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                } duration-200 w-full`}
               >
                 {view === "list" ? "Grid" : "List"}
               </button>
@@ -166,7 +175,9 @@ const Header = (): JSX.Element => {
                   navigate("/newfolder");
                   setOptionMenu(false);
                 }}
-                className="text-left p-3 hover:bg-slate-800 duration-200 w-full"
+                className={`text-left p-3 ${
+                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                } duration-200 w-full`}
               >
                 Create Folder
               </button>
@@ -175,11 +186,17 @@ const Header = (): JSX.Element => {
                   setOptionMenu(false);
                   setEdit(true);
                 }}
-                className="text-left p-3 hover:bg-slate-800 duration-200 w-full"
+                className={`text-left p-3 ${
+                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                } duration-200 w-full`}
               >
                 Edit
               </button>
-              <button className="text-left p-3 hover:bg-slate-800 duration-200 w-full">
+              <button
+                className={`text-left p-3 ${
+                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                } duration-200 w-full`}
+              >
                 Pin Favorites
               </button>
             </motion.div>

@@ -735,9 +735,9 @@ const Notes = (): JSX.Element => {
         <div
           onContextMenu={(e) => openNotesOptions(e, note)}
           key={note.noteid}
-          className={`${
-            view === "list" ? "w-full" : "w-[45%]"
-          } max-w-60 h-80 bg-slate-900 p-3 rounded-md shadow-lg overflow-hidden relative`}
+          className={`${view === "list" ? "w-full" : "w-[45%]"} max-w-60 h-80 ${
+            userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+          } p-3 rounded-md shadow-lg overflow-hidden relative cursor-pointer`}
           onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
         >
           <div aria-hidden="true" className="absolute inset-0 radial-gradient"></div>
@@ -778,33 +778,53 @@ const Notes = (): JSX.Element => {
             }}
             className="fixed bg-transparent inset-0"
           ></div>
-          <form className="p-5 fixed bottom-5 left-5 rounded-md shadow-md bg-slate-900 flex justify-center items-center gap-x-5">
+          <form
+            className={`p-5 fixed bottom-5 left-5 rounded-md shadow-md ${
+              userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+            } flex justify-center items-center gap-x-5`}
+          >
             <input
               ref={firstInput}
               value={pin.first}
               type="password"
               onChange={(e) => handlePinInput(e, "first")}
-              className="w-10 h-10 p-3 bg-slate-700 text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className={`w-10 h-10 p-3 ${
+                userPreferences.darkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-300 text-slate-700"
+              } text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
             />
             <input
               ref={secondInput}
               value={pin.second}
               type="password"
-              className="w-10 h-10 p-3 bg-slate-700 text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className={`w-10 h-10 p-3 ${
+                userPreferences.darkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-300 text-slate-700"
+              } text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
               onChange={(e) => handlePinInput(e, "second")}
             />
             <input
               ref={thirdInput}
               value={pin.third}
               type="password"
-              className="w-10 h-10 p-3 bg-slate-700 text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className={`w-10 h-10 p-3 ${
+                userPreferences.darkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-300 text-slate-700"
+              } text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
               onChange={(e) => handlePinInput(e, "third")}
             />
             <input
               ref={fourthInput}
               value={pin.fourth}
               type="password"
-              className="w-10 h-10 p-3 bg-slate-700 text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className={`w-10 h-10 p-3 ${
+                userPreferences.darkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-300 text-slate-700"
+              } text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
               onChange={(e) => handlePinInput(e, "fourth")}
             />
           </form>

@@ -22,7 +22,8 @@ const MainPage = (): JSX.Element => {
     user,
     edit,
     folder,
-    note
+    note,
+    userPreferences
   } = useContext(UserContext);
 
   const [keyPresses, setKeyPressed] = useState({
@@ -183,7 +184,12 @@ const MainPage = (): JSX.Element => {
   };
 
   return (
-    <section onContextMenu={(e) => openOptions(e)}>
+    <section
+      onContextMenu={(e) => openOptions(e)}
+      className={`${
+        userPreferences.darkMode ? "bg-[#223] text-white" : "bg-slate-100 text=black"
+      } min-h-screen scrollbar-hide`}
+    >
       <ContextMenu />
       <SystemNotif />
       {!loading ? (
