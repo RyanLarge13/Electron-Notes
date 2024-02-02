@@ -52,19 +52,6 @@ const SystemNotif = (): JSX.Element => {
     <AnimatePresence>
       {systemNotif.show && (
         <>
-          {/* <div
-            onClick={() =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
-            }
-            className="fixed bg-transparent inset-0 z-40"
-          ></div> */}
           <motion.div
             drag="x"
             dragSnapToOrigin={true}
@@ -84,7 +71,7 @@ const SystemNotif = (): JSX.Element => {
                   width: "100%",
                   transition: { duration: 5 }
                 }}
-                className="absolute top-0 left-0 min-h-[4px] bg-cyan-300 rounded-full"
+                className={`absolute top-0 left-0 min-h-[4px] ${systemNotif.color} rounded-full`}
               ></motion.div>
             )}
             <div

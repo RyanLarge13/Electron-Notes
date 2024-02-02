@@ -23,7 +23,7 @@ const Menu = (): JSX.Element => {
   } = useContext(UserContext);
 
   const navigate = useNavigate();
-  const hoverBgString = userPreferences.theme.replace("300", "200");
+  const hoverBgString = userPreferences?.theme?.replace("300", "200");
 
   const confirmLogout = (): void => {
     const newConfirmation = {

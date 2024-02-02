@@ -10,7 +10,7 @@ const NestedFolder = ({ moving, childFolders, parentId, level, open }) => {
 };
 
 const Tree = ({ moving, folders, parentId, level, open }) => {
-  const { setFolder, setSelectedFolder } = useContext(UserContext);
+  const { setFolder, setSelectedFolder, userPreferences } = useContext(UserContext);
 
   const childFolders = folders.filter((fold) => fold.parentFolderId !== parentId);
   const topFolders = folders.filter((fold) => fold.parentFolderId === parentId);
@@ -33,7 +33,11 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
             <div
               key={fold.folderid}
               style={{ marginLeft: level * 5 }}
-              className="w-full relative py-2 px-3 rounded-md bg-slate-700 hover:bg-slate-800 duration-200 my-2 cursor-pointer"
+              className={`w-full relative py-2 px-3 rounded-md ${
+                userPreferences.darkMode
+                  ? "bg-slate-700 hover:bg-slate-800 "
+                  : "bg-slate-200 hover:bg-slate-300"
+              } duration-200 my-2 cursor-pointer`}
               onClick={(e) => {
                 e.stopPropagation();
                 moving ? setSelectedFolder(fold) : setFolder(fold);

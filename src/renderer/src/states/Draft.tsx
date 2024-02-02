@@ -18,6 +18,7 @@ const Draft = (): JSX.Element => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const textThemeString = userPreferences?.theme?.replace("bg", "text");
 
   const saveNote = (): void => {
     setLoading(true);
@@ -206,6 +207,7 @@ const Draft = (): JSX.Element => {
       return { ...prevData, notes: newNotes };
     });
     navigate("/");
+    setNoteToEdit(null);
     updateNote(token, updatedNote)
       .then(() => {
         if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
@@ -334,13 +336,19 @@ const Draft = (): JSX.Element => {
   return (
     <>
       <div
-        className="fixed z-10 inset-0 bg-black bg-opacity-10 backdrop-blur-sm"
+        className={`fixed z-10 inset-0 ${
+          userPreferences.darkMode ? "bg-black" : "bg-white"
+        } bg-opacity-10 backdrop-blur-sm`}
         onClick={() => {
           noteToEdit && setNoteToEdit(null);
           navigate("/");
         }}
       ></div>
-      <div className="fixed top-20 right-5 left-5 lg:right-60 lg:left-60 bottom-20 rounded-md shadow-md bg-black z-40">
+      <div
+        className={`fixed top-20 right-5 left-5 lg:right-60 lg:left-60 bottom-20 rounded-md shadow-md ${
+          userPreferences.darkMode ? "bg-black" : "bg-white"
+        } z-40`}
+      >
         <div className="flex justify-between items-center pr-5">
           <input
             type="text"
@@ -348,14 +356,26 @@ const Draft = (): JSX.Element => {
             autoFocus={true}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="p-3 text-xl bg-black focus:outline-none"
+            className={`p-3 text-xl ${
+              userPreferences.darkMode ? "bg-black" : "bg-white"
+            } focus:outline-none`}
           />
           <div className="flex gap-x-3">
             <button onClick={() => setLocked((prev) => !prev)}>
-              {locked ? <FaLock className="text-amber-300" /> : <FaUnlock />}
+              {locked ? (
+                <FaLock
+                  className={`${userPreferences.theme ? textThemeString : "text-amber-300"}`}
+                />
+              ) : (
+                <FaUnlock />
+              )}
             </button>
             <button onClick={() => saveNote()} className="text-slate-200">
-              {loading ? <ClipLoader size={16} color="#fff" /> : <FaSave />}
+              {loading ? (
+                <ClipLoader size={16} color={`${userPreferences.darkMode ? "#fff" : "#000"}`} />
+              ) : (
+                <FaSave />
+              )}
             </button>
           </div>
         </div>
@@ -363,7 +383,7 @@ const Draft = (): JSX.Element => {
           theme="snow"
           value={value}
           onChange={setValue}
-          style={{ color: "#fff", height: "80%" }}
+          style={{ color: userPreferences.darkMode ? "#fff" : "#000", height: "80%" }}
         />
       </div>
     </>

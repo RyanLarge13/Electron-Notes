@@ -23,9 +23,11 @@ const NewFolder = (): JSX.Element => {
   const navigate = useNavigate();
 
   const [color, setColor] = useState(selectedFolder ? selectedFolder.color : "bg-amber-300");
-  const [title, setTitle] = useState(selectedFolder ? selectedFolder.foldertitle : "");
+  const [title, setTitle] = useState(selectedFolder ? selectedFolder.title : "");
   const [lock, setLock] = useState(selectedFolder ? selectedFolder.locked : false);
   const [loading, setLoading] = useState(false);
+
+  const textThemeString = userPreferences?.theme?.replace("bg", "text");
 
   const createFolder = (e): void => {
     e.preventDefault();
@@ -38,8 +40,7 @@ const NewFolder = (): JSX.Element => {
     };
     setAllData((prevData) => {
       const newFolders = [...prevData.folders, { ...newFolder, folderid: tempId }];
-      const newData = { ...prevData, folders: newFolders };
-      return newData;
+      return { ...prevData, folders: newFolders };
     });
     navigate("/");
     createNewFolder(token, newFolder)
@@ -192,7 +193,9 @@ const NewFolder = (): JSX.Element => {
       <motion.section
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-10 z-40 right-10 left-10 max-w-[500px] bg-slate-900 p-5 rounded-md shadow-md"
+        className={`fixed bottom-10 z-40 right-10 left-10 max-w-[500px] p-5 ${
+          userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+        } rounded-md shadow-md`}
       >
         <div
           className={`absolute top-0 right-0 ${color} w-[25%] h-3 rounded-bl-md rounded-tr-md`}
@@ -221,7 +224,11 @@ const NewFolder = (): JSX.Element => {
           )}
         </button>
         <button onClick={() => setLock((prev) => !prev)} className="absolute bottom-5 right-5">
-          {!lock ? <FaLockOpen /> : <FaLock className="text-amber-300" />}
+          {!lock ? (
+            <FaLockOpen />
+          ) : (
+            <FaLock className={`${userPreferences.theme ? textThemeString : "text-amber-300"}`} />
+          )}
         </button>
       </motion.section>
     </>

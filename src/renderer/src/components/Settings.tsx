@@ -670,14 +670,20 @@ const Settings = (): JSX.Element => {
       <motion.div
         initial={{ x: -10, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        className="fixed no-scroll-bar flex flex-col justify-start z-40 right-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 bg-slate-900 rounded-r-md overflow-y-auto no-scroll-bar"
+        className={`fixed no-scroll-bar flex flex-col justify-start z-40 right-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 ${
+          userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+        } rounded-r-md overflow-y-auto no-scroll-bar`}
       >
         <button
           onClick={() => setDarkModeTheme()}
           className="flex justify-between items-center my-3"
         >
           <p>Dark Mode</p>
-          <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+          <div
+            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 userPreferences.darkMode
@@ -699,7 +705,11 @@ const Settings = (): JSX.Element => {
           className="flex justify-between items-center my-3"
         >
           <p>Theme</p>
-          <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+          <div
+            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 theme ? "right-[1px] left-[50%] bg-green-200" : "left-[1px] right-[50%] bg-red-200"
@@ -720,7 +730,11 @@ const Settings = (): JSX.Element => {
           className="flex justify-between items-center my-3"
         >
           <p>Confirm Ops</p>
-          <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+          <div
+            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 confirmOps
@@ -735,7 +749,11 @@ const Settings = (): JSX.Element => {
           className="flex justify-between items-center my-3"
         >
           <p>Change Lock Pin</p>
-          <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+          <div
+            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 lockPin
@@ -752,27 +770,43 @@ const Settings = (): JSX.Element => {
               value={newLockPin.first}
               type="password"
               onChange={(e) => handlePinInput(e, "first")}
-              className="w-8 h-8 p-3 bg-slate-700 text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className={`w-10 h-10 p-3 ${
+                userPreferences.darkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-300 text-slate-700"
+              } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
             />
             <input
               ref={secondInput}
               value={newLockPin.second}
               type="password"
-              className="w-8 h-8 p-3 bg-slate-700 text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className={`w-10 h-10 p-3 ${
+                userPreferences.darkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-300 text-slate-700"
+              } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
               onChange={(e) => handlePinInput(e, "second")}
             />
             <input
               ref={thirdInput}
               value={newLockPin.third}
               type="password"
-              className="w-8 h-8 p-3 bg-slate-700 text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className={`w-10 h-10 p-3 ${
+                userPreferences.darkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-300 text-slate-700"
+              } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
               onChange={(e) => handlePinInput(e, "third")}
             />
             <input
               ref={fourthInput}
               value={newLockPin.fourth}
               type="password"
-              className="w-8 h-8 p-3 bg-slate-700 text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500 text-slate-300"
+              className={`w-10 h-10 p-3 ${
+                userPreferences.darkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-300 text-slate-700"
+              } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
               onChange={(e) => handlePinInput(e, "fourth")}
             />
             {createNewPin ? (
@@ -792,7 +826,11 @@ const Settings = (): JSX.Element => {
           className="flex justify-between items-center my-3"
         >
           <p>Update Username</p>
-          <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+          <div
+            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 username
@@ -820,7 +858,11 @@ const Settings = (): JSX.Element => {
           className="flex justify-between items-center my-3"
         >
           <p>Reset Password</p>
-          <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+          <div
+            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 password
@@ -856,13 +898,19 @@ const Settings = (): JSX.Element => {
             </form>
           </div>
         )}
-        <div className="p-2 rounded-md bg-slate-800">
+        <div
+          className={`${userPreferences.darkMode ? "bg-slate-800" : "bg-slate-300"} p-2 rounded-md`}
+        >
           <button
             onClick={() => setNotifyAll((prev) => !prev)}
             className="flex justify-between items-center w-full"
           >
             <p className="font-semibold">In App Notifications</p>
-            <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+            <div
+              className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              }`}
+            >
               <div
                 className={`absolute top-[1px] bottom-[1px] duration-200 ${
                   notifyAll
@@ -878,7 +926,11 @@ const Settings = (): JSX.Element => {
               className="flex justify-between items-center my-3 w-full"
             >
               <p>Success Prompts</p>
-              <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+              <div
+                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                }`}
+              >
                 <div
                   className={`absolute top-[1px] bottom-[1px] duration-200 ${
                     notifyAll && notifySuccess
@@ -893,7 +945,11 @@ const Settings = (): JSX.Element => {
               className="flex justify-between items-center my-3 w-full"
             >
               <p>Error Prompts</p>
-              <div className="ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer bg-slate-700">
+              <div
+                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                }`}
+              >
                 <div
                   className={`absolute top-[1px] bottom-[1px] duration-200 ${
                     notifyAll && notifyErrors
@@ -907,10 +963,12 @@ const Settings = (): JSX.Element => {
         </div>
         <div className="flex flex-col justify-start items-start mt-3">
           <p className="mb-1">Short Cuts</p>
-          {userPreferences.commands.map((command) => (
+          {userPreferences?.commands?.map((command) => (
             <button
               key={command.text}
-              className="flex justify-between w-full text-sm p-2 hover:bg-slate-700 duration-200 items-start"
+              className={`flex justify-between w-full text-sm p-2 ${
+                userPreferences.darkMode ? "hover:bg-slate-700" : "hover:bg-slate-300"
+              } duration-200 items-start`}
             >
               <p>{command.text}</p>
               <p>{command.command}</p>

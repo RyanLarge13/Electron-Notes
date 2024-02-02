@@ -18,11 +18,13 @@ const MainPage = (): JSX.Element => {
     setPosition,
     setView,
     setSettings,
+    setSystemNotif,
     loading,
     user,
     edit,
     folder,
     note,
+    noteToEdit,
     userPreferences
   } = useContext(UserContext);
 
@@ -99,6 +101,30 @@ const MainPage = (): JSX.Element => {
   const editCurrentFolder = (): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     if (!folder) {
+      if (userPreferences.notify.notifyErrors) {
+        const newError = {
+          show: true,
+          title: "Cannot Edit Home",
+          text: "This is your home folder, you cannot edit the name or color, sorry.",
+          color: "bg-red-300",
+          hasCancel: false,
+          actions: [
+            {
+              text: "close",
+              func: (): void =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            }
+          ]
+        };
+        setSystemNotif(newError);
+      }
       return;
     }
     setEditCurrentFolder(true);
@@ -106,7 +132,7 @@ const MainPage = (): JSX.Element => {
 
   const openOptions = (e): void => {
     e.preventDefault();
-    if (!user || loading || note) return;
+    if (!user || loading || note || noteToEdit) return;
     const { clientX, clientY } = e;
     let dynamicTop = clientY;
     let dynamicLeft = clientX;

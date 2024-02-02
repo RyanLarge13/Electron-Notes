@@ -58,7 +58,7 @@ const Account = (): JSX.Element => {
   const [newColor, setNewColor] = useState(folder ? folder.color : "bg-amber-300");
 
   const navigate = useNavigate();
-  const themeStringText = userPreferences.theme.replace("bg", "text");
+  const themeStringText = userPreferences?.theme?.replace("bg", "text");
 
   const addNewFolder = (): void => {
     navigate("/newfolder");
@@ -695,10 +695,14 @@ const Account = (): JSX.Element => {
             <motion.div
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-slate-900 z-40 rounded-md shadow-md absolute top-0 right-5 flex flex-col justify-between items-start w-40 text-sm"
+              className={`${
+                userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+              } z-40 rounded-md shadow-md absolute top-0 right-5 flex flex-col justify-between items-start w-40 text-sm`}
             >
               <button
-                className="text-left p-3 hover:bg-slate-800 duration-200 w-full"
+                className={`text-left p-3 ${
+                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                } duration-200 w-full`}
                 onClick={() => {
                   setFilterOptions(false);
                   setFilter("Title");
@@ -707,7 +711,9 @@ const Account = (): JSX.Element => {
                 Title
               </button>
               <button
-                className="text-left p-3 hover:bg-slate-800 duration-200 w-full"
+                className={`text-left p-3 ${
+                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                } duration-200 w-full`}
                 onClick={() => {
                   setFilterOptions(false);
                   setFilter("Date");
@@ -716,7 +722,9 @@ const Account = (): JSX.Element => {
                 Date
               </button>
               <button
-                className="text-left p-3 hover:bg-slate-800 duration-200 w-full"
+                className={`text-left p-3 ${
+                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                } duration-200 w-full`}
                 onClick={() => {
                   setFilterOptions(false);
                   setFilter("Updated");
@@ -741,8 +749,10 @@ const Account = (): JSX.Element => {
       <Notes />
       {/* <div className="hover:bg-rose-200 hover:bg-red-200 hover:bg-amber-200 hover:bg-yellow-200 hover:bg-lime-200 hover:bg-green-200 hover:bg-cyan-200 hover:bg-sky-200 hover:bg-blue-200 hover:bg-indigo-200 hover:bg-violet-200 hover:bg-fuchsia-200 hover:bg-pink-200"></div> */}
       <button
-        className={`fixed bottom-3 right-3 rounded-full bg-slate-600 ${
+        className={`fixed bottom-3 right-3 rounded-full ${
           userPreferences.theme ? themeStringText : "text-amber-300"
+        } ${
+          userPreferences.darkMode ? "bg-slate-600" : "bg-slate-500"
         } w-10 h-10 flex justify-center items-center shadow-sm`}
         onClick={() => setOptions((prev) => !prev)}
       >
@@ -754,10 +764,14 @@ const Account = (): JSX.Element => {
           <motion.div
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-md shadow-md fixed bottom-10 right-10 bg-slate-700 flex flex-col justify-center items-center font-bold w-40"
+            className={`rounded-md shadow-md fixed bottom-10 right-10 ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-200"
+            } flex flex-col justify-center items-center font-bold w-40`}
           >
             <button
-              className="flex justify-between items-center w-full py-3 px-4 hover:bg-slate-600"
+              className={`flex justify-between items-center w-full py-3 px-4 ${
+                userPreferences.darkMode ? "hover:bg-slate-600" : "hover:bg-slate-300"
+              }`}
               onClick={() => {
                 setOptions(false);
                 addNewFolder();
@@ -767,7 +781,9 @@ const Account = (): JSX.Element => {
               <FaFolderPlus />
             </button>
             <button
-              className="flex justify-between items-center w-full py-3 px-4 hover:bg-slate-600"
+              className={`flex justify-between items-center w-full py-3 px-4 ${
+                userPreferences.darkMode ? "hover:bg-slate-600" : "hover:bg-slate-300"
+              }`}
               onClick={() => {
                 setOptions(false);
                 addNewNote();
