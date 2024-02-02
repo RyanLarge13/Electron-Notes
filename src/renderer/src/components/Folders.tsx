@@ -980,6 +980,10 @@ const Folders = (): JSX.Element => {
   const onDragEnd = (e): void => {
     e.preventDefault();
     setDragging(false);
+    if (!draggedOverFolder) {
+      cancelMove();
+      return;
+    }
     if (!userPreferences.confirm) {
       return moveFolderAndContents();
     }
@@ -1174,7 +1178,7 @@ const Folders = (): JSX.Element => {
         <motion.div
           drag
           onDrag={handleDrag}
-          dragSnapToOrigin={true}
+          dragSnapToOrigin={draggedInto === folder.folderid ? false : true}
           whileDrag={{ zIndex: 900, pointerEvents: "none" }}
           onContextMenu={(e) => openOptions(e, folder)}
           onDragStart={(e) => onDragStart(e, folder)}

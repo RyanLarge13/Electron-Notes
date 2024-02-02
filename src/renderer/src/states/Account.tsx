@@ -4,7 +4,14 @@ import { useNavigate, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { TbFilters } from "react-icons/tb";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
-import { MdCancel, MdDelete, MdDriveFileMove, MdOutlineNoteAdd } from "react-icons/md";
+import {
+  MdCancel,
+  MdDelete,
+  MdDriveFileMove,
+  MdOutlineNoteAdd,
+  MdSelectAll,
+  MdTabUnselected
+} from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 import { FaFolderPlus, FaHome } from "react-icons/fa";
 import { deleteMultipleFolders } from "@renderer/utils/api";
@@ -596,6 +603,11 @@ const Account = (): JSX.Element => {
     setFolder(folderToSet);
   };
 
+  const selectAllFolders = (): void => {
+    const allFolders = allData.folders.map((fold) => fold.folderid);
+    setSelectedForEdit(allFolders);
+  };
+
   return (
     <section className="flex justify-center items-center flex-col pt-20 mx-10 lg:mx-60">
       {nesting.length > 0 && (
@@ -628,6 +640,22 @@ const Account = (): JSX.Element => {
               Cancel
               <MdCancel />
             </button>
+            <button
+              onClick={() => selectAllFolders()}
+              className="flex justify-between items-center text-xs p-3 hover:bg-slate-800 duration-200 w-40"
+            >
+              Select All
+              <MdSelectAll />
+            </button>
+            {selectedForEdit.length > 0 && (
+              <button
+                onClick={() => setSelectedForEdit([])}
+                className="flex justify-between items-center text-xs p-3 hover:bg-slate-800 duration-200 w-40"
+              >
+                Un-Select All
+                <MdTabUnselected />
+              </button>
+            )}
             {selectedForEdit.length > 0 && (
               <>
                 <button

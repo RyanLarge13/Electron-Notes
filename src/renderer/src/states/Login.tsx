@@ -4,7 +4,7 @@ import UserContext from "@renderer/contexxt/UserContext";
 import Signup from "./Signup";
 import ForgotCreds from "./ForgotCreds";
 
-const Login = () => {
+const Login = (): JSX.Element => {
   const { setToken, setSystemNotif, setLoading } = useContext(UserContext);
 
   const [email, setEmail] = useState("");
@@ -48,7 +48,20 @@ const Login = () => {
             text: "Please check your internet connection and try logging in again",
             color: "bg-red-300",
             hasCancel: false,
-            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              }
+            ]
           };
           return setSystemNotif(newError);
         }
@@ -60,7 +73,20 @@ const Login = () => {
             text: err.response.data.message,
             color: "bg-red-300",
             hasCancel: false,
-            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              }
+            ]
           };
           return setSystemNotif(newError);
         }
@@ -139,7 +165,7 @@ const Login = () => {
               Login &rarr;
             </button>
             <hr className="my-5" />
-            <p>don't have an account?</p>
+            <p>don&apos;t have an account?</p>
             <button
               onClick={() => setSignup(true)}
               className="py-2 px-4 rounded-md shadow-md bg-amber-300 text-black mt-3 font-semibold self-start hover:bg-slate-900 focus:bg-slate-900 focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
