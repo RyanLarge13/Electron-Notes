@@ -36,7 +36,8 @@ const NewFolder = (): JSX.Element => {
     const newFolder = {
       title: title,
       color: color,
-      parentFolderId: selectedFolder ? selectedFolder.folderid : folder ? folder.folderid : null
+      parentFolderId: selectedFolder ? selectedFolder.folderid : folder ? folder.folderid : null,
+      createdAt: new Date()
     };
     setAllData((prevData) => {
       const newFolders = [...prevData.folders, { ...newFolder, folderid: tempId }];

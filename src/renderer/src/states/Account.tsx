@@ -343,7 +343,7 @@ const Account = (): JSX.Element => {
         });
     }
     if (move.type === "folder") {
-      const folderMoving: Folder = move.item;
+      const folderMoving = move.item;
       const prevIdFolderId = folderMoving.folderid;
       const newFolder = {
         folderId: folderMoving.folderid,
@@ -405,9 +405,9 @@ const Account = (): JSX.Element => {
           setAllData((prevUser) => {
             const newFolders = prevUser.folders.map((fold) => {
               if (fold.folderid === folderMoving.folderid) {
-                return { ...fold, folderId: prevIdFolderId };
+                return { ...fold, folderid: prevIdFolderId };
               }
-              return note;
+              return fold;
             });
             const newData = {
               ...prevUser,

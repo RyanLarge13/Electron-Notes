@@ -1,9 +1,9 @@
 import UserContext from "@renderer/contexxt/UserContext";
 import { signupUser } from "@renderer/utils/api";
-import { useContext, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 import { ClipLoader } from "react-spinners";
 
-const Signup = ({ setSignup }) => {
+const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> }): JSX.Element => {
   const { setSystemNotif, systemNotif } = useContext(UserContext);
 
   const [username, setUsername] = useState("");
@@ -30,7 +30,20 @@ const Signup = ({ setSignup }) => {
         text: "You must follow the rules for all fields",
         color: "bg-red-400",
         hasCancel: true,
-        actions: [{ text: "close", func: (): void => setSystemNotif({ show: false }) }]
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
       };
       setSystemNotif(newError);
       return false;
@@ -45,7 +58,20 @@ const Signup = ({ setSignup }) => {
             text: `Please login with your credentials to access your account for the first time, a new email with your credentials was sent to your email`,
             color: "bg-cyan-300",
             hasCancel: true,
-            actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              }
+            ]
           };
           setSystemNotif(newNotification);
           localStorage.removeItem("loginCreds");
@@ -66,7 +92,18 @@ const Signup = ({ setSignup }) => {
             color: "bg-red-300",
             hasCancel: true,
             actions: [
-              { text: "close", func: () => setSystemNotif({ show: false }) },
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
               { text: "retry", func: () => handleSignup(e) }
             ]
           };
@@ -83,7 +120,18 @@ const Signup = ({ setSignup }) => {
         color: "bg-red-300",
         hasCancel: true,
         actions: [
-          { text: "close", func: () => setSystemNotif({ show: false }) },
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
           { text: "retry", func: () => handleSignup(e) }
         ]
       };
@@ -99,7 +147,14 @@ const Signup = ({ setSignup }) => {
     const userRegex = /^[a-zA-Z0-9_-]{4,}$/;
     const isValid = userRegex.test(username);
     if (isValid) {
-      setSystemNotif({ show: false });
+      setSystemNotif({
+        show: false,
+        title: "",
+        text: "",
+        color: "",
+        hasCancel: false,
+        actions: []
+      });
       return true;
     }
     if (!isValid) {
@@ -110,7 +165,20 @@ const Signup = ({ setSignup }) => {
         text: "Username must be: \n - 4 characters \n - contain only _, -, and numbers",
         color: "bg-red-300",
         hasCancel: true,
-        actions: [{ text: "close", func: (): void => setSystemNotif({ show: false }) }]
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
       };
       setSystemNotif(newNotif);
       return false;
@@ -123,7 +191,14 @@ const Signup = ({ setSignup }) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const isValid = emailRegex.test(email);
     if (isValid) {
-      setSystemNotif({ show: false });
+      setSystemNotif({
+        show: false,
+        title: "",
+        text: "",
+        color: "",
+        hasCancel: false,
+        actions: []
+      });
       return true;
     }
     if (!isValid) {
@@ -134,7 +209,20 @@ const Signup = ({ setSignup }) => {
         text: "Email must be a valid email",
         color: "bg-red-300",
         hasCancel: true,
-        actions: [{ text: "close", func: (): void => setSystemNotif({ show: false }) }]
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
       };
       setSystemNotif(newNotif);
       return false;
@@ -143,10 +231,17 @@ const Signup = ({ setSignup }) => {
   };
 
   const validatePass = (): boolean => {
-    const passRegex = /^(?=.*[A-Z].*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    const passRegex = /^(?=.*[A-Z].*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
     const isValid = passRegex.test(password);
     if (isValid) {
-      setSystemNotif({ show: false });
+      setSystemNotif({
+        show: false,
+        title: "",
+        text: "",
+        color: "",
+        hasCancel: false,
+        actions: []
+      });
       return true;
     }
     if (!isValid) {
@@ -157,7 +252,20 @@ const Signup = ({ setSignup }) => {
         text: "Your password must be: \n - 8 characters long \n - 2 special characters \n - 2 uppercase characters",
         color: "bg-red-300",
         hasCancel: true,
-        actions: [{ text: "close", func: (): void => setSystemNotif({ show: false }) }]
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
       };
       setSystemNotif(newNotif);
       return false;

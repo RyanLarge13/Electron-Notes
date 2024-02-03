@@ -27,7 +27,20 @@ const ForgotCreds = ({
           color: "bg-red-300",
           text: "Sorry, there is an issue parsing the previous email you entered, you will need to retype it",
           hasCancel: false,
-          actions: [{ text: "close", func: () => setSystemNotif({ show: false }) }]
+          actions: [
+            {
+              text: "close",
+              func: () =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            }
+          ]
         };
         setSystemNotif(newError);
       }
@@ -51,11 +64,29 @@ const ForgotCreds = ({
             color: "bg-cyan-300",
             hasCancel: true,
             actions: [
-              { text: "close", func: (): void => setSystemNotif({ show: false }) },
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
               {
                 text: "Login",
                 func: (): void => {
-                  setSystemNotif({ show: false });
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  });
                   setForgotCreds(false);
                 }
               }
@@ -74,11 +105,29 @@ const ForgotCreds = ({
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 {
                   text: "re-try",
-                  func: () => {
-                    setSystemNotif({ show: false });
+                  func: (): void => {
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    });
                     handleForgotCreds(e);
                   }
                 },
@@ -95,11 +144,29 @@ const ForgotCreds = ({
               color: "bg-red-300",
               hasCancel: true,
               actions: [
-                { text: "close", func: () => setSystemNotif({ show: false }) },
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
                 {
                   text: "re-try",
-                  func: () => {
-                    setSystemNotif({ show: false });
+                  func: (): void => {
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    });
                     handleForgotCreds(e);
                   }
                 },
@@ -118,7 +185,18 @@ const ForgotCreds = ({
         color: "bg-red-300",
         hasCancel: true,
         actions: [
-          { text: "close", func: () => setSystemNotif({ show: false }) },
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
           { text: "retry", func: () => handleForgotCreds(e) },
           { text: "reload app", func: () => window.location.reload() }
         ]
@@ -132,7 +210,14 @@ const ForgotCreds = ({
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const isValid = emailRegex.test(email);
     if (isValid) {
-      setSystemNotif({ show: false });
+      setSystemNotif({
+        show: false,
+        title: "",
+        text: "",
+        color: "",
+        hasCancel: false,
+        actions: []
+      });
       return true;
     }
     if (!isValid) {
@@ -143,7 +228,20 @@ const ForgotCreds = ({
         text: "Email must be a valid email",
         color: "bg-red-300",
         hasCancel: true,
-        actions: [{ text: "close", func: (): void => setSystemNotif({ show: false }) }]
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
       };
       setSystemNotif(newNotif);
       return false;
