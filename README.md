@@ -1,8 +1,8 @@
 # Electron-Notes
 
-<img serc="./build/512x512.png" alt="icon" />
+<img src="./build/icons/512x512.png" alt="icon" />
 
-Welcome to ELectron Notes
+Welcome to Electron Notes
 available on Linux Desktops and downloadable from the snap store.
 
 This notes taking application is simple sleek and a fun way to handle your notes and
