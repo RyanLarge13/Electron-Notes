@@ -1,6 +1,6 @@
 # Electron-Notes
 
-<img serc="./build/512x512.png" alt="icon" />
+<img serc="./build/icons/512x512.png" alt="icon" />
 
 Welcome to ELectron Notes
 available on Linux Desktops and downloadable from the snap store.
