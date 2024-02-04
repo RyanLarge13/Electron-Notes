@@ -345,7 +345,7 @@ const Draft = (): JSX.Element => {
         }}
       ></div>
       <div
-        className={`fixed top-20 right-5 left-5 lg:right-60 lg:left-60 bottom-20 rounded-md shadow-md ${
+        className={`fixed inset-10 rounded-md shadow-md ${
           userPreferences.darkMode ? "bg-black" : "bg-white"
         } z-40`}
       >
