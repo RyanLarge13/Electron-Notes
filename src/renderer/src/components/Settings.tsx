@@ -244,8 +244,7 @@ const Settings = (): JSX.Element => {
       darkMode: !userPreferences.darkMode
     };
     try {
-      const stringifiedPreferences = JSON.stringify(newPreferences);
-      localStorage.setItem("preferences", JSON.stringify(stringifiedPreferences));
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
       setUserPreferences(newPreferences);
     } catch (err) {
       console.log(err);
@@ -285,8 +284,9 @@ const Settings = (): JSX.Element => {
       currentPin[3] === Number(newLockPin.fourth)
     ) {
       setNewLockPin({ first: "", second: "", third: "", fourth: "" });
-      firstInput.current.focus();
-      return setCreateNewPin(true);
+      // firstInput.current.focus();
+      setCreateNewPin(true);
+      return;
     }
     const newError = {
       show: true,
@@ -326,11 +326,11 @@ const Settings = (): JSX.Element => {
       lockPin: newPinArr
     };
     try {
-      const stringifiedPreferences = JSON.stringify(newPreferences);
-      localStorage.setItem("preferences", JSON.stringify(stringifiedPreferences));
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
       setUserPreferences(newPreferences);
       setLockPin(false);
       setCreateNewPin(false);
+      setNewLockPin({ first: "", second: "", third: "", fourth: "" });
       const newConfirmation = {
         show: true,
         title: "New Lock Pin",
@@ -380,6 +380,8 @@ const Settings = (): JSX.Element => {
       };
       setSystemNotif(newError);
     }
+    setCreateNewPin(false);
+    setNewLockPin({ first: "", second: "", third: "", fourth: "" });
   };
 
   const handlePinInput = (e, level): void => {

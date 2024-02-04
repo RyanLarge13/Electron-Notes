@@ -77,8 +77,34 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
       setUserPreferences(defaultPreferences);
     }
     if (preferences) {
-      const parsedPreferences = JSON.parse(preferences);
-      setUserPreferences(parsedPreferences);
+      try {
+        const parsedPreferences = JSON.parse(preferences);
+        setUserPreferences(parsedPreferences);
+      } catch (err) {
+        console.log(err);
+        const newError = {
+          show: true,
+          title: "Loading PReferences",
+          text: "The application is having issues uploading your app preferences. Please reload and try again. If the issue persists, contact the developer at ryanlarge@ryanlarge.dev",
+          color: "bg-red-300",
+          hasCancel: true,
+          actions: [
+            {
+              text: "close",
+              func: (): void =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            }
+          ]
+        };
+        setSystemNotif(newError);
+      }
     }
     //Login and token handling
     if (token) {
