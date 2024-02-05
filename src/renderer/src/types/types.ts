@@ -20,7 +20,7 @@ export type Note = {
   noteid: string;
   locked: boolean;
   htmlText: string;
-  folderId: string;
+  folderId: string | null;
   createdAt: Date;
 };
 
@@ -116,10 +116,10 @@ type Nesting = {
 export interface ContextProps {
   setFolders: Dispatch<SetStateAction<Folder[]>>;
   setNotes: Dispatch<SetStateAction<Note[]>>;
-  setNested: Dispatch<SetStateAction<boolean>>;
+  // setNested: Dispatch<SetStateAction<boolean>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
-  setFoldersLength: Dispatch<SetStateAction<number>>;
-  setNotesLength: Dispatch<SetStateAction<number>>;
+  // setFoldersLength: Dispatch<SetStateAction<number>>;
+  // setNotesLength: Dispatch<SetStateAction<number>>;
   setMainTitle: Dispatch<SetStateAction<string>>;
   setToken: Dispatch<SetStateAction<string>>;
   setMenu: Dispatch<SetStateAction<boolean>>;
@@ -145,6 +145,7 @@ export interface ContextProps {
   fetchUser: (token: string) => void;
   setUserPreferences: Dispatch<SetStateAction<UserPreferences>>;
   setMove: Dispatch<SetStateAction<Move | null>>;
+  setDrafts: Dispatch<SetStateAction<Note[]>>;
   folders: Folder[];
   mainTitle: string;
   notes: Note[];
@@ -172,6 +173,7 @@ export interface ContextProps {
   settings: boolean;
   userPreferences: UserPreferences;
   move: Move | null;
-  foldersLength: number;
-  notesLength: number;
+  // foldersLength: number;
+  // notesLength: number;
+  drafts: Note[];
 }

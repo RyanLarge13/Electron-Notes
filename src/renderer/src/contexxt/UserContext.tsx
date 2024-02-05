@@ -29,6 +29,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [settings, setSettings] = useState(false);
   const [move, setMove] = useState(null);
   const [editCurrentFolder, setEditCurrentFolder] = useState(false);
+  const [drafts, setDrafts] = useState([]);
   const [systemNotif, setSystemNotif] = useState({
     show: false,
     title: "",
@@ -45,6 +46,11 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [userPreferences, setUserPreferences] = useState({
     confirm: true,
     darkMode: true,
+    notify: {
+      notifyAll: true,
+      notifySuccess: true,
+      notifyErrors: true
+    },
     lockPin: [1, 2, 3, 4],
     theme: "bg-amber-300",
     commands: []
@@ -135,22 +141,22 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   useEffect(() => {
     const copyOfNotes = [...notes];
     if (order) {
-      const sortedNotesAsc = copyOfNotes.sort((a, b) =>
+      const sortedNotesAsc = copyOfNotes.sort((a, b): number =>
         filter === "Title"
           ? a.title.localeCompare(b.title)
           : filter === "Date"
-            ? new Date(a.createdAt) - new Date(b.createdAt)
-            : new DataTransfer(a.createdAt) - new Date(b.createdAt)
+            ? +new Date(a.createdAt) - +new Date(b.createdAt)
+            : +new Date(a.createdAt) - +new Date(b.createdAt)
       );
       return setNotesToRender(sortedNotesAsc);
     }
     if (!order) {
-      const sortedNotesAsc = copyOfNotes.sort((a, b) =>
+      const sortedNotesAsc = copyOfNotes.sort((a, b): number =>
         filter === "Title"
           ? b.title.localeCompare(a.title)
           : filter === "Date"
-            ? new Date(b.createdAt) - new Date(a.createdAt)
-            : new DataTransfer(b.createdAt) - new Date(a.createdAt)
+            ? +new Date(b.createdAt) - +new Date(a.createdAt)
+            : +new Date(b.createdAt) - +new Date(a.createdAt)
       );
       return setNotesToRender(sortedNotesAsc);
     }
@@ -280,7 +286,9 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         userPreferences,
         setUserPreferences,
         move,
-        setMove
+        setMove,
+        drafts,
+        setDrafts
       }}
     >
       {children}

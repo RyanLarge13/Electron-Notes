@@ -9,8 +9,16 @@ import UserContext from "@renderer/contexxt/UserContext";
 import "react-quill/dist/quill.snow.css";
 
 const Draft = (): JSX.Element => {
-  const { token, folder, userPreferences, noteToEdit, setAllData, setNoteToEdit, setSystemNotif } =
-    useContext(UserContext);
+  const {
+    token,
+    folder,
+    userPreferences,
+    noteToEdit,
+    setDrafts,
+    setAllData,
+    setNoteToEdit,
+    setSystemNotif
+  } = useContext(UserContext);
 
   const [title, setTitle] = useState(noteToEdit ? noteToEdit.title : "");
   const [value, setValue] = useState(noteToEdit ? noteToEdit.htmlText : "");
@@ -333,6 +341,55 @@ const Draft = (): JSX.Element => {
       });
   };
 
+  const saveNoteAsDraft = (): void => {
+    const tempId = uuidv4();
+    const newDraft = {
+      noteid: tempId,
+      title: title,
+      htmlText: value,
+      locked: locked,
+      folderId: folder ? folder.folderid : null,
+      createdAt: new Date()
+    };
+    setDrafts((prev) => [...prev, newDraft]);
+    const newDraftNotif = {
+      show: true,
+      title: "Saved In Drafts",
+      text: "Your note was saved as a draft. This note will be lost when you exit the application, if you would like to save it, go into the menu and edit the draft",
+      color: "bg-green-300",
+      hasCancel: false,
+      actions: [
+        {
+          text: "close",
+          func: (): void =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
+        {
+          text: "undo",
+          func: (): void => {
+            setDrafts((prevDrafts) => prevDrafts.filter((draft) => draft.noteid !== tempId));
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            });
+          }
+        }
+      ]
+    };
+    setSystemNotif(newDraftNotif);
+  };
+
   return (
     <>
       <div
@@ -341,6 +398,9 @@ const Draft = (): JSX.Element => {
         } bg-opacity-10 backdrop-blur-sm`}
         onClick={() => {
           noteToEdit && setNoteToEdit(null);
+          if (!noteToEdit && title) {
+            saveNoteAsDraft();
+          }
           navigate("/");
         }}
       ></div>
