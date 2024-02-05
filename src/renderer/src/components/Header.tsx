@@ -35,6 +35,18 @@ const Header = (): JSX.Element => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const handleNavBack = (e): void => {
+      e.preventDefault();
+      if (e.buttons === 8) {
+        goBack();
+        return;
+      }
+    };
+    window.addEventListener("mousedown", handleNavBack);
+    return () => window.removeEventListener("mousedown", handleNavBack);
+  }, []);
+
+  useEffect(() => {
     if (!search) {
       const topLevelNotes = allData.notes.filter((aNote) => aNote.folderId === null);
       return setNotes(topLevelNotes);
@@ -83,7 +95,7 @@ const Header = (): JSX.Element => {
       setMainTitle("Folders");
       return setFolder(null);
     }
-    if (!folder.parentFolderId) {
+    if (!folder?.parentFolderId) {
       setNesting([]);
       return setFolder(null);
     }
