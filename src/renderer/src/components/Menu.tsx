@@ -19,11 +19,13 @@ const Menu = (): JSX.Element => {
     user,
     allData,
     token,
-    userPreferences
+    userPreferences,
+    drafts
   } = useContext(UserContext);
 
   const navigate = useNavigate();
   const hoverBgString = userPreferences?.theme?.replace("300", "200");
+  const textThemeString = userPreferences?.theme?.replace("bg", "text");
 
   const confirmLogout = (): void => {
     const newConfirmation = {
@@ -196,6 +198,13 @@ const Menu = (): JSX.Element => {
     }
   };
 
+  const showAllDrafts = (): void => {
+    setMainTitle("Drafts");
+    setFolders([]);
+    setNotes(drafts);
+    setMenu(false);
+  };
+
   return (
     <>
       <motion.div
@@ -222,7 +231,13 @@ const Menu = (): JSX.Element => {
             } w-full flex justify-between items-center duration-200`}
           >
             <p>All Notes</p>
-            <p>{allData?.notes?.length}</p>
+            <div
+              className={` w-5 h-5 ${
+                userPreferences.theme ? userPreferences.theme : "bg-amber-300"
+              } text-black flex justify-center items-center font-semibold rounded-full`}
+            >
+              <p>{allData?.notes?.length}</p>
+            </div>
           </button>
           <button
             onClick={() => showAllLocked()}
@@ -233,7 +248,30 @@ const Menu = (): JSX.Element => {
             } w-full flex justify-between items-center duration-200`}
           >
             <p>Locked Notes</p>
-            <p>{allData?.notes?.filter((note) => note.locked).length}</p>
+            <div
+              className={` w-5 h-5 ${
+                userPreferences.theme ? userPreferences.theme : "bg-amber-300"
+              } text-black flex justify-center items-center font-semibold rounded-full`}
+            >
+              <p>{allData?.notes?.filter((note) => note.locked).length}</p>
+            </div>
+          </button>
+          <button
+            onClick={() => showAllDrafts()}
+            className={`p-3 rounded-md shadow-md my-3 ${
+              userPreferences.darkMode
+                ? "bg-slate-700 hover:bg-slate-800"
+                : "bg-slate-300 hover:bg-slate-400"
+            } w-full flex justify-between items-center duration-200`}
+          >
+            <p>Draft Notes</p>
+            <div
+              className={` w-5 h-5 ${
+                userPreferences.theme ? userPreferences.theme : "bg-amber-300"
+              } text-black flex justify-center items-center font-semibold rounded-full`}
+            >
+              <p>{drafts.length}</p>
+            </div>
           </button>
           <button
             className={`p-3 rounded-md shadow-md my-3 w-full ${
@@ -243,7 +281,9 @@ const Menu = (): JSX.Element => {
             } flex justify-between items-center duration-200`}
           >
             <p>Shared Notes</p>
-            <FaShareAlt className="text-amber-300" />
+            <FaShareAlt
+              className={`${userPreferences.theme ? textThemeString : "text-amber-300"}`}
+            />
           </button>
           <button
             className={`p-3 rounded-md shadow-md my-3 w-full ${
@@ -253,7 +293,13 @@ const Menu = (): JSX.Element => {
             } flex justify-between items-center duration-200`}
           >
             <p>Trash Notes</p>
-            <p>0</p>
+            <div
+              className={` w-5 h-5 ${
+                userPreferences.theme ? userPreferences.theme : "bg-amber-300"
+              } text-black flex justify-center items-center font-semibold rounded-full`}
+            >
+              <p>0</p>
+            </div>
           </button>
           <p className="text-2xl my-5">Folders</p>
           <Tree

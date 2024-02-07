@@ -71,12 +71,12 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         },
         lockPin: [1, 2, 3, 4],
         commands: [
-          { text: "new folder", command: "ctrl + f", active: true },
-          { text: "new note", command: "ctrl + n", active: true },
-          { text: "open menu", command: "ctrl + m", active: true },
-          { text: "reorder notes", command: "ctrl + o", active: true },
-          { text: "edit", command: "ctrl + e", active: true },
-          { text: "search", command: "ctrl + s", active: true }
+          { text: "new folder", command: "ctrl + alt + f", active: true },
+          { text: "new note", command: "ctrl + alt + n", active: true },
+          { text: "open menu", command: "ctrl + alt + m", active: true },
+          { text: "reorder notes", command: "ctrl + alt + o", active: true },
+          { text: "edit", command: "ctrl + alt + e", active: true },
+          { text: "search", command: "ctrl + alt + s", active: true }
         ]
       };
       localStorage.setItem("preferences", JSON.stringify(defaultPreferences));
