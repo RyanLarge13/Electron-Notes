@@ -234,7 +234,7 @@ const Menu = (): JSX.Element => {
             <div
               className={` w-5 h-5 ${
                 userPreferences.theme ? userPreferences.theme : "bg-amber-300"
-              } text-black flex justify-center items-center font-semibold rounded-full`}
+              } text-black flex justify-center items-center font-semibold rounded-full text-sm`}
             >
               <p>{allData?.notes?.length}</p>
             </div>
@@ -251,7 +251,7 @@ const Menu = (): JSX.Element => {
             <div
               className={` w-5 h-5 ${
                 userPreferences.theme ? userPreferences.theme : "bg-amber-300"
-              } text-black flex justify-center items-center font-semibold rounded-full`}
+              } text-black flex justify-center items-center font-semibold rounded-full text-sm`}
             >
               <p>{allData?.notes?.filter((note) => note.locked).length}</p>
             </div>
@@ -268,7 +268,7 @@ const Menu = (): JSX.Element => {
             <div
               className={` w-5 h-5 ${
                 userPreferences.theme ? userPreferences.theme : "bg-amber-300"
-              } text-black flex justify-center items-center font-semibold rounded-full`}
+              } text-black flex justify-center items-center font-semibold rounded-full text-sm`}
             >
               <p>{drafts.length}</p>
             </div>
@@ -282,7 +282,7 @@ const Menu = (): JSX.Element => {
           >
             <p>Shared Notes</p>
             <FaShareAlt
-              className={`${userPreferences.theme ? textThemeString : "text-amber-300"}`}
+              className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
             />
           </button>
           <button
@@ -296,7 +296,7 @@ const Menu = (): JSX.Element => {
             <div
               className={` w-5 h-5 ${
                 userPreferences.theme ? userPreferences.theme : "bg-amber-300"
-              } text-black flex justify-center items-center font-semibold rounded-full`}
+              } text-black flex justify-center items-center font-semibold rounded-full text-sm`}
             >
               <p>0</p>
             </div>
