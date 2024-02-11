@@ -111,7 +111,12 @@ const Header = (): JSX.Element => {
   };
 
   const checkFolder = (): boolean => {
-    if (mainTitle === "All Notes" || mainTitle === "Locked Notes") {
+    if (
+      mainTitle === "All Notes" ||
+      mainTitle === "Locked Notes" ||
+      mainTitle === "Drafts" ||
+      mainTitle === "Trashed"
+    ) {
       return true;
     }
     if (folder) {

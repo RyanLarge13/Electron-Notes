@@ -16,6 +16,7 @@ const Notes = (): JSX.Element => {
     setSystemNotif,
     setNoteToEdit,
     setMove,
+    setTrashedNotes,
     notesToRender,
     token,
     view,
@@ -481,12 +482,16 @@ const Notes = (): JSX.Element => {
         };
       });
       deleteANote(token, note.noteid)
-        .then(() => {
+        .then((res) => {
+          if (res.data.data) {
+            const newTrashedNote = res.data.data[0];
+            setTrashedNotes((prev) => [...prev, newTrashedNote]);
+          }
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
             const newSuccess = {
               show: true,
               title: `${note.title} Deleted`,
-              text: "successfully deleted your note",
+              text: "Successfully deleted your note, and placed it in your trash bin",
               color: "bg-green-300",
               hasCancel: false,
               actions: [

@@ -30,6 +30,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [move, setMove] = useState(null);
   const [editCurrentFolder, setEditCurrentFolder] = useState(false);
   const [drafts, setDrafts] = useState([]);
+  const [trashedNotes, setTrashedNotes] = useState([]);
   const [systemNotif, setSystemNotif] = useState({
     show: false,
     title: "",
@@ -166,8 +167,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     getuserData(token)
       .then((res) => {
         const data = res.data.data;
-        console.log(data);
         setAllData(data);
+        setTrashedNotes(data.trashed);
         setUser(data.user);
         setFolder(null);
         setLoading(false);
@@ -288,7 +289,9 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         move,
         setMove,
         drafts,
-        setDrafts
+        setDrafts,
+        trashedNotes,
+        setTrashedNotes
       }}
     >
       {children}

@@ -1,10 +1,11 @@
 import { useContext } from "react";
 import { motion } from "framer-motion";
-import { FaShareAlt } from "react-icons/fa";
-import Tree from "./Tree";
-import UserContext from "@renderer/contexxt/UserContext";
+import { FaShareAlt, FaTrashAlt, FaLock, FaFirstdraft } from "react-icons/fa";
+import { LuFileStack } from "react-icons/lu";
 import { deleteUser } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
+import UserContext from "@renderer/contexxt/UserContext";
+import Tree from "./Tree";
 
 const Menu = (): JSX.Element => {
   const {
@@ -20,7 +21,8 @@ const Menu = (): JSX.Element => {
     allData,
     token,
     userPreferences,
-    drafts
+    drafts,
+    trashedNotes
   } = useContext(UserContext);
 
   const navigate = useNavigate();
@@ -205,6 +207,13 @@ const Menu = (): JSX.Element => {
     setMenu(false);
   };
 
+  const showAllTrashed = (): void => {
+    setMainTitle("Trashed");
+    setFolders([]);
+    setNotes(trashedNotes);
+    setMenu(false);
+  };
+
   return (
     <>
       <motion.div
@@ -231,12 +240,11 @@ const Menu = (): JSX.Element => {
             } w-full flex justify-between items-center duration-200`}
           >
             <p>All Notes</p>
-            <div
-              className={` w-5 h-5 ${
-                userPreferences.theme ? userPreferences.theme : "bg-amber-300"
-              } text-black flex justify-center items-center font-semibold rounded-full text-sm`}
-            >
-              <p>{allData?.notes?.length}</p>
+            <div className="flex justify-center items-center gap-x-3">
+              <p className="font-semibold">{allData?.notes?.length}</p>
+              <LuFileStack
+                className={`${userPreferences.theme ? textThemeString : "bg-amber-300"} text-sm`}
+              />
             </div>
           </button>
           <button
@@ -248,12 +256,13 @@ const Menu = (): JSX.Element => {
             } w-full flex justify-between items-center duration-200`}
           >
             <p>Locked Notes</p>
-            <div
-              className={` w-5 h-5 ${
-                userPreferences.theme ? userPreferences.theme : "bg-amber-300"
-              } text-black flex justify-center items-center font-semibold rounded-full text-sm`}
-            >
-              <p>{allData?.notes?.filter((note) => note.locked).length}</p>
+            <div className="flex justify-center items-center gap-x-3">
+              <p className="font-semibold">
+                {allData?.notes?.filter((note) => note.locked).length}
+              </p>
+              <FaLock
+                className={`${userPreferences.theme ? textThemeString : "bg-amber-300"} text-sm`}
+              />
             </div>
           </button>
           <button
@@ -265,12 +274,27 @@ const Menu = (): JSX.Element => {
             } w-full flex justify-between items-center duration-200`}
           >
             <p>Draft Notes</p>
-            <div
-              className={` w-5 h-5 ${
-                userPreferences.theme ? userPreferences.theme : "bg-amber-300"
-              } text-black flex justify-center items-center font-semibold rounded-full text-sm`}
-            >
-              <p>{drafts.length}</p>
+            <div className="flex justify-center items-center gap-x-3">
+              <p className="font-semibold">{drafts.length}</p>
+              <FaFirstdraft
+                className={`${userPreferences.theme ? textThemeString : "bg-amber-300"} text-sm`}
+              />
+            </div>
+          </button>
+          <button
+            onClick={(): void => showAllTrashed()}
+            className={`p-3 rounded-md shadow-md my-3 w-full ${
+              userPreferences.darkMode
+                ? "bg-slate-700 hover:bg-slate-800"
+                : "bg-slate-300 hover:bg-slate-400"
+            } flex justify-between items-center duration-200`}
+          >
+            <p>Trash Notes</p>
+            <div className="flex justify-center items-center gap-x-3">
+              <p className="font-semibold">{trashedNotes.length}</p>
+              <FaTrashAlt
+                className={`${userPreferences.theme ? textThemeString : "bg-amber-300"} text-sm`}
+              />
             </div>
           </button>
           <button
@@ -281,24 +305,11 @@ const Menu = (): JSX.Element => {
             } flex justify-between items-center duration-200`}
           >
             <p>Shared Notes</p>
-            <FaShareAlt
-              className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
-            />
-          </button>
-          <button
-            className={`p-3 rounded-md shadow-md my-3 w-full ${
-              userPreferences.darkMode
-                ? "bg-slate-700 hover:bg-slate-800"
-                : "bg-slate-300 hover:bg-slate-400"
-            } flex justify-between items-center duration-200`}
-          >
-            <p>Trash Notes</p>
-            <div
-              className={` w-5 h-5 ${
-                userPreferences.theme ? userPreferences.theme : "bg-amber-300"
-              } text-black flex justify-center items-center font-semibold rounded-full text-sm`}
-            >
-              <p>0</p>
+            <div className="flex justify-center items-center gap-x-3">
+              <p className="font-semibold">0</p>
+              <FaShareAlt
+                className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
+              />
             </div>
           </button>
           <p className="text-2xl my-5">Folders</p>
@@ -314,7 +325,7 @@ const Menu = (): JSX.Element => {
             className={`p-2 mt-3 rounded-md text-black shadow-md duration-200 ${
               userPreferences.theme
                 ? `${userPreferences.theme} hover:${hoverBgString}`
-                : "bg-amber-300 hover:bg-amber-200 "
+                : "bg-amber-300 hover:bg-amber-200"
             }`}
           >
             Create Folder +

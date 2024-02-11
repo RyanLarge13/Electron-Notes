@@ -146,6 +146,7 @@ export interface ContextProps {
   setUserPreferences: Dispatch<SetStateAction<UserPreferences>>;
   setMove: Dispatch<SetStateAction<Move | null>>;
   setDrafts: Dispatch<SetStateAction<Note[]>>;
+  setTrashedNotes: Dispatch<SetStateAction<Note[]>>;
   folders: Folder[];
   mainTitle: string;
   notes: Note[];
@@ -173,7 +174,6 @@ export interface ContextProps {
   settings: boolean;
   userPreferences: UserPreferences;
   move: Move | null;
-  // foldersLength: number;
-  // notesLength: number;
+  trashedNotes: Note[];
   drafts: Note[];
 }
