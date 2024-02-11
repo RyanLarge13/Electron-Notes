@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
-import { ContextProps } from "@renderer/types/types";
+import { ContextProps, Folder, Note } from "@renderer/types/types";
 import { getuserData } from "@renderer/utils/api";
 
 const UserContext = createContext({} as ContextProps);
@@ -124,15 +124,19 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
 
   useEffect(() => {
     if (!folder && allData) {
-      const topFolders = allData.folders.filter((fold) => fold.parentFolderId === null);
-      const topNotes = allData.notes.filter((aNote) => aNote.folderId === null);
+      const topFolders = allData.folders.filter((fold: Folder) => fold.parentFolderId === null);
+      const topNotes = allData.notes.filter(
+        (aNote: Note) => aNote.folderId === null && !aNote.trashed
+      );
       setFolders(topFolders);
       setNotes(topNotes);
       setMainTitle("Folders");
     }
     if (folder) {
       const subFolders = allData.folders.filter((fold) => fold.parentFolderId === folder.folderid);
-      const nestedNotes = allData.notes.filter((aNote) => aNote.folderId === folder.folderid);
+      const nestedNotes = allData.notes.filter(
+        (aNote: Note) => aNote.folderId === folder.folderid && !aNote.trashed
+      );
       setFolders(subFolders);
       setNotes(nestedNotes);
       setMainTitle(folder.title);
@@ -140,7 +144,12 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   }, [folder, allData]);
 
   useEffect(() => {
-    const copyOfNotes = [...notes];
+    let copyOfNotes: Note[];
+    if (mainTitle === "Trashed") {
+      copyOfNotes = notes.filter((aNote) => aNote.trashed);
+    } else {
+      copyOfNotes = notes.filter((aNote) => !aNote.trashed);
+    }
     if (order) {
       const sortedNotesAsc = copyOfNotes.sort((a, b): number =>
         filter === "Title"
@@ -168,7 +177,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
       .then((res) => {
         const data = res.data.data;
         setAllData(data);
-        setTrashedNotes(data.trashed);
+        setTrashedNotes(data.notes.filter((aNote: Note) => aNote.trashed));
         setUser(data.user);
         setFolder(null);
         setLoading(false);

@@ -1,5 +1,5 @@
 import { useContext, useState, useRef, useEffect } from "react";
-import { createNewNote, deleteANote, updateNote } from "@renderer/utils/api";
+import { createNewNote, deleteANote, moveNoteToTrash, updateNote } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import { TbNotes } from "react-icons/tb";
@@ -17,6 +17,7 @@ const Notes = (): JSX.Element => {
     setNoteToEdit,
     setMove,
     setTrashedNotes,
+    mainTitle,
     notesToRender,
     token,
     view,
@@ -426,7 +427,7 @@ const Notes = (): JSX.Element => {
     }
   };
 
-  const move = (note): void => {
+  const move = (note: Note): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     setMove({
       isMoving: true,
@@ -437,7 +438,209 @@ const Notes = (): JSX.Element => {
     });
   };
 
-  const confirmDelete = (note): void => {
+  const confirmTrash = (note: Note): void => {
+    const newConfirmation = {
+      show: true,
+      title: `Trash ${note.title}`,
+      text: `Are you sure you want to move this note to your trash bin?`,
+      color: "bg-red-400",
+      hasCancel: true,
+      actions: [
+        {
+          text: "cancel",
+          func: () =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
+        { text: "trash", func: () => moveToTrash(note) }
+      ]
+    };
+    setSystemNotif(newConfirmation);
+  };
+
+  const moveToTrash = (note: Note): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    setSystemNotif({
+      show: false,
+      title: "",
+      text: "",
+      color: "",
+      hasCancel: false,
+      actions: []
+    });
+    const trashed = note.trashed;
+    const newNote = { ...note, trashed: !trashed };
+    try {
+      setAllData((prevData) => {
+        const newNotes = prevData.notes.map((aNote) => {
+          if (aNote.noteid === note.noteid) {
+            return newNote;
+          }
+          return aNote;
+        });
+        return {
+          ...prevData,
+          notes: newNotes
+        };
+      });
+      !trashed
+        ? setTrashedNotes((prevTrash) => [...prevTrash, newNote])
+        : setTrashedNotes((prevTrash) => prevTrash.filter((aNote) => aNote.noteid !== note.noteid));
+      moveNoteToTrash(token, note.noteid, !trashed)
+        .then(() => {
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
+              show: true,
+              title: `${note.title} ${trashed ? "Moved" : "Trashed"}`,
+              text: `Successfully moved your note ${trashed ? "out of" : "into"} your trash`,
+              color: "bg-green-300",
+              hasCancel: false,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "undo", func: (): void => {} }
+              ]
+            };
+            setSystemNotif(newSuccess);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prevData) => {
+            const newNotes = prevData.notes.map((aNote) => {
+              if (aNote.noteid === note.noteid) {
+                return { ...aNote, trashed: trashed };
+              }
+              return aNote;
+            });
+            return {
+              ...prevData,
+              notes: newNotes
+            };
+          });
+          trashed
+            ? setTrashedNotes((prevTrash) => [...prevTrash, newNote])
+            : setTrashedNotes((prevTrash) =>
+                prevTrash.filter((aNote) => aNote.noteid !== note.noteid)
+              );
+          if (err.response) {
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: `Issues ${trashed ? "Moving" : "Trashing"} Note`,
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => moveToTrash(note) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
+          }
+          if (err.request) {
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => moveToTrash(note) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      setAllData((prevData) => {
+        const newNotes = prevData.notes.map((aNote) => {
+          if (aNote.noteid === note.noteid) {
+            return { ...aNote, trashed: trashed };
+          }
+          return aNote;
+        });
+        return {
+          ...prevData,
+          notes: newNotes
+        };
+      });
+      trashed
+        ? setTrashedNotes((prevTrash) => [...prevTrash, newNote])
+        : setTrashedNotes((prevTrash) => prevTrash.filter((aNote) => aNote.noteid !== note.noteid));
+      const newError = {
+        show: true,
+        title: `Issues ${trashed ? "Moving" : "Trashing"} Note`,
+        text: `Please contact the developer if this issue persists. We seemed to have a problem ${
+          trashed ? "moving" : "trashing"
+        } your note. Please close the application, reload it and try the operation again.`,
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
+  };
+
+  const confirmDelete = (note: Note): void => {
     const newConfirmation = {
       show: true,
       title: `Delete ${note.title}`,
@@ -482,16 +685,12 @@ const Notes = (): JSX.Element => {
         };
       });
       deleteANote(token, note.noteid)
-        .then((res) => {
-          if (res.data.data) {
-            const newTrashedNote = res.data.data[0];
-            setTrashedNotes((prev) => [...prev, newTrashedNote]);
-          }
+        .then(() => {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
             const newSuccess = {
               show: true,
               title: `${note.title} Deleted`,
-              text: "Successfully deleted your note, and placed it in your trash bin",
+              text: "Successfully deleted your note",
               color: "bg-green-300",
               hasCancel: false,
               actions: [
@@ -606,7 +805,7 @@ const Notes = (): JSX.Element => {
     }
   };
 
-  const openNotesOptions = (event, note): void => {
+  const openNotesOptions = (event, note: Note): void => {
     event.preventDefault();
     event.stopPropagation();
     const { clientX, clientY } = event;
@@ -619,11 +818,51 @@ const Notes = (): JSX.Element => {
       dynamicLeft -= 245;
     }
     setPosition({ top: dynamicTop, left: dynamicLeft });
+    if (note.trashed) {
+      const newMenu = {
+        show: true,
+        meta: {
+          title: note.title,
+          color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`
+        },
+        options: [
+          {
+            title: "move out of trash",
+            func: () => moveToTrash(note)
+          },
+          {
+            title: "delete forever",
+            func: () => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
+          }
+        ]
+      };
+      return setContextMenu(newMenu);
+    }
+    if (mainTitle === "Drafts") {
+      const newMenu = {
+        show: true,
+        meta: {
+          title: note.title,
+          color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`
+        },
+        options: [
+          {
+            title: "move out of drafts",
+            func: () => edit(note)
+          },
+          {
+            title: "delete forever",
+            func: () => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
+          }
+        ]
+      };
+      return setContextMenu(newMenu);
+    }
     const newMenu = {
       show: true,
       meta: {
         title: note.title,
-        color: "bg-slate-300"
+        color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`
       },
       options: [
         {
@@ -643,7 +882,11 @@ const Notes = (): JSX.Element => {
           func: () => rename(note)
         },
         {
-          title: "delete",
+          title: "move to trash",
+          func: () => (userPreferences.confirm ? confirmTrash(note) : moveToTrash(note))
+        },
+        {
+          title: "delete forever",
           func: () => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
         }
       ]

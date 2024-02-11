@@ -163,6 +163,19 @@ export const updateNote = (
   return res;
 };
 
+export const moveNoteToTrash = (
+  token: string,
+  noteId: string,
+  trashedBool: boolean
+): Promise<AxiosResponse> => {
+  const res = Axios.patch(
+    `${devUrl}/notes/movetotrash`,
+    { noteId, trashedBool },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
+
 export const deleteANote = (token: string, noteId: string): Promise<AxiosResponse> => {
   const res = Axios.delete(`${devUrl}/notes/delete/${noteId}`, {
     headers: {

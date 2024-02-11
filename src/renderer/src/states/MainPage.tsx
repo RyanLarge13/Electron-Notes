@@ -147,7 +147,7 @@ const MainPage = (): JSX.Element => {
       show: true,
       meta: {
         title: "options",
-        color: "bg-amber-300"
+        color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`
       },
       options: [
         {
