@@ -17,6 +17,10 @@ const Notes = (): JSX.Element => {
     setNoteToEdit,
     setMove,
     setTrashedNotes,
+    setEditDraft,
+    setDrafts,
+    setNotes,
+    drafts,
     mainTitle,
     notesToRender,
     token,
@@ -77,7 +81,10 @@ const Notes = (): JSX.Element => {
     }
   }, [pin.fourth]);
 
-  const edit = (note): void => {
+  const edit = (note: Note, draft: boolean): void => {
+    if (draft) {
+      setEditDraft(true);
+    }
     if (note.locked) {
       setContextMenu({
         show: false,
@@ -805,6 +812,44 @@ const Notes = (): JSX.Element => {
     }
   };
 
+  const confirmDeleteDraft = (note: Note): void => {
+    const newConfirmation = {
+      show: true,
+      title: `Delete Draft ${note.title}`,
+      text: `Are you sure you want to delete this note?`,
+      color: "bg-red-400",
+      hasCancel: true,
+      actions: [
+        {
+          text: "cancel",
+          func: () =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
+        { text: "delete", func: () => deleteDraft(note) }
+      ]
+    };
+    setSystemNotif(newConfirmation);
+  };
+
+  const deleteDraft = (note: Note): void => {
+    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
+    setContextMenu({
+      show: false,
+      meta: { title: "", color: "" },
+      options: []
+    });
+    const newDrafts = drafts.filter((draft) => draft.noteid !== note.noteid);
+    setDrafts(newDrafts);
+    setNotes(newDrafts);
+  };
+
   const openNotesOptions = (event, note: Note): void => {
     event.preventDefault();
     event.stopPropagation();
@@ -847,12 +892,12 @@ const Notes = (): JSX.Element => {
         },
         options: [
           {
-            title: "move out of drafts",
-            func: () => edit(note)
+            title: "edit",
+            func: (): void => edit(note, true)
           },
           {
             title: "delete forever",
-            func: () => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
+            func: () => (userPreferences.confirm ? confirmDeleteDraft(note) : deleteDraft(note))
           }
         ]
       };
@@ -867,7 +912,7 @@ const Notes = (): JSX.Element => {
       options: [
         {
           title: "edit",
-          func: () => edit(note)
+          func: () => edit(note, false)
         },
         {
           title: "move",

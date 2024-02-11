@@ -14,6 +14,7 @@ const Draft = (): JSX.Element => {
     folder,
     userPreferences,
     noteToEdit,
+    editDraft,
     setDrafts,
     setAllData,
     setNoteToEdit,
@@ -47,9 +48,10 @@ const Draft = (): JSX.Element => {
       title: title,
       htmlText: value,
       folderId: folder ? folder.folderid : null,
-      locked: locked
+      locked: locked,
+      trashed: false
     };
-    if (noteToEdit) {
+    if (noteToEdit && !editDraft) {
       return updateEditNote();
     }
     setAllData((prevData) => {
@@ -60,6 +62,8 @@ const Draft = (): JSX.Element => {
       return newData;
     });
     setLoading(false);
+    setNoteToEdit(null);
+    setDrafts((prevDrafts) => prevDrafts.filter((aNote) => aNote.noteid !== noteToEdit.noteid));
     navigate("/");
     createNewNote(token, newNote)
       .then((res) => {
@@ -349,13 +353,14 @@ const Draft = (): JSX.Element => {
       htmlText: value,
       locked: locked,
       folderId: folder ? folder.folderid : null,
-      createdAt: new Date()
+      createdAt: new Date(),
+      trashed: false
     };
     setDrafts((prev) => [...prev, newDraft]);
     const newDraftNotif = {
       show: true,
       title: "Saved In Drafts",
-      text: "Your note was saved as a draft. This note will be lost when you exit the application, if you would like to save it, go into the menu and edit the draft",
+      text: "Your note was saved as a draft. This note will be lost when you exit the application, if you would like to save it, go into the menu, edit and save",
       color: "bg-green-300",
       hasCancel: false,
       actions: [

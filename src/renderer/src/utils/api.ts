@@ -1,8 +1,8 @@
 import { Folder } from "@renderer/types/types";
 import Axios from "axios";
 import { AxiosResponse } from "axios";
-const devUrl = "http://localhost:8080";
-// const devUrl = "https://notesserver-production-9640.up.railway.app";
+// const devUrl = "http://localhost:8080";
+const devUrl = "https://notesserver-production-9640.up.railway.app";
 
 export const loginUser = (
   username: string,

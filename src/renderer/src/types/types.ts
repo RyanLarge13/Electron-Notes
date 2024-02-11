@@ -148,6 +148,7 @@ export interface ContextProps {
   setMove: Dispatch<SetStateAction<Move | null>>;
   setDrafts: Dispatch<SetStateAction<Note[]>>;
   setTrashedNotes: Dispatch<SetStateAction<Note[]>>;
+  setEditDraft: Dispatch<SetStateAction<boolean>>;
   folders: Folder[];
   mainTitle: string;
   notes: Note[];
@@ -177,4 +178,5 @@ export interface ContextProps {
   move: Move | null;
   trashedNotes: Note[];
   drafts: Note[];
+  editDraft: boolean;
 }

@@ -23,6 +23,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [nesting, setNesting] = useState([]);
   const [edit, setEdit] = useState(false);
+  const [editDraft, setEditDraft] = useState(false);
   const [selectedForEdit, setSelectedForEdit] = useState([]);
   const [draggedOverFolder, setDraggedOverFolder] = useState(null);
   const [noteToEdit, setNoteToEdit] = useState(null);
@@ -300,7 +301,9 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         drafts,
         setDrafts,
         trashedNotes,
-        setTrashedNotes
+        setTrashedNotes,
+        editDraft,
+        setEditDraft
       }}
     >
       {children}
