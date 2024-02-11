@@ -65,7 +65,7 @@ No upcoming new releases
 #### Commits
 
 1. [Trashed Notes](https://github.com/RyanLarge13/Electron-Notes/commit/4b85a02a4ff8ff2bcd89f2c98585e14e3c5368d4)
-2. [Draft Notes](https://github.com/RyanLarge13/Electron-Notes/commit/4b85a02a4ff8ff2bcd89f2c98585e14e3c5368d4)
+2. [Draft Notes](https://github.com/RyanLarge13/Electron-Notes/commit/3f80ad01fe468e985d5d3159fdc116d01f10a685)
 
 ### Fixed
 
