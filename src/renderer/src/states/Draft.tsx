@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLock, FaSave, FaUnlock } from "react-icons/fa";
 import { createNewNote, updateNote } from "@renderer/utils/api";
@@ -26,6 +26,7 @@ const Draft = (): JSX.Element => {
   const [locked, setLocked] = useState(noteToEdit ? noteToEdit.locked : false);
   const [loading, setLoading] = useState(false);
 
+  const quillRef = useRef(null);
   const navigate = useNavigate();
   const textThemeString = userPreferences?.theme?.replace("bg", "text");
 
@@ -416,6 +417,7 @@ const Draft = (): JSX.Element => {
       >
         <div className="flex justify-between items-center pr-5">
           <input
+            onClick={(e) => e.target.focus()}
             type="text"
             placeholder="Title"
             autoFocus={true}
@@ -444,12 +446,15 @@ const Draft = (): JSX.Element => {
             </button>
           </div>
         </div>
-        <ReactQuill
-          theme="snow"
-          value={value}
-          onChange={setValue}
-          style={{ color: userPreferences.darkMode ? "#fff" : "#000", height: "80%" }}
-        />
+        <div onClick={() => quillRef.current.focus()} className="h-full">
+          <ReactQuill
+            ref={quillRef}
+            theme="snow"
+            value={value}
+            onChange={setValue}
+            style={{ color: userPreferences.darkMode ? "#fff" : "#000", height: "80%" }}
+          />
+        </div>
       </div>
     </>
   );
