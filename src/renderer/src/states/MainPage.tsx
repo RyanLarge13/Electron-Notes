@@ -19,6 +19,12 @@ const MainPage = (): JSX.Element => {
     setView,
     setSettings,
     setSystemNotif,
+    setSearch,
+    menu,
+    search,
+    settings,
+    systemNotif,
+    contextMenu,
     loading,
     user,
     edit,
@@ -36,6 +42,7 @@ const MainPage = (): JSX.Element => {
     m: false,
     e: false,
     o: false,
+    s: false,
     Escape: false
   });
 
@@ -66,7 +73,7 @@ const MainPage = (): JSX.Element => {
   };
 
   useEffect(() => {
-    const { Alt, Control, f, n, e, o, m, Escape } = keyPresses;
+    const { Alt, Control, f, n, e, o, m, s, Escape } = keyPresses;
 
     if (Alt && Control && n) {
       navigate("/newnote");
@@ -83,9 +90,34 @@ const MainPage = (): JSX.Element => {
     if (Control && m) {
       setMenu((prev) => !prev);
     }
+    if (Control && s) {
+      setSearch((prev) => !prev);
+    }
     if (edit && Escape) {
       setEdit(false);
       setSelectedForEdit([]);
+    }
+    if (contextMenu.show && Escape) {
+      setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    }
+    if (systemNotif.show && Escape) {
+      setSystemNotif({
+        show: false,
+        title: "",
+        text: "",
+        color: "",
+        hasCancel: false,
+        actions: []
+      });
+    }
+    if (menu && Escape) {
+      setMenu(false);
+    }
+    if (settings && Escape) {
+      setSettings(false);
+    }
+    if (search && Escape) {
+      setSearch(false);
     }
   }, [keyPresses]);
 

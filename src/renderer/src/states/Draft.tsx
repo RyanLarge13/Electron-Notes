@@ -452,7 +452,10 @@ const Draft = (): JSX.Element => {
             theme="snow"
             value={value}
             onChange={setValue}
-            style={{ color: userPreferences.darkMode ? "#fff" : "#000", height: "80%" }}
+            style={{
+              color: userPreferences.darkMode ? "#fff" : "#000",
+              height: "80%"
+            }}
           />
         </div>
       </div>

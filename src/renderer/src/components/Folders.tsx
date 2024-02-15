@@ -264,7 +264,7 @@ const Folders = (): JSX.Element => {
             })
         },
         { text: "duplicate all", func: (): void => {} },
-        { text: "du[plicate folder", func: (): void => dupFolder(folder) }
+        { text: "duplicate folder", func: (): void => dupFolder(folder) }
       ]
     };
     setSystemNotif(newConfirmation);

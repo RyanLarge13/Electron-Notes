@@ -604,7 +604,7 @@ const Account = (): JSX.Element => {
   };
 
   const selectAllFolders = (): void => {
-    const allFolders = allData.folders.map((fold) => fold.folderid);
+    const allFolders = folders.map((fold) => fold.folderid);
     setSelectedForEdit(allFolders);
   };
 

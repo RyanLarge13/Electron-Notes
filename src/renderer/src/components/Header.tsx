@@ -19,16 +19,17 @@ const Header = (): JSX.Element => {
     setNotes,
     setNesting,
     setEdit,
+    setSearch,
     allData,
     view,
     mainTitle,
     editCurrentFolder,
     folder,
     nesting,
-    userPreferences
+    userPreferences,
+    search
   } = useContext(UserContext);
 
-  const [search, setSearch] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [optionMenu, setOptionMenu] = useState(false);
 

@@ -31,6 +31,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [move, setMove] = useState(null);
   const [editCurrentFolder, setEditCurrentFolder] = useState(false);
   const [drafts, setDrafts] = useState([]);
+  const [search, setSearch] = useState(false);
   const [trashedNotes, setTrashedNotes] = useState([]);
   const [systemNotif, setSystemNotif] = useState({
     show: false,
@@ -75,10 +76,10 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         commands: [
           { text: "new folder", command: "ctrl + alt + f", active: true },
           { text: "new note", command: "ctrl + alt + n", active: true },
-          { text: "open menu", command: "ctrl + alt + m", active: true },
-          { text: "reorder notes", command: "ctrl + alt + o", active: true },
-          { text: "edit", command: "ctrl + alt + e", active: true },
-          { text: "search", command: "ctrl + alt + s", active: true }
+          { text: "open menu", command: "ctrl + m", active: true },
+          { text: "reorder notes", command: "ctrl + o", active: true },
+          { text: "edit", command: "ctrl + e", active: true },
+          { text: "search", command: "ctrl + s", active: true }
         ]
       };
       localStorage.setItem("preferences", JSON.stringify(defaultPreferences));
@@ -87,7 +88,17 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     if (preferences) {
       try {
         const parsedPreferences = JSON.parse(preferences);
+        const newCommands = (parsedPreferences.commands = [
+          { text: "new folder", command: "ctrl + alt + f", active: true },
+          { text: "new note", command: "ctrl + alt + n", active: true },
+          { text: "open menu", command: "ctrl + m", active: true },
+          { text: "reorder notes", command: "ctrl + o", active: true },
+          { text: "edit", command: "ctrl + e", active: true },
+          { text: "search", command: "ctrl + s", active: true }
+        ]);
+        parsedPreferences.commands = newCommands;
         setUserPreferences(parsedPreferences);
+        localStorage.setItem("preferences", JSON.stringify(parsedPreferences));
       } catch (err) {
         console.log(err);
         const newError = {
@@ -303,7 +314,9 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         trashedNotes,
         setTrashedNotes,
         editDraft,
-        setEditDraft
+        setEditDraft,
+        search,
+        setSearch
       }}
     >
       {children}
