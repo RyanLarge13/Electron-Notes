@@ -99,6 +99,7 @@ type UserPreferences = {
   lockPin: number[];
   theme: string;
   commands: Commands[];
+  grid: boolean;
 };
 
 type Move = {

@@ -8,12 +8,14 @@ import { ClipLoader } from "react-spinners";
 const Settings = (): JSX.Element => {
   const {
     setSettings,
-    userPreferences,
     setUserPreferences,
     setSystemNotif,
-    token,
     setToken,
     setUser,
+    setView,
+    view,
+    userPreferences,
+    token,
     user
   } = useContext(UserContext);
 
@@ -689,6 +691,33 @@ const Settings = (): JSX.Element => {
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 userPreferences.darkMode
+                  ? "right-[1px] left-[50%] bg-green-200"
+                  : "left-[1px] right-[50%] bg-red-200"
+              } rounded-full`}
+            ></div>
+          </div>
+        </button>
+        <button
+          onClick={() => {
+            const newPreferences = {
+              ...userPreferences,
+              grid: view === "list" ? true : false
+            };
+            localStorage.setItem("preferences", JSON.stringify(newPreferences));
+            setUserPreferences(newPreferences);
+            setView((prevView) => (prevView === "list" ? "grid" : "list"));
+          }}
+          className="flex justify-between items-center my-3"
+        >
+          <p>Grid View</p>
+          <div
+            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
+            <div
+              className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                userPreferences.grid
                   ? "right-[1px] left-[50%] bg-green-200"
                   : "left-[1px] right-[50%] bg-red-200"
               } rounded-full`}

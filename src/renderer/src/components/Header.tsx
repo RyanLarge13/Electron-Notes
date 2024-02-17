@@ -20,6 +20,7 @@ const Header = (): JSX.Element => {
     setNesting,
     setEdit,
     setSearch,
+    setUserPreferences,
     allData,
     view,
     mainTitle,
@@ -180,6 +181,12 @@ const Header = (): JSX.Element => {
               <button
                 onClick={() => {
                   setOptionMenu(false);
+                  const newPreferences = {
+                    ...userPreferences,
+                    grid: view === "list" ? true : false
+                  };
+                  localStorage.setItem("preferences", JSON.stringify(newPreferences));
+                  setUserPreferences(newPreferences);
                   setView((prev) => (prev === "list" ? "grid" : "list"));
                 }}
                 className={`text-left p-3 ${

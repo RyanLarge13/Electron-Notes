@@ -20,6 +20,8 @@ const MainPage = (): JSX.Element => {
     setSettings,
     setSystemNotif,
     setSearch,
+    setUserPreferences,
+    view,
     menu,
     search,
     settings,
@@ -43,6 +45,7 @@ const MainPage = (): JSX.Element => {
     e: false,
     o: false,
     s: false,
+    g: false,
     Escape: false
   });
 
@@ -73,7 +76,7 @@ const MainPage = (): JSX.Element => {
   };
 
   useEffect(() => {
-    const { Alt, Control, f, n, e, o, m, s, Escape } = keyPresses;
+    const { Alt, Control, f, n, e, o, m, s, g, Escape } = keyPresses;
 
     if (Alt && Control && n) {
       navigate("/newnote");
@@ -92,6 +95,15 @@ const MainPage = (): JSX.Element => {
     }
     if (Control && s) {
       setSearch((prev) => !prev);
+    }
+    if (Control && g) {
+      const newPreferences = {
+        ...userPreferences,
+        grid: view === "list" ? true : false
+      };
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+      setUserPreferences(newPreferences);
+      setView((prev) => (prev === "list" ? "grid" : "list"));
     }
     if (edit && Escape) {
       setEdit(false);
@@ -214,6 +226,12 @@ const MainPage = (): JSX.Element => {
           title: "change view",
           func: (): void => {
             setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+            const newPreferences = {
+              ...userPreferences,
+              grid: view === "list" ? true : false
+            };
+            localStorage.setItem("preferences", JSON.stringify(newPreferences));
+            setUserPreferences(newPreferences);
             setView((prevView) => (prevView === "list" ? "grid" : "list"));
           }
         },

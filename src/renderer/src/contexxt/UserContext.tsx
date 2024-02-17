@@ -49,6 +49,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [userPreferences, setUserPreferences] = useState({
     confirm: true,
     darkMode: true,
+    grid: false,
     notify: {
       notifyAll: true,
       notifySuccess: true,
@@ -67,6 +68,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         darkMode: true,
         theme: "",
         confirm: true,
+        grid: false,
         notify: {
           notifyAll: true,
           notifySuccess: true,
@@ -97,6 +99,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           { text: "search", command: "ctrl + s", active: true }
         ]);
         parsedPreferences.commands = newCommands;
+        parsedPreferences.grid = false;
+        parsedPreferences.grid ? setView("grid") : setView("list");
         setUserPreferences(parsedPreferences);
         localStorage.setItem("preferences", JSON.stringify(parsedPreferences));
       } catch (err) {
