@@ -55,6 +55,8 @@ No upcoming new releases
 
 1. [JSON.stringify Error](https://github.com/RyanLarge13/Electron-Notes/commit/cee2f6acbb1809b38d43544f2863390b24c184ca)
 
+---
+
 ## [1.2.0] - 02-04-2024
 
 ### Added
@@ -66,6 +68,26 @@ No upcoming new releases
 
 1. [Trashed Notes](https://github.com/RyanLarge13/Electron-Notes/commit/4b85a02a4ff8ff2bcd89f2c98585e14e3c5368d4)
 2. [Draft Notes](https://github.com/RyanLarge13/Electron-Notes/commit/3f80ad01fe468e985d5d3159fdc116d01f10a685)
+
+### Fixed
+
+- No crucial fixes
+
+#### Commits
+
+- No commits for fixed issues
+
+---
+
+## [1.2.2] - 02-04-2024
+
+### Added
+
+- Grid view in settings
+
+#### Commits
+
+1. [Persistent Grid View](https://github.com/RyanLarge13/Electron-Notes/commit/20cd9c36166d909e587b574c3b58f1c779138204)
 
 ### Fixed
 
