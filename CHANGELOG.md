@@ -96,3 +96,24 @@ No upcoming new releases
 #### Commits
 
 - No commits for fixed issues
+
+---
+
+## [1.2.3] - 02-04-2024
+
+### Added
+
+- Sort by updated date
+- Display date last updated on note
+
+#### Commits
+
+1. [Update At Note Data](https://github.com/RyanLarge13/Electron-Notes/commit/ac53aa4b4f809a02bf37d41c232e9f4f58faabe7)
+
+### Fixed
+
+- No crucial fixes
+
+#### Commits
+
+- No commits for fixed issues
