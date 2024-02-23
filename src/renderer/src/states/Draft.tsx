@@ -1,4 +1,4 @@
-import { useState, useContext, useRef } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLock, FaSave, FaUnlock } from "react-icons/fa";
 import { createNewNote, updateNote } from "@renderer/utils/api";
@@ -26,7 +26,6 @@ const Draft = (): JSX.Element => {
   const [locked, setLocked] = useState(noteToEdit ? noteToEdit.locked : false);
   const [loading, setLoading] = useState(false);
 
-  const quillRef = useRef(null);
   const navigate = useNavigate();
   const textThemeString = userPreferences?.theme?.replace("bg", "text");
 
@@ -50,7 +49,8 @@ const Draft = (): JSX.Element => {
       htmlText: value,
       folderId: folder ? folder.folderid : null,
       locked: locked,
-      trashed: false
+      trashed: false,
+      updated: new Date()
     };
     if (noteToEdit && !editDraft) {
       return updateEditNote();
@@ -208,7 +208,8 @@ const Draft = (): JSX.Element => {
       title: title,
       htmlNotes: value,
       locked: locked,
-      folderId: noteToEdit.folderId
+      folderId: noteToEdit.folderId,
+      updated: new Date()
     };
     setAllData((prevData) => {
       const newNotes = prevData.notes.map((aNote) => {
@@ -355,7 +356,8 @@ const Draft = (): JSX.Element => {
       locked: locked,
       folderId: folder ? folder.folderid : null,
       createdAt: new Date(),
-      trashed: false
+      trashed: false,
+      updated: new Date()
     };
     setDrafts((prev) => [...prev, newDraft]);
     const newDraftNotif = {
@@ -417,7 +419,6 @@ const Draft = (): JSX.Element => {
       >
         <div className="flex justify-between items-center pr-5">
           <input
-            onClick={(e) => e.target.focus()}
             type="text"
             placeholder="Title"
             autoFocus={true}
@@ -446,9 +447,8 @@ const Draft = (): JSX.Element => {
             </button>
           </div>
         </div>
-        <div onClick={() => quillRef.current.focus()} className="h-full">
+        <div className="h-full">
           <ReactQuill
-            ref={quillRef}
             theme="snow"
             value={value}
             onChange={setValue}

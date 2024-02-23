@@ -1034,6 +1034,20 @@ const Notes = (): JSX.Element => {
           onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
         >
           <div aria-hidden="true" className="absolute inset-0 radial-gradient"></div>
+          <div
+            className={`absolute right-0 bottom-0 p-1 z-10 ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300 text-black"
+            } rounded-tl-md`}
+          >
+            <p>
+              Last Updated On{" "}
+              {new Date(note.updated).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+              })}
+            </p>
+          </div>
           <div className="flex justify-between items-center">
             {renameANote && renameANote.noteid === note.noteid ? (
               <form onSubmit={changeTitle}>

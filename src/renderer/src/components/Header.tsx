@@ -38,7 +38,6 @@ const Header = (): JSX.Element => {
 
   useEffect(() => {
     const handleNavBack = (e): void => {
-      e.preventDefault();
       if (e.buttons === 8) {
         goBack();
         return;

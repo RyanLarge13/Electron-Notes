@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { ContextProps, Folder, Note } from "@renderer/types/types";
 import { getuserData } from "@renderer/utils/api";
+// import Dexie from "dexie";
 
 const UserContext = createContext({} as ContextProps);
 
@@ -59,6 +60,11 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     theme: "bg-amber-300",
     commands: []
   });
+
+  // const db = new Dexie("localCache");
+  // db.version(1).stores({
+  //   user: "id, "
+  // });
 
   useEffect(() => {
     //preferences settings
@@ -129,7 +135,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setSystemNotif(newError);
       }
     }
-    //Login and token handling
+    // Login and token handling
     if (token) {
       fetchUser(token);
     }
@@ -172,7 +178,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           ? a.title.localeCompare(b.title)
           : filter === "Date"
             ? +new Date(a.createdAt) - +new Date(b.createdAt)
-            : +new Date(a.createdAt) - +new Date(b.createdAt)
+            : +new Date(a.updated) - +new Date(b.updated)
       );
       return setNotesToRender(sortedNotesAsc);
     }
@@ -182,7 +188,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           ? b.title.localeCompare(a.title)
           : filter === "Date"
             ? +new Date(b.createdAt) - +new Date(a.createdAt)
-            : +new Date(b.createdAt) - +new Date(a.createdAt)
+            : +new Date(b.updated) - +new Date(a.updated)
       );
       return setNotesToRender(sortedNotesAsc);
     }

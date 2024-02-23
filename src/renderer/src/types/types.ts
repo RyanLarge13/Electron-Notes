@@ -22,6 +22,7 @@ export type Note = {
   htmlText: string;
   folderId: string | null;
   createdAt: Date;
+  updated: Date;
   trashed: boolean;
 };
 

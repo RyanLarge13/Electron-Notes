@@ -780,7 +780,7 @@ const Account = (): JSX.Element => {
         className={`fixed bottom-3 right-3 rounded-full ${
           userPreferences.theme ? themeStringText : "text-amber-300"
         } ${
-          userPreferences.darkMode ? "bg-slate-600" : "bg-slate-500"
+          userPreferences.darkMode ? "bg-slate-600" : "bg-slate-300"
         } w-10 h-10 flex justify-center items-center shadow-sm`}
         onClick={() => setOptions((prev) => !prev)}
       >

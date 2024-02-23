@@ -205,7 +205,6 @@ const NewFolder = (): JSX.Element => {
         <form onSubmit={createFolder}>
           <input
             placeholder="title"
-            onClick={(e) => e.target.focus()}
             autoFocus={true}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
