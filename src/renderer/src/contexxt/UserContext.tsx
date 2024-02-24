@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { ContextProps, Folder, Note } from "@renderer/types/types";
 import { getuserData } from "@renderer/utils/api";
-// import Dexie from "dexie";
+import LocalCache from "../utils/cache.ts";
 
 const UserContext = createContext({} as ContextProps);
 
@@ -61,10 +61,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     commands: []
   });
 
-  // const db = new Dexie("localCache");
-  // db.version(1).stores({
-  //   user: "id, "
-  // });
+  const cacheHandler = new LocalCache();
 
   useEffect(() => {
     //preferences settings
@@ -135,13 +132,24 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setSystemNotif(newError);
       }
     }
-    // Login and token handling
-    if (token) {
-      fetchUser(token);
-    }
-    if (!token) {
-      setLoading(false);
-    }
+    cacheHandler
+      .fetchAllLocalData(["user", "folders", "notes"])
+      .then((res) => {
+        if (res[0].length > 0) {
+          installCache(res);
+        } else {
+          // Login and token handling
+          if (token) {
+            fetchUser(token);
+          }
+          if (!token) {
+            setLoading(false);
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, [token]);
 
   useEffect(() => {
@@ -194,6 +202,32 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     }
   }, [order, notes, filter]);
 
+  const installCache = (data): void => {
+    const cachedAllData = {
+      user: data[0][0],
+      folders: data[1],
+      notes: data[2]
+    };
+    console.log(cachedAllData);
+    setAllData(cachedAllData);
+    setTrashedNotes(cachedAllData.notes.filter((aNote: Note) => aNote.trashed));
+    setUser(cachedAllData.user);
+    setFolder(null);
+    setLoading(false);
+    if (token) {
+      fetchUser(token);
+    }
+    if (!token) {
+      setLoading(false);
+    }
+  };
+
+  const uploadCache = async (data): Promise<void> => {
+    await cacheHandler.updateData("user", data.user);
+    await cacheHandler.updateData("folders", data.folders);
+    await cacheHandler.updateData("notes", data.notes);
+  };
+
   const fetchUser = (token: string): void => {
     getuserData(token)
       .then((res) => {
@@ -203,6 +237,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setUser(data.user);
         setFolder(null);
         setLoading(false);
+        uploadCache(data);
       })
       .catch((err) => {
         console.log(err);
