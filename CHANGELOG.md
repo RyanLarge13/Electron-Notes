@@ -117,3 +117,24 @@ No upcoming new releases
 #### Commits
 
 - No commits for fixed issues
+
+---
+
+## [1.3.0] - 02-04-2024
+
+### Added
+
+- Caching data
+
+#### Commits
+
+1. [Cache Authorization](https://github.com/RyanLarge13/Electron-Notes/commit/2886b6603d4a7dd45814c479b0bc198a904d5340)
+2. [Caching Data](https://github.com/RyanLarge13/Electron-Notes/commit/59f020c65c23a00588c51f14e2b4b8216ca3b834)
+
+### Fixed
+
+- No crucial fixes
+
+#### Commits
+
+- No commits for fixed issues
