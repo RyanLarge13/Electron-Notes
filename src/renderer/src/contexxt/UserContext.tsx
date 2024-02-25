@@ -132,24 +132,22 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setSystemNotif(newError);
       }
     }
-    cacheHandler
-      .fetchAllLocalData(["user", "folders", "notes"])
-      .then((res) => {
-        if (res[0].length > 0) {
-          installCache(res);
-        } else {
-          // Login and token handling
-          if (token) {
+    if (token) {
+      cacheHandler
+        .fetchAllLocalData(["user", "folders", "notes"])
+        .then((res) => {
+          if (res[0].length > 0) {
+            installCache(res);
+          } else {
             fetchUser(token);
           }
-          if (!token) {
-            setLoading(false);
-          }
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      setLoading(false);
+    }
   }, [token]);
 
   useEffect(() => {
@@ -214,12 +212,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     setUser(cachedAllData.user);
     setFolder(null);
     setLoading(false);
-    if (token) {
-      fetchUser(token);
-    }
-    if (!token) {
-      setLoading(false);
-    }
+    fetchUser(token);
   };
 
   const uploadCache = async (data): Promise<void> => {
