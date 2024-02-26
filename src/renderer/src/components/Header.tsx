@@ -68,7 +68,7 @@ const Header = (): JSX.Element => {
       const searchedNotes = allData.notes.filter((aNote) => aNote.title.includes(searchText));
       setNotes(searchedNotes);
     }
-  }, [searchText, search]);
+  }, [searchText]);
 
   const takeUserHome = (): void => {
     if (editCurrentFolder) {
@@ -162,7 +162,7 @@ const Header = (): JSX.Element => {
             className="bg-transparent focus:outline-none text-sm text-center"
           />
         )}
-        <div className="trelative">
+        <div className="relative">
           <button onClick={() => setSearch((prev) => !prev)}>
             <IoIosSearch />
           </button>

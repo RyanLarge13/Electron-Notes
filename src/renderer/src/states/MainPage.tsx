@@ -53,7 +53,7 @@ const MainPage = (): JSX.Element => {
 
   const handleKeyPress = (e): void => {
     const key: string = e.key;
-    if (keyPresses.hasOwnProperty(key)) {
+    if (key in keyPresses) {
       setKeyPressed((prevPresses) => {
         return {
           ...prevPresses,
@@ -65,7 +65,7 @@ const MainPage = (): JSX.Element => {
 
   const handleKeyUp = (e): void => {
     const key: string = e.key;
-    if (keyPresses.hasOwnProperty(key)) {
+    if (key in keyPresses) {
       setKeyPressed((prevPresses) => {
         return {
           ...prevPresses,
@@ -266,6 +266,7 @@ const MainPage = (): JSX.Element => {
         userPreferences.darkMode ? "bg-[#223] text-white" : "bg-slate-100 text=black"
       } min-h-screen scrollbar-hide`}
     >
+      <div className="text-rose-300 text-red-300 text-amber-300 text-yellow-300 text-lime-300 text-green-300 text-emerald-300 text-cyan-300 text-sky-300 text-blue-300 text-indigo-300 text-violet-300 text-fuchsia-300 text-pink-300"></div>
       <ContextMenu />
       <SystemNotif />
       {!loading ? (

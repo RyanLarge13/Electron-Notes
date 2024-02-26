@@ -208,7 +208,9 @@ const NewFolder = (): JSX.Element => {
             autoFocus={true}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="focus:outline-none p-2 text-xl text-white bg-transparent"
+            className={`focus:outline-none p-2 text-xl ${
+              userPreferences.darkMode ? "text-white" : "text-black"
+            } bg-transparent`}
           />
         </form>
         <Colors setColor={setColor} />

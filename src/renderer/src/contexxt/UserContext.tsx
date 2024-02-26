@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { ContextProps, Folder, Note } from "@renderer/types/types";
 import { getuserData } from "@renderer/utils/api";
-import LocalCache from "../utils/cache.ts";
+import LocalCache from "../utils/cache";
 
 const UserContext = createContext({} as ContextProps);
 
@@ -102,7 +102,11 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           { text: "search", command: "ctrl + s", active: true }
         ]);
         parsedPreferences.commands = newCommands;
-        parsedPreferences.grid = false;
+        if ("grid" in parsedPreferences) {
+          null;
+        } else {
+          parsedPreferences.grid = false;
+        }
         parsedPreferences.grid ? setView("grid") : setView("list");
         setUserPreferences(parsedPreferences);
         localStorage.setItem("preferences", JSON.stringify(parsedPreferences));
@@ -110,7 +114,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         console.log(err);
         const newError = {
           show: true,
-          title: "Loading PReferences",
+          title: "Loading Preferences",
           text: "The application is having issues uploading your app preferences. Please reload and try again. If the issue persists, contact the developer at ryanlarge@ryanlarge.dev",
           color: "bg-red-300",
           hasCancel: true,
@@ -137,9 +141,9 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         .fetchAllLocalData(["user", "folders", "notes"])
         .then((res) => {
           if (res[0].length > 0) {
-            installCache(res);
+            installCache(res, true);
           } else {
-            fetchUser(token);
+            fetchUser(token, false);
           }
         })
         .catch((err) => {
@@ -200,19 +204,20 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     }
   }, [order, notes, filter]);
 
-  const installCache = (data): void => {
+  const installCache = (data, fetchAfter: boolean): void => {
     const cachedAllData = {
       user: data[0][0],
       folders: data[1],
       notes: data[2]
     };
-    console.log(cachedAllData);
     setAllData(cachedAllData);
     setTrashedNotes(cachedAllData.notes.filter((aNote: Note) => aNote.trashed));
     setUser(cachedAllData.user);
     setFolder(null);
     setLoading(false);
-    fetchUser(token);
+    if (fetchAfter) {
+      fetchUser(token, true);
+    }
   };
 
   const uploadCache = async (data): Promise<void> => {
@@ -221,7 +226,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     await cacheHandler.updateData("notes", data.notes);
   };
 
-  const fetchUser = (token: string): void => {
+  const fetchUser = (token: string, cacheInstalled: boolean): void => {
     getuserData(token)
       .then((res) => {
         const data = res.data.data;
@@ -234,9 +239,45 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
       })
       .catch((err) => {
         console.log(err);
-        localStorage.removeItem("authToken");
-        setToken(null);
         if (err.code === "ERR_NETWORK") {
+          if (!cacheInstalled) {
+            cacheHandler
+              .fetchAllLocalData(["user", "folders", "notes"])
+              .then((res) => {
+                if (res[0].length > 0) {
+                  installCache(res, false);
+                  const newError = {
+                    show: true,
+                    title: "Offline",
+                    text: "You are in offline mode",
+                    color: "bg-yellow-300",
+                    hasCancel: false,
+                    actions: [
+                      {
+                        text: "close",
+                        func: () =>
+                          setSystemNotif({
+                            show: false,
+                            title: "",
+                            text: "",
+                            color: "",
+                            hasCancel: false,
+                            actions: []
+                          })
+                      },
+                      { text: "reload", func: () => window.location.reload() }
+                    ]
+                  };
+                  return setSystemNotif(newError);
+                } else {
+                  setLoading(false);
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            return;
+          }
           const newError = {
             show: true,
             title: "Network Error",
@@ -261,6 +302,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           };
           return setSystemNotif(newError);
         }
+        localStorage.removeItem("authToken");
+        setToken(null);
         const status = err.response.status;
         if (status === 401) {
           const newError = {

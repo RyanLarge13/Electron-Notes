@@ -145,7 +145,7 @@ export interface ContextProps {
   setDraggedOverFolder: Dispatch<SetStateAction<Folder | null>>;
   setNoteToEdit: Dispatch<SetStateAction<Note | null>>;
   setSettings: Dispatch<SetStateAction<boolean>>;
-  fetchUser: (token: string) => void;
+  fetchUser: (token: string, cacheInstalled: boolean) => void;
   setUserPreferences: Dispatch<SetStateAction<UserPreferences>>;
   setMove: Dispatch<SetStateAction<Move | null>>;
   setDrafts: Dispatch<SetStateAction<Note[]>>;

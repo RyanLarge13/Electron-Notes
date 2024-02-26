@@ -438,7 +438,10 @@ const Draft = (): JSX.Element => {
                 <FaUnlock />
               )}
             </button>
-            <button onClick={() => saveNote()} className="text-slate-200">
+            <button
+              onClick={() => saveNote()}
+              className={`${userPreferences.darkMode ? "text-slate-200" : "text-black"}`}
+            >
               {loading ? (
                 <ClipLoader size={16} color={`${userPreferences.darkMode ? "#fff" : "#000"}`} />
               ) : (
