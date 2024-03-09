@@ -5,6 +5,7 @@ import { FaLock } from "react-icons/fa";
 import { TbNotes } from "react-icons/tb";
 import { Note } from "@renderer/types/types";
 import { v4 as uuidv4 } from "uuid";
+import cheerio from "cheerio";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const Notes = (): JSX.Element => {
@@ -25,7 +26,8 @@ const Notes = (): JSX.Element => {
     notesToRender,
     token,
     view,
-    userPreferences
+    userPreferences,
+    user
   } = useContext(UserContext);
 
   const [pinInput, setPinInput] = useState(false);
@@ -850,14 +852,156 @@ const Notes = (): JSX.Element => {
     setNotes(newDrafts);
   };
 
+  const extractText = (html: string): string => {
+    const $ = cheerio.load(html);
+
+    // Get the text content of the document
+    return $("body").text();
+  };
+
+  const saveFileToSystem = async (note: Note): Promise<void> => {
+    const plainText = extractText(note.htmlText, note.title);
+    await window.save.saveTxt(plainText);
+    setContextMenu({
+      show: false,
+      meta: { title: "", color: "" },
+      options: []
+    });
+    if (userPreferences.notify.notifySuccess) {
+      const newSuccess = {
+        show: true,
+        title: `Saved ${note.title}`,
+        text: "Your file was saved successfully as a plain text file",
+        color: "bg-green-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newSuccess);
+    }
+  };
+
+  const saveFileToSysAsHtml = async (note: Note): Promise<void> => {
+    await window.save.saveHtml(note.htmlText, note.title);
+    setContextMenu({
+      show: false,
+      meta: { title: "", color: "" },
+      options: []
+    });
+    if (userPreferences.notify.notifySuccess) {
+      const newSuccess = {
+        show: true,
+        title: `Saved ${note.title}`,
+        text: "Your file was saved successfully as an HTML file",
+        color: "bg-green-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newSuccess);
+    }
+  };
+
+  const saveFileToSysAsPdf = async (note: Note): Promise<void> => {
+    const plainText = extractText(note.htmlText, note.title);
+    await window.save.saveAsPdf(plainText, note.title);
+    setContextMenu({
+      show: false,
+      meta: { title: "", color: "" },
+      options: []
+    });
+    if (userPreferences.notify.notifySuccess) {
+      const newSuccess = {
+        show: true,
+        title: `Saved ${note.title}`,
+        text: "Your file was saved successfully as a PDF file",
+        color: "bg-green-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newSuccess);
+    }
+  };
+
+  const saveFileToSysAsDocX = async (note: Note): Promise<void> => {
+    const plainText = extractText(note.htmlText);
+    await window.save.saveAsDocX(plainText, note.title), user.username;
+    setContextMenu({
+      show: false,
+      meta: { title: "", color: "" },
+      options: []
+    });
+    if (userPreferences.notify.notifySuccess) {
+      const newSuccess = {
+        show: true,
+        title: `Saved ${note.title}`,
+        text: "Your file was saved successfully as a docx file",
+        color: "bg-green-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newSuccess);
+    }
+  };
+
   const openNotesOptions = (event, note: Note): void => {
     event.preventDefault();
     event.stopPropagation();
     const { clientX, clientY } = event;
     let dynamicTop = clientY;
     let dynamicLeft = clientX;
-    if (clientY + 185 > window.innerHeight) {
-      dynamicTop -= 185;
+    if (clientY + 325 > window.innerHeight) {
+      dynamicTop -= 325;
     }
     if (clientX + 200 > window.innerWidth) {
       dynamicLeft -= 245;
@@ -925,6 +1069,22 @@ const Notes = (): JSX.Element => {
         {
           title: "rename",
           func: () => rename(note)
+        },
+        {
+          title: "save file as plain text",
+          func: () => saveFileToSystem(note)
+        },
+        {
+          title: "save file as html",
+          func: (): Promise<void> => saveFileToSysAsHtml(note)
+        },
+        {
+          title: "save file as pdf",
+          func: (): Promise<void> => saveFileToSysAsPdf(note)
+        },
+        {
+          title: "save file as docx",
+          func: (): Promise<void> => saveFileToSysAsDocX(note)
         },
         {
           title: "move to trash",

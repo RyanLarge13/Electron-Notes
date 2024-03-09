@@ -304,7 +304,16 @@ const Menu = (): JSX.Element => {
                 : "bg-slate-300 hover:bg-slate-400"
             } flex justify-between items-center duration-200`}
           >
-            <p>Shared Notes</p>
+            <div className="flex justify-center items-center gap-x-5">
+              <p>Shared Notes </p>
+              <p
+                className={`${
+                  userPreferences.theme ? textThemeString : "text-amber-300"
+                } text-sm font-bold`}
+              >
+                Beta
+              </p>
+            </div>
             <div className="flex justify-center items-center gap-x-3">
               <p className="font-semibold">0</p>
               <FaShareAlt

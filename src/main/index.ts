@@ -1,7 +1,10 @@
-import { app, shell, BrowserWindow } from "electron";
+import { app, shell, BrowserWindow, ipcMain, dialog } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
+import { Document, Packer, Paragraph, TextRun } from "docx";
+import PDFDocument from "pdfkit";
 import fs from "fs";
+import path from "path";
 import appIcon from "../../resources/icon.png?asset";
 
 function createWindow(): void {
@@ -43,6 +46,99 @@ function createWindow(): void {
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return { action: "deny" };
+  });
+
+  ipcMain.handle("saveTxt", async (event, content, title) => {
+    const documentsPath = app.getPath("documents");
+    const defaultPath = documentsPath ? path.join(documentsPath, `${title}.txt`) : `${title}.txt`;
+    const { filePath } = await dialog.showSaveDialog({
+      buttonLabel: "Save As Plain Text",
+      defaultPath: defaultPath,
+      filters: [{ name: "Text Files", extensions: ["txt"] }]
+    });
+    if (filePath) {
+      fs.writeFile(filePath, content, (err) => {
+        if (err) {
+          console.error("Error saving file:", err);
+          return;
+        }
+        console.log("File saved successfully:", filePath);
+      });
+    } else {
+      console.log("File save operation was canceled by the user.");
+    }
+  });
+
+  ipcMain.handle("saveHtml", async (event, content, title) => {
+    const documentsPath = app.getPath("documents");
+    const defaultPath = documentsPath ? path.join(documentsPath, `${title}.html`) : `${title}.html`;
+    const { filePath } = await dialog.showSaveDialog({
+      buttonLabel: "Save As HTML",
+      defaultPath: defaultPath,
+      filters: [{ name: "HTML Files", extensions: ["html"] }]
+    });
+    if (filePath) {
+      fs.writeFile(filePath, content, (err) => {
+        if (err) {
+          console.error("Error saving file:", err);
+          return;
+        }
+        console.log("File saved successfully:", filePath);
+      });
+    } else {
+      console.log("File save operation was canceled by the user.");
+    }
+  });
+
+  ipcMain.handle("savePdf", async (event, content, title) => {
+    const documentsPath = app.getPath("documents");
+    const defaultPath = documentsPath ? path.join(documentsPath, `${title}.pdf`) : `${title}.pdf`;
+    const { filePath } = await dialog.showSaveDialog({
+      buttonLabel: "Save As PDF",
+      defaultPath: defaultPath,
+      filters: [{ name: "PDF Files", extensions: ["pdf"] }]
+    });
+    if (filePath) {
+      const doc = new PDFDocument();
+      const stream = fs.createWriteStream(filePath);
+      doc.pipe(stream);
+      doc.text(content);
+      doc.end();
+      console.log("PDF file saved successfully:", filePath);
+    } else {
+      console.log("PDF save operation was canceled by the user.");
+    }
+  });
+
+  ipcMain.handle("saveDocX", async (event, content, title, username) => {
+    const documentsPath = app.getPath("documents");
+    const defaultPath = documentsPath ? path.join(documentsPath, `${title}.docx`) : `${title}.docx`;
+    const { filePath } = await dialog.showSaveDialog({
+      buttonLabel: "Save As DOCX",
+      defaultPath: defaultPath,
+      filters: [{ name: "DOCX Files", extensions: ["docx"] }]
+    });
+    if (filePath) {
+      const doc = new Document({
+        creator: username,
+        title: title,
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({
+                children: [new TextRun(content)]
+              })
+            ]
+          }
+        ]
+      });
+      const buffer = await Packer.toBuffer(doc);
+      fs.writeFileSync(filePath, buffer);
+      console.log("DOCX file saved successfully:", filePath);
+    } else {
+      console.log("DOCX save operation was canceled by the user.");
+    }
   });
 
   mainWindow.loadFile(join(__dirname, "../renderer/index.html"), { hash: "login" });
