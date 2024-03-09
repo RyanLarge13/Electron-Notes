@@ -105,6 +105,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         if ("grid" in parsedPreferences) {
           null;
         } else {
+          console.log("No grid in parsed prefs");
           parsedPreferences.grid = false;
         }
         parsedPreferences.grid ? setView("grid") : setView("list");
@@ -136,12 +137,16 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setSystemNotif(newError);
       }
     }
+  }, []);
+
+  useEffect(() => {
     if (token) {
       cacheHandler
         .fetchAllLocalData(["user", "folders", "notes"])
         .then((res) => {
           if (res[0].length > 0) {
-            installCache(res, true);
+            installCache(res);
+            fetchUser(token, true);
           } else {
             fetchUser(token, false);
           }
@@ -204,7 +209,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     }
   }, [order, notes, filter]);
 
-  const installCache = (data, fetchAfter: boolean): void => {
+  const installCache = (data): void => {
     const cachedAllData = {
       user: data[0][0],
       folders: data[1],
@@ -215,9 +220,6 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     setUser(cachedAllData.user);
     setFolder(null);
     setLoading(false);
-    if (fetchAfter) {
-      fetchUser(token, true);
-    }
   };
 
   const uploadCache = async (data): Promise<void> => {
@@ -240,43 +242,30 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
       .catch((err) => {
         console.log(err);
         if (err.code === "ERR_NETWORK") {
-          if (!cacheInstalled) {
-            cacheHandler
-              .fetchAllLocalData(["user", "folders", "notes"])
-              .then((res) => {
-                if (res[0].length > 0) {
-                  installCache(res, false);
-                  const newError = {
-                    show: true,
-                    title: "Offline",
-                    text: "You are in offline mode",
-                    color: "bg-yellow-300",
-                    hasCancel: false,
-                    actions: [
-                      {
-                        text: "close",
-                        func: () =>
-                          setSystemNotif({
-                            show: false,
-                            title: "",
-                            text: "",
-                            color: "",
-                            hasCancel: false,
-                            actions: []
-                          })
-                      },
-                      { text: "reload", func: () => window.location.reload() }
-                    ]
-                  };
-                  return setSystemNotif(newError);
-                } else {
-                  setLoading(false);
-                }
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-            return;
+          if (cacheInstalled) {
+            const newError = {
+              show: true,
+              title: "Offline Mode",
+              text: "You are offline. Any changes made on another device will load once an internet connection is established",
+              color: "bg-yellow-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "reload", func: () => window.location.reload() }
+              ]
+            };
+            return setSystemNotif(newError);
           }
           const newError = {
             show: true,
