@@ -29,6 +29,38 @@ const Draft = (): JSX.Element => {
   const navigate = useNavigate();
   const textThemeString = userPreferences?.theme?.replace("bg", "text");
 
+  const modules = {
+    toolbar: [
+      [{ header: "1" }, { header: "2" }, { font: [] }],
+      [{ size: [] }],
+      ["bold", "italic", "underline", "strike", "blockquote"],
+      [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
+      [{ color: [] }, { background: [] }], // Color and Background buttons
+      ["link", "image", "video"],
+      ["clean"]
+    ]
+  };
+
+  const formats = [
+    "header",
+    "font",
+    "size",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "blockquote",
+    "list",
+    "bullet",
+    "indent",
+    "link",
+    "image",
+    "video",
+    "color",
+    "background",
+    "clean"
+  ];
+
   const saveNote = (): void => {
     setLoading(true);
     if (!token) {
@@ -453,10 +485,11 @@ const Draft = (): JSX.Element => {
         <div className="h-full">
           <ReactQuill
             theme="snow"
+            modules={modules}
+            formats={formats}
             value={value}
             onChange={setValue}
             style={{
-              color: userPreferences.darkMode ? "#fff" : "#000",
               height: "80%"
             }}
           />
