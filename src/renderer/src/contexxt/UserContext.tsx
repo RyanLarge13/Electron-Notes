@@ -34,6 +34,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [drafts, setDrafts] = useState([]);
   const [search, setSearch] = useState(false);
   const [trashedNotes, setTrashedNotes] = useState([]);
+  const [createCon, setCreateCon] = useState(false);
   const [systemNotif, setSystemNotif] = useState({
     show: false,
     title: "",
@@ -293,6 +294,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         }
         localStorage.removeItem("authToken");
         setToken(null);
+        setUser(false);
         const status = err.response.status;
         if (status === 401) {
           const newError = {
@@ -386,7 +388,9 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         editDraft,
         setEditDraft,
         search,
-        setSearch
+        setSearch,
+        createCon,
+        setCreateCon
       }}
     >
       {children}

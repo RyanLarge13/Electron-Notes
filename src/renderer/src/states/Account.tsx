@@ -2,13 +2,16 @@ import { useContext, useState } from "react";
 import { updateNote, updateFolder } from "@renderer/utils/api";
 import { useNavigate, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { TbFilters } from "react-icons/tb";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
+import { IoMdShare } from "react-icons/io";
 import {
   MdCancel,
   MdDelete,
   MdDriveFileMove,
   MdOutlineNoteAdd,
+  MdGroupAdd,
   MdSelectAll,
   MdTabUnselected
 } from "react-icons/md";
@@ -25,6 +28,7 @@ import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
 import Tree from "@renderer/components/Tree";
 import Colors from "@renderer/components/Colors";
+import ConRequest from "@renderer/components/ConRequest";
 
 const Account = (): JSX.Element => {
   const {
@@ -39,6 +43,8 @@ const Account = (): JSX.Element => {
     setMove,
     setFolder,
     setSystemNotif,
+    setCreateCon,
+    createCon,
     token,
     edit,
     editCurrentFolder,
@@ -61,6 +67,7 @@ const Account = (): JSX.Element => {
 
   const [filterOptions, setFilterOptions] = useState(false);
   const [options, setOptions] = useState(false);
+  const [conOptions, setConOptions] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newColor, setNewColor] = useState(folder ? folder.color : "bg-amber-300");
 
@@ -777,6 +784,55 @@ const Account = (): JSX.Element => {
       <Notes />
       {/* <div className="hover:bg-rose-200 hover:bg-red-200 hover:bg-amber-200 hover:bg-yellow-200 hover:bg-lime-200 hover:bg-green-200 hover:bg-cyan-200 hover:bg-sky-200 hover:bg-blue-200 hover:bg-indigo-200 hover:bg-violet-200 hover:bg-fuchsia-200 hover:bg-pink-200"></div> */}
       <button
+        className={`fixed top-3 right-3 rounded-full ${
+          userPreferences.theme ? themeStringText : "text-amber-300"
+        } ${
+          userPreferences.darkMode
+            ? "bg-slate-600 hover:bg-slate-500"
+            : "bg-slate-300 hover:bg-slate-400"
+        } duration-200 w-10 h-10 flex justify-center items-center shadow-sm`}
+        onClick={() => setConOptions((prev) => !prev)}
+      >
+        <AiOutlineUsergroupAdd />
+      </button>
+      {conOptions && (
+        <>
+          <div onClick={() => setConOptions(false)} className="fixed bg-transparent inset-0"></div>
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`rounded-md shadow-md fixed top-10 right-10 ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-200"
+            } flex flex-col justify-center items-center font-bold w-40`}
+          >
+            <button
+              className={`flex justify-between items-center w-full py-3 px-4 ${
+                userPreferences.darkMode ? "hover:bg-slate-600" : "hover:bg-slate-300"
+              }`}
+              onClick={() => {
+                setConOptions(false);
+                setCreateCon(true);
+              }}
+            >
+              Connect
+              <MdGroupAdd />
+            </button>
+            <button
+              className={`flex justify-between items-center w-full py-3 px-4 ${
+                userPreferences.darkMode ? "hover:bg-slate-600" : "hover:bg-slate-300"
+              }`}
+              onClick={() => {
+                setConOptions(false);
+                // addNewNote();
+              }}
+            >
+              Share Note
+              <IoMdShare />
+            </button>
+          </motion.div>
+        </>
+      )}
+      <button
         className={`fixed bottom-3 right-3 rounded-full ${
           userPreferences.theme ? themeStringText : "text-amber-300"
         } ${
@@ -828,6 +884,7 @@ const Account = (): JSX.Element => {
       {note && <NoteView />}
       {menu && <Menu />}
       {settings && <Settings />}
+      {createCon && <ConRequest />}
       {move && move.isMoving && (
         <>
           <motion.div

@@ -1,8 +1,8 @@
 import { Folder } from "@renderer/types/types";
 import Axios from "axios";
 import { AxiosResponse } from "axios";
-// const devUrl = "http://localhost:8080";
-const devUrl = "https://notesserver-production-9640.up.railway.app";
+const devUrl = "http://localhost:8080";
+// const devUrl = "https://notesserver-production-9640.up.railway.app";
 
 export const loginUser = (
   username: string,
@@ -182,5 +182,14 @@ export const deleteANote = (token: string, noteId: string): Promise<AxiosRespons
       Authorization: `Bearer ${token}`
     }
   });
+  return res;
+};
+
+export const createConRequest = (token: string, email: string): Promise<AxiosResponse> => {
+  const res = Axios.post(
+    `${devUrl}/connect/create/request`,
+    { userEmail: email },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
   return res;
 };
