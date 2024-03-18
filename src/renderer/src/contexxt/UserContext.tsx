@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { ContextProps, Folder, Note } from "@renderer/types/types";
 import { getuserData } from "@renderer/utils/api";
+import "@renderer/threads/handleConnections";
 import LocalCache from "../utils/cache";
 
 const UserContext = createContext({} as ContextProps);
@@ -12,6 +13,10 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [folders, setFolders] = useState([]);
   const [folder, setFolder] = useState(null);
   const [notes, setNotes] = useState([]);
+  const [connections, setConnections] = useState([]);
+  const [connectionRequests, setConnectionRequests] = useState([]);
+  const [shareRequests, setShareRequests] = useState([]);
+  const [sharedNotes, setSharedNotes] = useState([]);
   const [notesToRender, setNotesToRender] = useState([]);
   const [order, setOrder] = useState(true);
   const [filter, setFilter] = useState("Title");
@@ -229,11 +234,47 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     await cacheHandler.updateData("notes", data.notes);
   };
 
+  const handleConnections = (cons, conReqs, shareReqs, shareNotes, userEmail): void => {
+    const connectionWorker = new Worker("/src/threads/handleConnections.js");
+    connectionWorker.onmessage = (event): void => {
+      const {
+        filteredConnections,
+        filteredConnectionRequests,
+        filteredShareRequests,
+        filteredSharedNotes
+      } = event.data;
+      setConnections(filteredConnections);
+      setConnectionRequests(filteredConnectionRequests);
+      setShareRequests(filteredShareRequests);
+      setSharedNotes(filteredSharedNotes);
+    };
+    connectionWorker.postMessage({
+      connections: cons,
+      connectionRequests: conReqs,
+      shareRequests: shareReqs,
+      sharedNotes: shareNotes,
+      userEmail: userEmail
+    });
+  };
+
   const fetchUser = (token: string, cacheInstalled: boolean): void => {
     getuserData(token)
       .then((res) => {
         const data = res.data.data;
-        setAllData(data);
+        const newAllData = {
+          user: data.user,
+          folders: data.folders,
+          notes: data.notes
+        };
+        handleConnections(
+          data.connections,
+          data.connectionRequests,
+          data.shareRequests,
+          data.sharedNotes,
+          data.user.email
+        );
+        setAllData(newAllData);
+        console.log(newAllData);
         setTrashedNotes(data.notes.filter((aNote: Note) => aNote.trashed));
         setUser(data.user);
         setFolder(null);
@@ -390,7 +431,15 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         search,
         setSearch,
         createCon,
-        setCreateCon
+        setCreateCon,
+        connections,
+        setConnections,
+        connectionRequests,
+        setConnectionRequests,
+        shareRequests,
+        setShareRequests,
+        sharedNotes,
+        setSharedNotes
       }}
     >
       {children}

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { createConRequest } from "../utils/api";
 import UserContext from "@renderer/contexxt/UserContext";
 
-const ConRequest = (): JSX.Element => {
+const Connections = (): JSX.Element => {
   const { userPreferences, setCreateCon, token } = useContext(UserContext);
 
   const [email, setEmail] = useState("");
@@ -59,4 +59,4 @@ const ConRequest = (): JSX.Element => {
   );
 };
 
-export default ConRequest;
+export default Connections;

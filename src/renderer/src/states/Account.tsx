@@ -28,7 +28,8 @@ import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
 import Tree from "@renderer/components/Tree";
 import Colors from "@renderer/components/Colors";
-import ConRequest from "@renderer/components/ConRequest";
+import Connections from "@renderer/components/Connections";
+import ConBubbles from "@renderer/components/ConBubbles";
 
 const Account = (): JSX.Element => {
   const {
@@ -795,6 +796,7 @@ const Account = (): JSX.Element => {
       >
         <AiOutlineUsergroupAdd />
       </button>
+      <ConBubbles />
       {conOptions && (
         <>
           <div onClick={() => setConOptions(false)} className="fixed bg-transparent inset-0"></div>
@@ -884,7 +886,7 @@ const Account = (): JSX.Element => {
       {note && <NoteView />}
       {menu && <Menu />}
       {settings && <Settings />}
-      {createCon && <ConRequest />}
+      {createCon && <Connections />}
       {move && move.isMoving && (
         <>
           <motion.div
