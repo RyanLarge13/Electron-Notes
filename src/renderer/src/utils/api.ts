@@ -193,3 +193,19 @@ export const createConRequest = (token: string, email: string): Promise<AxiosRes
   );
   return res;
 };
+
+export const acceptRequestConnection = (
+  token: string,
+  requestId: string,
+  userEmail: string
+): Promise<AxiosResponse> => {
+  const res = Axios.post(
+    `${devUrl}/connect/create`,
+    {
+      requestId,
+      userEmail
+    },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
