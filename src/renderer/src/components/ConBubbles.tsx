@@ -3,12 +3,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { acceptRequestConnection } from "@renderer/utils/api";
 import { FaUserCheck } from "react-icons/fa";
 import { TiCancel } from "react-icons/ti";
+import { Tooltip } from "react-tooltip";
 // import { createConRequest } from "../utils/api";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const ConBubbles = (): JSX.Element => {
-  const { connections, connectionRequests, userPreferences, token, setSystemNotif } =
-    useContext(UserContext);
+  const {
+    connections,
+    connectionRequests,
+    setConnections,
+    userPreferences,
+    token,
+    setSystemNotif
+  } = useContext(UserContext);
 
   const [options, setOptions] = useState({ id: "", email: "" });
 
@@ -47,6 +54,36 @@ const ConBubbles = (): JSX.Element => {
   const acceptRequest = (requestId: string, userEmail: string): void => {
     acceptRequestConnection(token, requestId, userEmail)
       .then((res) => {
+        setSystemNotif({
+          show: false,
+          title: "",
+          text: "",
+          color: "",
+          hasCancel: false,
+          actions: []
+        });
+        setSystemNotif({
+          show: false,
+          title: "New Connection",
+          text: res.data.data.message,
+          color: "bg-green-300",
+          hasCancel: false,
+          actions: [
+            {
+              text: "close",
+              func: (): void =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            }
+          ]
+        });
+        setConnections((prev) => [...prev, userEmail]);
         console.log(res);
       })
       .catch((err) => {
@@ -58,8 +95,11 @@ const ConBubbles = (): JSX.Element => {
     <>
       {connections.map((con, index) => (
         <div
+          data-tooltip-delay-show={750}
+          data-tooltip-id="con-name"
+          data-tooltip-content={con.email}
           style={{ right: 5 * index + 50 }}
-          className={`fixed top-3 rounded-full ${
+          className={`fixed top-3 cursor-pointer rounded-full ${
             userPreferences.theme ? themeStringText : "text-amber-300"
           } ${
             userPreferences.darkMode
@@ -68,6 +108,7 @@ const ConBubbles = (): JSX.Element => {
           } duration-200 w-10 h-10 flex justify-center items-center shadow-sm`}
           key={con.id}
         >
+          <Tooltip id="con-name" />
           <p className="text-lg font-bold">{con.email[0].toUpperCase()}</p>
         </div>
       ))}
@@ -77,9 +118,14 @@ const ConBubbles = (): JSX.Element => {
             {options.id === conReq.id && (
               <motion.div
                 key={conReq.email}
-                initial={{ opacity: 0, x: 15 }}
-                exit={{ opacity: 0, x: 15 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, scale: 0, transformOrigin: "top right" }}
+                exit={{ opacity: 0, scale: 0, transformOrigin: "top right" }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  transformOrigin: "top right",
+                  transition: { duration: 0.025 }
+                }}
                 style={{ top: 5 * index + 60, zIndex: index }}
                 className={`fixed right-10 shadow-md rounded-md outline outline-slate-800 outline-2 text-white duration-200 ${
                   userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"

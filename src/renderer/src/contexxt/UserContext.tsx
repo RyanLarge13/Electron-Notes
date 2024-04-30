@@ -15,6 +15,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [notes, setNotes] = useState([]);
   const [connections, setConnections] = useState([]);
   const [connectionRequests, setConnectionRequests] = useState([]);
+  const [consSent, setConsSent] = useState([]);
   const [shareRequests, setShareRequests] = useState([]);
   const [sharedNotes, setSharedNotes] = useState([]);
   const [notesToRender, setNotesToRender] = useState([]);
@@ -274,7 +275,6 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           data.user.email
         );
         setAllData(newAllData);
-        console.log(newAllData);
         setTrashedNotes(data.notes.filter((aNote: Note) => aNote.trashed));
         setUser(data.user);
         setFolder(null);
@@ -433,6 +433,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         createCon,
         setCreateCon,
         connections,
+        setConsSent,
+        consSent,
         setConnections,
         connectionRequests,
         setConnectionRequests,

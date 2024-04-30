@@ -4,7 +4,8 @@ import { createConRequest } from "../utils/api";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const Connections = (): JSX.Element => {
-  const { userPreferences, setCreateCon, token } = useContext(UserContext);
+  const { userPreferences, setCreateCon, token, setSystemNotif, setConsSent } =
+    useContext(UserContext);
 
   const [email, setEmail] = useState("");
 
@@ -13,6 +14,33 @@ const Connections = (): JSX.Element => {
     try {
       createConRequest(token, email)
         .then((res) => {
+          setCreateCon(false);
+          setSystemNotif({
+            show: true,
+            title: "Connection Created",
+            text: res.data.data.message,
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              {
+                text: "cancel",
+                func: (): void => {}
+              }
+            ]
+          });
+          setConsSent((prev) => [...prev, email]);
           console.log(res);
         })
         .catch((err) => {

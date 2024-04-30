@@ -2,6 +2,8 @@
 
 <img src="./build/icons/512x512.png" alt="icon" />
 
+[![web-notes](https://snapcraft.io/web-notes/badge.svg)](https://snapcraft.io/web-notes)
+
 Welcome to Electron Notes
 available on Linux Desktops and downloadable from the snap store.
 
