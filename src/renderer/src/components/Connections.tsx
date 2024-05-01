@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import { createConRequest } from "../utils/api";
+import { ClipLoader } from "react-spinners";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const Connections = (): JSX.Element => {
@@ -8,17 +9,19 @@ const Connections = (): JSX.Element => {
     useContext(UserContext);
 
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const sendRequest = (e): void => {
     e.preventDefault();
     try {
+      setLoading(true);
       createConRequest(token, email)
         .then((res) => {
           setCreateCon(false);
           setSystemNotif({
             show: true,
-            title: "Connection Created",
-            text: res.data.data.message,
+            title: "Connection Request Sent",
+            text: res.data.message,
             color: "bg-green-300",
             hasCancel: false,
             actions: [
@@ -40,13 +43,16 @@ const Connections = (): JSX.Element => {
               }
             ]
           });
-          setConsSent((prev) => [...prev, email]);
+          setConsSent((prev) => [...prev, { id: res.data.data.conreqid, email }]);
           console.log(res);
+          setLoading(false);
         })
         .catch((err) => {
+          setLoading(false);
           console.log(err);
         });
     } catch (err) {
+      setLoading(false);
       console.log(err);
     }
   };
@@ -77,10 +83,11 @@ const Connections = (): JSX.Element => {
           />
         </form>
         <button
+          disabled={loading}
           onClick={(e) => sendRequest(e)}
           className="mt-5 py-2 px-3 rounded-md shadow-md bg-amber-300 text-black font-bold"
         >
-          Send Request
+          {loading ? <ClipLoader color="#000" size={15} /> : "Send Request"}
         </button>
       </motion.section>
     </>
