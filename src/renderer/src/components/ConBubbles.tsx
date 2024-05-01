@@ -85,7 +85,7 @@ const ConBubbles = (): JSX.Element => {
             }
           ]
         });
-        setConnections((prev) => [...prev, userEmail]);
+        setConnections((prev) => [...prev, { id: res.data.data.conreqid, email: userEmail }]);
         console.log(res);
       })
       .catch((err) => {

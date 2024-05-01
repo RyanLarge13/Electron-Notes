@@ -49,6 +49,27 @@ const Connections = (): JSX.Element => {
         })
         .catch((err) => {
           setLoading(false);
+          setSystemNotif({
+            show: true,
+            title: "Error",
+            text: err.response.data.message,
+            color: "bg-red-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              }
+            ]
+          });
           console.log(err);
         });
     } catch (err) {
