@@ -13,6 +13,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [folders, setFolders] = useState([]);
   const [folder, setFolder] = useState(null);
   const [notes, setNotes] = useState([]);
+  const [hoverConnections, setHoverConnections] = useState(false);
   const [connections, setConnections] = useState([]);
   const [connectionRequests, setConnectionRequests] = useState([]);
   const [consSent, setConsSent] = useState([]);
@@ -391,6 +392,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         contextMenu,
         setContextMenu,
         menu,
+        hoverConnections,
+        setHoverConnections,
         editCurrentFolder,
         setEditCurrentFolder,
         setMenu,

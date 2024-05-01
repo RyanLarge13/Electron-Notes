@@ -45,6 +45,8 @@ const Account = (): JSX.Element => {
     setFolder,
     setSystemNotif,
     setCreateCon,
+    setHoverConnections,
+    hoverConnections,
     createCon,
     token,
     edit,
@@ -784,19 +786,35 @@ const Account = (): JSX.Element => {
       </div>
       <Notes />
       {/* <div className="hover:bg-rose-200 hover:bg-red-200 hover:bg-amber-200 hover:bg-yellow-200 hover:bg-lime-200 hover:bg-green-200 hover:bg-cyan-200 hover:bg-sky-200 hover:bg-blue-200 hover:bg-indigo-200 hover:bg-violet-200 hover:bg-fuchsia-200 hover:bg-pink-200"></div> */}
-      <button
-        className={`fixed top-3 right-3 rounded-full ${
-          userPreferences.theme ? themeStringText : "text-amber-300"
-        } ${
-          userPreferences.darkMode
-            ? "bg-slate-600 hover:bg-slate-500"
-            : "bg-slate-300 hover:bg-slate-400"
-        } duration-200 w-10 h-10 flex justify-center items-center shadow-sm`}
-        onClick={() => setConOptions((prev) => !prev)}
+      <div
+        className="bg-transparent"
+        onMouseLeave={() => {
+          if (hoverConnections) {
+            setTimeout(() => {
+              setHoverConnections(false);
+            }, 250);
+          }
+        }}
       >
-        <AiOutlineUsergroupAdd />
-      </button>
-      <ConBubbles />
+        <button
+          onMouseEnter={() => {
+            setTimeout(() => {
+              setHoverConnections(true);
+            }, 750);
+          }}
+          className={`fixed top-3 right-3 rounded-full ${
+            userPreferences.theme ? themeStringText : "text-amber-300"
+          } ${
+            userPreferences.darkMode
+              ? "bg-slate-600 hover:bg-slate-500"
+              : "bg-slate-300 hover:bg-slate-400"
+          } duration-200 w-10 h-10 flex justify-center items-center shadow-sm`}
+          onClick={() => setConOptions((prev) => !prev)}
+        >
+          <AiOutlineUsergroupAdd />
+        </button>
+        <ConBubbles />
+      </div>
       {conOptions && (
         <>
           <div onClick={() => setConOptions(false)} className="fixed bg-transparent inset-0"></div>

@@ -12,12 +12,14 @@ const ConBubbles = (): JSX.Element => {
     connections,
     connectionRequests,
     setConnections,
+    hoverConnections,
     userPreferences,
     token,
     setSystemNotif
   } = useContext(UserContext);
 
   const [options, setOptions] = useState({ id: "", email: "" });
+  const [conOptions, setConOptions] = useState({ id: "", email: "" });
 
   const themeStringText = userPreferences?.theme?.replace("bg", "text");
 
@@ -94,23 +96,81 @@ const ConBubbles = (): JSX.Element => {
   return (
     <>
       {connections.map((con, index) => (
-        <div
-          data-tooltip-delay-show={750}
-          data-tooltip-id="con-name"
-          data-tooltip-content={con.email}
-          style={{ right: 5 * index + 50 }}
-          className={`fixed top-3 cursor-pointer rounded-full ${
-            userPreferences.theme ? themeStringText : "text-amber-300"
-          } ${
-            userPreferences.darkMode
-              ? "bg-slate-600 hover:bg-slate-500"
-              : "bg-slate-300 hover:bg-slate-400"
-          } duration-200 w-10 h-10 flex justify-center items-center shadow-sm`}
-          key={con.id}
-        >
-          <Tooltip id="con-name" />
-          <p className="text-lg font-bold">{con.email[0].toUpperCase()}</p>
-        </div>
+        <>
+          <AnimatePresence key={index}>
+            {conOptions.id === con.id && (
+              <motion.div
+                key={con.email}
+                initial={{ opacity: 0, scale: 0, transformOrigin: "top right" }}
+                exit={{ opacity: 0, scale: 0, transformOrigin: "top right" }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  transformOrigin: "top right",
+                  transition: { duration: 0.025 }
+                }}
+                style={{
+                  right: hoverConnections ? 5 * index + 60 : 5,
+                  zIndex: hoverConnections ? index : -1
+                }}
+                className={`fixed right-10 shadow-md rounded-md outline outline-slate-800 outline-2 text-white duration-200 ${
+                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                }`}
+              >
+                <p className="mb-2 p-2 pr-10 font-semibold">{conOptions.email}</p>
+                <button
+                  onClick={() => confirmAccept(con.id, con.email)}
+                  className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
+                    userPreferences.darkMode
+                      ? "bg-slate-700 hover:bg-slate-600"
+                      : "bg-slate-300 hover:bg-slate-400"
+                  }`}
+                >
+                  <p>Remove</p>
+                  <FaUserCheck />
+                </button>
+                <button
+                  className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
+                    userPreferences.darkMode
+                      ? "bg-slate-700 hover:bg-slate-600"
+                      : "bg-slate-300 hover:bg-slate-400"
+                  }`}
+                >
+                  <p>Share Note</p>
+                  <TiCancel />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <button
+            data-tooltip-delay-show={750}
+            data-tooltip-id="con-name"
+            data-tooltip-content={con.email}
+            onClick={() =>
+              setConOptions((prev) => {
+                if (prev.id === con.id) {
+                  return { id: "", email: "" };
+                }
+                return con;
+              })
+            }
+            style={{
+              right: hoverConnections ? 5 * index + 50 : 5,
+              zIndex: hoverConnections ? index : -1
+            }}
+            className={`fixed top-3 rounded-full ${
+              userPreferences.theme ? themeStringText : "text-amber-300"
+            } ${
+              userPreferences.darkMode
+                ? "bg-slate-600 hover:bg-slate-500"
+                : "bg-slate-300 hover:bg-slate-400"
+            } duration-200 w-10 h-10 flex justify-center items-center shadow-sm`}
+            key={con.id}
+          >
+            <Tooltip id="con-name" />
+            <p className="text-lg font-bold">{con.email[0].toUpperCase()}</p>
+          </button>
+        </>
       ))}
       {connectionRequests.map((conReq, index) => (
         <>
@@ -126,7 +186,10 @@ const ConBubbles = (): JSX.Element => {
                   transformOrigin: "top right",
                   transition: { duration: 0.025 }
                 }}
-                style={{ top: 5 * index + 60, zIndex: index }}
+                style={{
+                  top: hoverConnections ? 5 * index + 60 : 5,
+                  zIndex: hoverConnections ? index : -1
+                }}
                 className={`fixed right-10 shadow-md rounded-md outline outline-slate-800 outline-2 text-white duration-200 ${
                   userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
                 }`}
