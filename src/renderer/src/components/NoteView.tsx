@@ -1,10 +1,10 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEdit } from "react-icons/fa";
+import { FaCopy, FaEdit, FaShareAlt, FaTrashAlt } from "react-icons/fa";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const NoteView = (): JSX.Element => {
-  const { setNote, setNoteToEdit, note, userPreferences } = useContext(UserContext);
+  const { setNote, setNoteToEdit, note, userPreferences, setSystemNotif } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -13,6 +13,35 @@ const NoteView = (): JSX.Element => {
     setNote(null);
     navigate("/newnote");
   };
+
+  const copyNoteText = (): void => {
+    const noteText = note.htmlText;
+    navigator.clipboard
+      .writeText(noteText)
+      .then(() => {
+        setSystemNotif({
+          show: true,
+          title: "Copied",
+          text: "Your note has been copied as HTML to your clipboard",
+          color: "bg-green-300",
+          hasCancel: false,
+          actions: []
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        setSystemNotif({
+          show: true,
+          title: "Copy Failed",
+          text: "We cannot copy your not to the clip board. Try using the context menu to save your note text as a plain text document instead.",
+          color: "bg-red-300",
+          hasCancel: false,
+          actions: []
+        });
+      });
+  };
+
+  const trashNote = () => {};
 
   return (
     <>
@@ -31,9 +60,20 @@ const NoteView = (): JSX.Element => {
           } bg-opacity-20 backdrop-blur-sm p-4`}
         >
           <p className="text-3xl">{note.title}</p>
-          <button onClick={() => editNote()}>
-            <FaEdit />
-          </button>
+          <div className="flex justify-center items-center gap-x-3">
+            <button onClick={() => copyNoteText()}>
+              <FaCopy />
+            </button>
+            <button>
+              <FaShareAlt />
+            </button>
+            <button onClick={() => editNote()}>
+              <FaEdit />
+            </button>
+            <button onClick={() => trashNote()}>
+              <FaTrashAlt />
+            </button>
+          </div>
         </div>
         <div className="renderHtml mt-5" dangerouslySetInnerHTML={{ __html: note.htmlText }}></div>
       </div>

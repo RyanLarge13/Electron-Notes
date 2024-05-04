@@ -808,7 +808,7 @@ const Account = (): JSX.Element => {
             userPreferences.darkMode
               ? "bg-slate-600 hover:bg-slate-500"
               : "bg-slate-300 hover:bg-slate-400"
-          } duration-200 w-10 h-10 flex justify-center items-center shadow-sm`}
+          } duration-200 w-10 h-10 flex justify-center items-center shadow-sm z-[999]`}
           onClick={() => setConOptions((prev) => !prev)}
         >
           <AiOutlineUsergroupAdd />

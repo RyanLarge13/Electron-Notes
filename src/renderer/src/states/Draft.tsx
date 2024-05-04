@@ -194,7 +194,7 @@ const Draft = (): JSX.Element => {
             const newError = {
               show: true,
               title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              text: "There was a problem uploading your new note. We are terribly sorry. We only allow to upload a maximum of 100kb notes at this time. If your note is not this large, please check your internet connection and try again",
               color: "bg-red-300",
               hasCancel: true,
               actions: [

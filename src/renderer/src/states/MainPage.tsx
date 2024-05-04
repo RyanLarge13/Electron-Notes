@@ -175,8 +175,8 @@ const MainPage = (): JSX.Element => {
   };
 
   const openOptions = (e): void => {
-    e.preventDefault();
     if (!user || loading || note || noteToEdit) return;
+    e.preventDefault();
     const { clientX, clientY } = e;
     let dynamicTop = clientY;
     let dynamicLeft = clientX;
