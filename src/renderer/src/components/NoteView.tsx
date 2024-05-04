@@ -25,7 +25,20 @@ const NoteView = (): JSX.Element => {
           text: "Your note has been copied as HTML to your clipboard",
           color: "bg-green-300",
           hasCancel: false,
-          actions: []
+          actions: [
+            {
+              text: "close",
+              func: (): void =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            }
+          ]
         });
       })
       .catch((err) => {
@@ -36,12 +49,51 @@ const NoteView = (): JSX.Element => {
           text: "We cannot copy your not to the clip board. Try using the context menu to save your note text as a plain text document instead.",
           color: "bg-red-300",
           hasCancel: false,
-          actions: []
+          actions: [
+            {
+              text: "close",
+              func: (): void =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            }
+          ]
         });
       });
   };
 
-  const trashNote = () => {};
+  const trashNote = (): void => {
+    setSystemNotif({
+      show: true,
+      title: `Delete Note ${note.title}`,
+      text: `Are you sure you want to delete note ${note.title}?`,
+      color: "bg-red-300",
+      hasCancel: true,
+      actions: [
+        {
+          text: "close",
+          func: (): void =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
+        { text: "trash note", func: (): void => {} },
+        { text: "delete", func: (): void => {} }
+      ]
+    });
+  };
+
+  const shareNote = (): void => {};
 
   return (
     <>
@@ -64,7 +116,7 @@ const NoteView = (): JSX.Element => {
             <button onClick={() => copyNoteText()}>
               <FaCopy />
             </button>
-            <button>
+            <button onClick={() => shareNote()}>
               <FaShareAlt />
             </button>
             <button onClick={() => editNote()}>
