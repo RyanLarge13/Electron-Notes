@@ -13,7 +13,11 @@ const Settings = (): JSX.Element => {
     setToken,
     setUser,
     setView,
+    setOrder,
+    setFilter,
     view,
+    order,
+    filter,
     userPreferences,
     token,
     user
@@ -724,6 +728,125 @@ const Settings = (): JSX.Element => {
             ></div>
           </div>
         </button>
+        <button
+          onClick={() => {
+            const newPreferences = {
+              ...userPreferences,
+              order: order ? false : true
+            };
+            localStorage.setItem("preferences", JSON.stringify(newPreferences));
+            setUserPreferences(newPreferences);
+            setOrder((prev) => !prev);
+          }}
+          className="flex justify-between items-center my-3"
+        >
+          <p>Order</p>
+          <div
+            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
+            <div
+              className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                userPreferences.order
+                  ? "right-[1px] left-[50%] bg-green-200"
+                  : "left-[1px] right-[50%] bg-red-200"
+              } rounded-full`}
+            ></div>
+          </div>
+        </button>
+
+        <div
+          className={`${userPreferences.darkMode ? "bg-slate-800" : "bg-slate-300"} p-2 rounded-md`}
+        >
+          <div className="flex justify-between items-center w-full">
+            <p className="font-semibold">Sort By</p>
+          </div>
+          <div className="pl-5">
+            <button
+              onClick={() => {
+                const newPreferences = {
+                  ...userPreferences,
+                  filter: "Title"
+                };
+                localStorage.setItem("preferences", JSON.stringify(newPreferences));
+                setUserPreferences(newPreferences);
+                setFilter("Title");
+              }}
+              className="flex justify-between items-center my-3 w-full"
+            >
+              <p>Sort by Title</p>
+              <div
+                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                }`}
+              >
+                <div
+                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                    filter === "Title"
+                      ? "right-[1px] left-[50%] bg-green-200"
+                      : "left-[1px] right-[50%] bg-red-200"
+                  } rounded-full`}
+                ></div>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                const newPreferences = {
+                  ...userPreferences,
+                  filter: "Date"
+                };
+                localStorage.setItem("preferences", JSON.stringify(newPreferences));
+                setUserPreferences(newPreferences);
+                setFilter("Date");
+              }}
+              className="flex justify-between items-center my-3 w-full"
+            >
+              <p>Sort By Date</p>
+              <div
+                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                }`}
+              >
+                <div
+                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                    filter === "Date"
+                      ? "right-[1px] left-[50%] bg-green-200"
+                      : "left-[1px] right-[50%] bg-red-200"
+                  } rounded-full`}
+                ></div>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                const newPreferences = {
+                  ...userPreferences,
+                  filter: "Updated"
+                };
+                localStorage.setItem("preferences", JSON.stringify(newPreferences));
+                setUserPreferences(newPreferences);
+                setFilter("Updated");
+              }}
+              className="flex justify-between items-center my-3 w-full"
+            >
+              <p>Sort by Updated</p>
+              <div
+                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                }`}
+              >
+                <div
+                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                    filter === "Updated"
+                      ? "right-[1px] left-[50%] bg-green-200"
+                      : "left-[1px] right-[50%] bg-red-200"
+                  } rounded-full`}
+                ></div>
+              </div>
+            </button>
+          </div>
+        </div>
+
         <button
           onClick={() =>
             setTheme((prev) => {

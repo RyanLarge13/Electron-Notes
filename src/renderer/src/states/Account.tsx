@@ -641,18 +641,24 @@ const Account = (): JSX.Element => {
             initial={{ opacity: 0, y: -10 }}
             exit={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="fixed top-5 left-5 padding-3 z-50 bg-slate-900 rounded-md shadow-md flex justify-evenly items-center gap-3"
+            className={`fixed top-5 left-5 padding-3 z-50 ${
+              userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+            } rounded-md shadow-md flex justify-evenly items-center gap-3`}
           >
             <button
               onClick={() => cancelEdit()}
-              className="flex justify-between items-center text-xs p-3 hover:bg-slate-800 duration-200 w-40"
+              className={`flex justify-between items-center text-xs p-3 ${
+                userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+              } duration-200 w-40`}
             >
               Cancel
               <MdCancel />
             </button>
             <button
               onClick={() => selectAllFolders()}
-              className="flex justify-between items-center text-xs p-3 hover:bg-slate-800 duration-200 w-40"
+              className={`flex justify-between items-center text-xs p-3 ${
+                userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+              } duration-200 w-40`}
             >
               Select All
               <MdSelectAll />
@@ -660,7 +666,9 @@ const Account = (): JSX.Element => {
             {selectedForEdit.length > 0 && (
               <button
                 onClick={() => setSelectedForEdit([])}
-                className="flex justify-between items-center text-xs p-3 hover:bg-slate-800 duration-200 w-40"
+                className={`flex justify-between items-center text-xs p-3 ${
+                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                } duration-200 w-40`}
               >
                 Un-Select All
                 <MdTabUnselected />
@@ -670,14 +678,18 @@ const Account = (): JSX.Element => {
               <>
                 <button
                   onClick={() => deleteAllSelected()}
-                  className="flex justify-between items-center text-xs p-3 hover:bg-slate-800 duration-200 w-40"
+                  className={`flex justify-between items-center text-xs p-3 ${
+                    userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                  } duration-200 w-40`}
                 >
                   {selectedForEdit.length < 2 ? "Delete" : "Delete All"}
                   <MdDelete />
                 </button>
                 <button
                   onClick={() => moveAllSelected()}
-                  className="flex justify-between items-center text-xs p-3 hover:bg-slate-800 duration-200 w-40"
+                  className={`flex justify-between items-center text-xs p-3 ${
+                    userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                  } duration-200 w-40`}
                 >
                   {selectedForEdit.length < 2 ? "Move" : "Move All"}
                   <MdDriveFileMove />
@@ -744,6 +756,33 @@ const Account = (): JSX.Element => {
                 onClick={() => {
                   setFilterOptions(false);
                   setFilter("Title");
+                  userPreferences.filter = "Title";
+                  try {
+                    localStorage.setItem("preferences", JSON.stringify(userPreferences));
+                  } catch (err) {
+                    console.log(err);
+                    setSystemNotif({
+                      show: true,
+                      title: "Saving Settings",
+                      text: "We ran into an error when trying to update the filter option in your settings. Please reload the application and try again to save your settings and if the error persists contact the developer at ryanlarge@ryanlarge.dev",
+                      color: "bg-red-300",
+                      hasCancel: true,
+                      actions: [
+                        {
+                          text: "close",
+                          func: (): void =>
+                            setSystemNotif({
+                              show: false,
+                              title: "",
+                              text: "",
+                              color: "",
+                              hasCancel: false,
+                              actions: []
+                            })
+                        }
+                      ]
+                    });
+                  }
                 }}
               >
                 Title
@@ -755,6 +794,33 @@ const Account = (): JSX.Element => {
                 onClick={() => {
                   setFilterOptions(false);
                   setFilter("Date");
+                  userPreferences.filter = "Date";
+                  try {
+                    localStorage.setItem("preferences", JSON.stringify(userPreferences));
+                  } catch (err) {
+                    console.log(err);
+                    setSystemNotif({
+                      show: true,
+                      title: "Saving Settings",
+                      text: "We ran into an error when trying to update the filter option in your settings. Please reload the application and try again to save your settings and if the error persists contact the developer at ryanlarge@ryanlarge.dev",
+                      color: "bg-red-300",
+                      hasCancel: true,
+                      actions: [
+                        {
+                          text: "close",
+                          func: (): void =>
+                            setSystemNotif({
+                              show: false,
+                              title: "",
+                              text: "",
+                              color: "",
+                              hasCancel: false,
+                              actions: []
+                            })
+                        }
+                      ]
+                    });
+                  }
                 }}
               >
                 Date
@@ -766,6 +832,33 @@ const Account = (): JSX.Element => {
                 onClick={() => {
                   setFilterOptions(false);
                   setFilter("Updated");
+                  userPreferences.filter = "Update";
+                  try {
+                    localStorage.setItem("preferences", JSON.stringify(userPreferences));
+                  } catch (err) {
+                    console.log(err);
+                    setSystemNotif({
+                      show: true,
+                      title: "Saving Settings",
+                      text: "We ran into an error when trying to update the filter option in your settings. Please reload the application and try again to save your settings and if the error persists contact the developer at ryanlarge@ryanlarge.dev",
+                      color: "bg-red-300",
+                      hasCancel: true,
+                      actions: [
+                        {
+                          text: "close",
+                          func: (): void =>
+                            setSystemNotif({
+                              show: false,
+                              title: "",
+                              text: "",
+                              color: "",
+                              hasCancel: false,
+                              actions: []
+                            })
+                        }
+                      ]
+                    });
+                  }
                 }}
               >
                 Updated

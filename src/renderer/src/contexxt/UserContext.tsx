@@ -80,6 +80,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         theme: "",
         confirm: true,
         grid: false,
+        order: order,
+        filter: filter,
         notify: {
           notifyAll: true,
           notifySuccess: true,
@@ -116,6 +118,20 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           console.log("No grid in parsed prefs");
           parsedPreferences.grid = false;
         }
+        if ("order" in parsedPreferences) {
+          null;
+        } else {
+          console.log("No order in preferences");
+          parsedPreferences.order = true;
+        }
+        if ("filter" in parsedPreferences) {
+          null;
+        } else {
+          console.log("no filter in preferences");
+          parsedPreferences.filter = "Title";
+        }
+        parsedPreferences.order ? setOrder(parsedPreferences.order) : setOrder(true);
+        parsedPreferences.filter ? setFilter(parsedPreferences.filter) : setFilter("Title");
         parsedPreferences.grid ? setView("grid") : setView("list");
         setUserPreferences(parsedPreferences);
         localStorage.setItem("preferences", JSON.stringify(parsedPreferences));

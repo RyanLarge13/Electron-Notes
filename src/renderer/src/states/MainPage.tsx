@@ -21,6 +21,7 @@ const MainPage = (): JSX.Element => {
     setSystemNotif,
     setSearch,
     setUserPreferences,
+    order,
     view,
     menu,
     search,
@@ -88,6 +89,12 @@ const MainPage = (): JSX.Element => {
       setEdit((prev) => !prev);
     }
     if (Control && o) {
+      const newPreferences = {
+        ...userPreferences,
+        order: order ? false : true
+      };
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+      setUserPreferences(newPreferences);
       setOrder((prev) => !prev);
     }
     if (Control && m) {

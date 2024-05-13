@@ -1071,19 +1071,19 @@ const Notes = (): JSX.Element => {
           func: () => rename(note)
         },
         {
-          title: "save file as plain text",
+          title: "save file as .txt",
           func: () => saveFileToSystem(note)
         },
         {
-          title: "save file as html",
+          title: "save file as .html",
           func: (): Promise<void> => saveFileToSysAsHtml(note)
         },
         {
-          title: "save file as pdf",
+          title: "save file as .pdf",
           func: (): Promise<void> => saveFileToSysAsPdf(note)
         },
         {
-          title: "save file as docx",
+          title: "save file as .docx",
           func: (): Promise<void> => saveFileToSysAsDocX(note)
         },
         {

@@ -109,6 +109,19 @@ export const moveMultipleFolders = (
   return res;
 };
 
+export const duplicateMultipleContents = (
+  token: string,
+  newFolders,
+  newNotes
+): Promise<AxiosResponse> => {
+  const res = Axios.post(
+    `${devUrl}/folders/dup/multiple`,
+    { newFolders: newFolders, newNotes: newNotes },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
+
 // export const updateMultiFolders = (token, folders, newFolderId) => {};
 
 // export const updateMultiNotes = (token, notes, newFolderId) => {};

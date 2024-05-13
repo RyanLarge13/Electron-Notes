@@ -1,6 +1,6 @@
 import { useContext, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Folder } from "@renderer/types/types";
+import { Folder, Note } from "@renderer/types/types";
 import { CiFolderOn } from "react-icons/ci";
 import { TbNotes } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,8 @@ import {
   updateFolder,
   // updateMultiFolders,
   // updateMultiNotes,
-  deleteAFolder
+  deleteAFolder,
+  duplicateMultipleContents
 } from "@renderer/utils/api";
 import Colors from "./Colors";
 import UserContext from "@renderer/contexxt/UserContext";
@@ -263,14 +264,249 @@ const Folders = (): JSX.Element => {
               actions: []
             })
         },
-        { text: "duplicate all", func: (): void => {} },
+        { text: "duplicate all", func: (): void => dupAll(folder) },
         { text: "duplicate folder", func: (): void => dupFolder(folder) }
       ]
     };
     setSystemNotif(newConfirmation);
   };
 
-  // const dupAll = (folder: Folder): void => {};
+  const buildChildFolders = (
+    aFoldId: string,
+    newFolders: { folderid: string; title: string; color: string; parentFolderId: string }[]
+  ): void => {
+    const childFolders = allData.folders.filter((fold) => fold.parentFolderId === aFoldId);
+    if (childFolders.length === 0) {
+      return;
+    }
+    childFolders.forEach((child) => {
+      const newFolder = {
+        folderid: child.folderid,
+        title: child.title,
+        color: child.color,
+        parentFolderId: child.parentFolderId
+      };
+      newFolders.push(newFolder);
+      buildChildFolders(child.folderid, newFolders);
+    });
+  };
+
+  const buildChildNotes = (
+    folderIds: string[],
+    newNotes: {
+      title: string;
+      htmlText: string;
+      locked: boolean;
+      trashed: boolean;
+      folderId: string;
+    }[]
+  ): void => {
+    for (let i = 0; i < folderIds.length; i++) {
+      const childNotes = allData.notes.filter((aNote) => aNote.folderId === folderIds[i]);
+      childNotes.forEach((child) => {
+        const newNote = {
+          title: child.title,
+          htmlText: child.htmlText,
+          locked: child.locked,
+          trashed: child.trashed,
+          folderId: child.folderId
+        };
+        newNotes.push(newNote);
+      });
+    }
+  };
+
+  const getNestedFoldersIds = (folderId: string, folderIds: string[]): void => {
+    const childFolders = allData.folders.filter((fold) => fold.parentFolderId === folderId);
+    if (childFolders.length === 0) {
+      return;
+    }
+    childFolders.forEach((child) => {
+      folderIds.push(child.folderid);
+      getNestedFoldersIds(child.folderid, folderIds);
+    });
+  };
+
+  const dupAll = (folder: Folder): void => {
+    const oldFolders = allData.folders;
+    const oldNotes = allData.notes;
+    setSystemNotif({
+      show: false,
+      title: "",
+      text: "",
+      color: "",
+      hasCancel: false,
+      actions: []
+    });
+    const newFolders = [];
+    const newNotes = [];
+    const folderIds = [];
+    const newFolder = {
+      folderid: folder.folderid,
+      title: folder.title,
+      color: folder.color,
+      parentFolderId: folder.parentFolderId
+    };
+    newFolders.push(newFolder);
+    folderIds.push(folder.folderid);
+    getNestedFoldersIds(folder.folderid, folderIds);
+    buildChildFolders(folder.folderid, newFolders);
+    buildChildNotes(folderIds, newNotes);
+    for (let i = 0; i < newFolders.length; i++) {
+      const newId = uuidv4();
+      for (let j = 0; j < newNotes.length; j++) {
+        if (newNotes[j].folderId === newFolders[i].folderid) {
+          newNotes[j].folderId = newId;
+        }
+      }
+      for (let k = 0; k < newFolders.length; k++) {
+        if (newFolders[k].parentFolderId === newFolders[i].folderid) {
+          newFolders[k].parentFolderId = newId;
+        }
+      }
+      newFolders[i].folderid = newId;
+    }
+    for (let i = 0; i < newNotes.length; i++) {
+      const newId = uuidv4();
+      newNotes[i].noteid = newId;
+    }
+    setAllData((prev) => {
+      const newData = {
+        ...prev,
+        folders: [...prev.folders, ...newFolders],
+        notes: [...prev.notes, ...newNotes]
+      };
+      return newData;
+    });
+    try {
+      duplicateMultipleContents(token, newFolders, newNotes)
+        .then((res) => {
+          const updatedData = res.data.data;
+          console.log(updatedData);
+          setAllData((prev) => {
+            return {
+              ...prev,
+              folders: [...oldFolders, ...updatedData.newFoldersArray],
+              notes: [...oldNotes, ...updatedData.newNotesArray]
+            };
+          });
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+            const newSuccess = {
+              show: true,
+              title: "Duplicated All Content",
+              text: res.data.message,
+              color: "bg-green-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                }
+              ]
+            };
+            setSystemNotif(newSuccess);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          setAllData((prev) => {
+            return {
+              ...prev,
+              folders: oldFolders,
+              notes: oldNotes
+            };
+          });
+          if (err.response) {
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Issues Duplicating Content",
+                text: err.response.message,
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => dupAll(folder) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
+          }
+          if (err.request) {
+            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+              const newError = {
+                show: true,
+                title: "Network Error",
+                text: "Our application was not able to reach the server, please check your internet connection and try again",
+                color: "bg-red-300",
+                hasCancel: true,
+                actions: [
+                  {
+                    text: "close",
+                    func: () =>
+                      setSystemNotif({
+                        show: false,
+                        title: "",
+                        text: "",
+                        color: "",
+                        hasCancel: false,
+                        actions: []
+                      })
+                  },
+                  { text: "re-try", func: () => dupAll(folder) },
+                  { text: "reload app", func: () => window.location.reload() }
+                ]
+              };
+              setSystemNotif(newError);
+            }
+          }
+        });
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Issues Duplicating Content",
+        text: "Please contact the developer if this issue persists. We seemed to have a problem duplicating your folders and notes. Please close the application, reload it and try the operation again.",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      };
+      setSystemNotif(newError);
+    }
+  };
 
   const dupFolder = (folder: Folder): void => {
     setSystemNotif({

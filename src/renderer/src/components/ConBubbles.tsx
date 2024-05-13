@@ -96,8 +96,8 @@ const ConBubbles = (): JSX.Element => {
   return (
     <>
       {connections.map((con, index) => (
-        <>
-          <AnimatePresence key={index}>
+        <div key={con.id}>
+          <AnimatePresence>
             {conOptions.id === con.id && (
               <motion.div
                 key={con.email}
@@ -170,7 +170,7 @@ const ConBubbles = (): JSX.Element => {
             <Tooltip id="con-name" />
             <p className="text-lg font-bold">{con.email[0].toUpperCase()}</p>
           </button>
-        </>
+        </div>
       ))}
       {connectionRequests.map((conReq, index) => (
         <>

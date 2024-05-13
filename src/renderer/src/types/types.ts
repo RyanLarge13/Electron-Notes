@@ -100,6 +100,8 @@ type UserPreferences = {
   lockPin: number[];
   theme: string;
   commands: Commands[];
+  order: boolean;
+  filter: string;
   grid: boolean;
 };
 
