@@ -75,6 +75,12 @@ const Header = (): JSX.Element => {
       setEditCurrentFolder(false);
     }
     if (checkFolder()) {
+      const newPreferences = {
+        ...userPreferences,
+        savedFolder: null
+      };
+      setUserPreferences(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
       setNesting([]);
       setFolders(allData.folders.filter((fold) => fold.parentFolderId === null));
       setNotes(allData.notes.filter((aNote) => aNote.folderId === null));
@@ -94,10 +100,24 @@ const Header = (): JSX.Element => {
       setFolders(allData.folders.filter((fold) => fold.parentFolderId === null));
       setNotes(allData.notes.filter((aNote) => aNote.folderId === null));
       setMainTitle("Folders");
+      setFolder(folder);
+      const newPreferences = {
+        ...userPreferences,
+        savedFolder: null
+      };
+      setUserPreferences(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
       return setFolder(null);
     }
     if (!folder?.parentFolderId) {
       setNesting([]);
+      setFolder(folder);
+      const newPreferences = {
+        ...userPreferences,
+        savedFolder: null
+      };
+      setUserPreferences(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
       return setFolder(null);
     }
     if (folder.parentFolderId) {
@@ -107,6 +127,13 @@ const Header = (): JSX.Element => {
       const nestingCopy = [...nesting];
       nestingCopy.pop();
       setNesting(nestingCopy);
+      setFolder(folder);
+      const newPreferences = {
+        ...userPreferences,
+        savedFolder: folder.parentFolderId
+      };
+      setUserPreferences(newPreferences);
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
       return setFolder(foundFolder);
     }
   };

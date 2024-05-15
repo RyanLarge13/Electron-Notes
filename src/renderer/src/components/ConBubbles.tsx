@@ -21,7 +21,9 @@ const ConBubbles = (): JSX.Element => {
   const [options, setOptions] = useState({ id: "", email: "" });
   const [conOptions, setConOptions] = useState({ id: "", email: "" });
 
-  const themeStringText = userPreferences?.theme?.replace("bg", "text");
+  const themeStringText = userPreferences?.theme
+    ? userPreferences.theme.replace("bg", "text")
+    : "text-amber-300";
 
   const confirmAccept = (requestId: string, userEmail: string): void => {
     if (userPreferences.confirm) {

@@ -66,7 +66,7 @@ type ContextMenu = {
   options: ContextMenuOption[];
 };
 
-type AllData = {
+export type AllData = {
   user: User;
   folders: Folder[];
   notes: Note[];
@@ -99,6 +99,7 @@ type UserPreferences = {
   darkMode: boolean;
   lockPin: number[];
   theme: string;
+  savedFolder: string | null;
   commands: Commands[];
   order: boolean;
   filter: string;

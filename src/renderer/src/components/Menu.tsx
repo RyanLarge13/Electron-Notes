@@ -26,8 +26,12 @@ const Menu = (): JSX.Element => {
   } = useContext(UserContext);
 
   const navigate = useNavigate();
-  const hoverBgString = userPreferences?.theme?.replace("300", "200");
-  const textThemeString = userPreferences?.theme?.replace("bg", "text");
+  const hoverBgString = userPreferences?.theme
+    ? userPreferences.theme.replace("300", "200")
+    : "bg-amber-200";
+  const textThemeString = userPreferences?.theme
+    ? userPreferences.theme.replace("bg", "text")
+    : "text-amber-300";
 
   const confirmLogout = (): void => {
     const newConfirmation = {

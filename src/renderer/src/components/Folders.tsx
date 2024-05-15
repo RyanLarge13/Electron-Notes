@@ -31,6 +31,7 @@ const Folders = (): JSX.Element => {
     setSelectedForEdit,
     setDraggedOverFolder,
     setMove,
+    setUserPreferences,
     userPreferences,
     folders,
     token,
@@ -55,6 +56,12 @@ const Folders = (): JSX.Element => {
   const openFolder = (folder: Folder): void => {
     setNesting((prev) => [...prev, { title: folder.title, id: folder.folderid }]);
     setFolder(folder);
+    const newPreferences = {
+      ...userPreferences,
+      savedFolder: folder.folderid
+    };
+    setUserPreferences(newPreferences);
+    localStorage.setItem("preferences", JSON.stringify(newPreferences));
   };
 
   const confirmDelete = (folder: Folder): void => {

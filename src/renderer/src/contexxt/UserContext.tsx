@@ -7,10 +7,14 @@ import LocalCache from "../utils/cache";
 const UserContext = createContext({} as ContextProps);
 
 export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element => {
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [allData, setAllData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [folders, setFolders] = useState([]);
+  // const [homeFolders, setHomeFolders] = useState([]);
+  // const [prevFolders, setPrevFolders] = useState([]);
+  // const [nextFolders, setNextFolders] = useState([]);
   const [folder, setFolder] = useState(null);
   const [notes, setNotes] = useState([]);
   const [hoverConnections, setHoverConnections] = useState(false);
@@ -55,19 +59,26 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     meta: { title: "", color: "" },
     options: []
   });
-  const [userPreferences, setUserPreferences] = useState({
-    confirm: true,
-    darkMode: true,
-    grid: false,
-    notify: {
-      notifyAll: true,
-      notifySuccess: true,
-      notifyErrors: true
-    },
-    lockPin: [1, 2, 3, 4],
-    theme: "bg-amber-300",
-    commands: []
-  });
+  // const [userPreferences, setUserPreferences] = useState({
+  //   confirm: true,
+  //   darkMode: true,
+  //   grid: false,
+  //   order: true,
+  //   filter: "Title",
+  //   savedFolder: null,
+  //   notify: {
+  //     notifyAll: true,
+  //     notifySuccess: true,
+  //     notifyErrors: true
+  //   },
+  //   lockPin: [1, 2, 3, 4],
+  //   theme: "bg-amber-300",
+  //   commands: []
+  // });
+
+  const [userPreferences, setUserPreferences] = useState(
+    JSON.parse(localStorage.getItem("preferences"))
+  );
 
   const cacheHandler = new LocalCache();
 
@@ -82,6 +93,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         grid: false,
         order: order,
         filter: filter,
+        savedFolder: null,
         notify: {
           notifyAll: true,
           notifySuccess: true,
@@ -184,23 +196,50 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   }, [token]);
 
   useEffect(() => {
-    if (!folder && allData) {
-      const topFolders = allData.folders.filter((fold: Folder) => fold.parentFolderId === null);
-      const topNotes = allData.notes.filter(
-        (aNote: Note) => aNote.folderId === null && !aNote.trashed
-      );
-      setFolders(topFolders);
-      setNotes(topNotes);
-      setMainTitle("Folders");
+    if (isInitialLoad && allData) {
+      const storedFolder = JSON.parse(localStorage.getItem("preferences")).savedFolder;
+      if (storedFolder && storedFolder != null) {
+        const folderToSet = allData.folders.filter((aFold) => aFold.folderid === storedFolder);
+        const childFolders = allData.folders.filter(
+          (aFold) => aFold.parentFolderId === storedFolder
+        );
+        const notesToSet = allData.notes.filter((aNote) => aNote.folderId == storedFolder);
+        if (folderToSet) {
+          setFolder(folderToSet[0]);
+          setFolders(childFolders);
+          setMainTitle(folderToSet[0].title);
+        }
+        if (notesToSet) {
+          setNotes(notesToSet);
+        }
+      } else {
+        setIsInitialLoad(false);
+        setFolder(null);
+      }
     }
-    if (folder) {
-      const subFolders = allData.folders.filter((fold) => fold.parentFolderId === folder.folderid);
-      const nestedNotes = allData.notes.filter(
-        (aNote: Note) => aNote.folderId === folder.folderid && !aNote.trashed
-      );
-      setFolders(subFolders);
-      setNotes(nestedNotes);
-      setMainTitle(folder.title);
+  }, [isInitialLoad, allData]);
+
+  useEffect(() => {
+    if (!isInitialLoad && allData) {
+      if (!folder) {
+        const topFolders = allData.folders.filter((fold: Folder) => fold.parentFolderId === null);
+        const topNotes = allData.notes.filter(
+          (aNote: Note) => aNote.folderId === null && !aNote.trashed
+        );
+        setFolders(topFolders);
+        setNotes(topNotes);
+        setMainTitle("Folders");
+      } else {
+        const subFolders = allData.folders.filter(
+          (fold) => fold.parentFolderId === folder.folderid
+        );
+        const nestedNotes = allData.notes.filter(
+          (aNote: Note) => aNote.folderId === folder.folderid && !aNote.trashed
+        );
+        setFolders(subFolders);
+        setNotes(nestedNotes);
+        setMainTitle(folder.title);
+      }
     }
   }, [folder, allData]);
 
@@ -242,7 +281,6 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     setAllData(cachedAllData);
     setTrashedNotes(cachedAllData.notes.filter((aNote: Note) => aNote.trashed));
     setUser(cachedAllData.user);
-    setFolder(null);
     setLoading(false);
   };
 
@@ -253,26 +291,26 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   };
 
   const handleConnections = (cons, conReqs, shareReqs, shareNotes, userEmail): void => {
-    const connectionWorker = new Worker("/src/threads/handleConnections.js");
-    connectionWorker.onmessage = (event): void => {
-      const {
-        filteredConnections,
-        filteredConnectionRequests,
-        filteredShareRequests,
-        filteredSharedNotes
-      } = event.data;
-      setConnections(filteredConnections);
-      setConnectionRequests(filteredConnectionRequests);
-      setShareRequests(filteredShareRequests);
-      setSharedNotes(filteredSharedNotes);
-    };
-    connectionWorker.postMessage({
-      connections: cons,
-      connectionRequests: conReqs,
-      shareRequests: shareReqs,
-      sharedNotes: shareNotes,
-      userEmail: userEmail
-    });
+    // const connectionWorker = new Worker("/src/threads/handleConnections.js");
+    // connectionWorker.onmessage = (event): void => {
+    //   const {
+    //     filteredConnections,
+    //     filteredConnectionRequests,
+    //     filteredShareRequests,
+    //     filteredSharedNotes
+    //   } = event.data;
+    //   setConnections(filteredConnections);
+    //   setConnectionRequests(filteredConnectionRequests);
+    //   setShareRequests(filteredShareRequests);
+    //   setSharedNotes(filteredSharedNotes);
+    // };
+    // connectionWorker.postMessage({
+    //   connections: cons,
+    //   connectionRequests: conReqs,
+    //   shareRequests: shareReqs,
+    //   sharedNotes: shareNotes,
+    //   userEmail: userEmail
+    // });
   };
 
   const fetchUser = (token: string, cacheInstalled: boolean): void => {
@@ -294,8 +332,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setAllData(newAllData);
         setTrashedNotes(data.notes.filter((aNote: Note) => aNote.trashed));
         setUser(data.user);
-        setFolder(null);
         setLoading(false);
+        setIsInitialLoad(false);
         uploadCache(data);
       })
       .catch((err) => {

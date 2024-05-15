@@ -27,7 +27,9 @@ const NewFolder = (): JSX.Element => {
   const [lock, setLock] = useState(selectedFolder ? selectedFolder.locked : false);
   const [loading, setLoading] = useState(false);
 
-  const textThemeString = userPreferences?.theme?.replace("bg", "text");
+  const textThemeString = userPreferences?.theme
+    ? userPreferences.theme.replace("bg", "text")
+    : "text-amber-300";
 
   const createFolder = (e): void => {
     e.preventDefault();

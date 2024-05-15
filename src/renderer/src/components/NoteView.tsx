@@ -107,11 +107,11 @@ const NoteView = (): JSX.Element => {
         } inset-10 overflow-y-auto no-scroll-bar rounded-md shadow-md px-5 pb-5`}
       >
         <div
-          className={`flex justify-between items-start sticky top-0 right-0 left-0 ${
+          className={`flex justify-between items-center sticky top-0 right-0 left-0 ${
             userPreferences.darkMode ? "bg-black" : "bg-white"
-          } bg-opacity-20 backdrop-blur-sm p-4`}
+          } bg-opacity-20 backdrop-blur-sm`}
         >
-          <p className="text-3xl">{note.title}</p>
+          <p className="text-3xl py-4">{note.title}</p>
           <div className="flex justify-center items-center gap-x-3">
             <button onClick={() => copyNoteText()}>
               <FaCopy />

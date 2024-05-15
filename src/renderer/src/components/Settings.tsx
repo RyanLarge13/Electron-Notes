@@ -31,7 +31,9 @@ const Settings = (): JSX.Element => {
   const [lockPin, setLockPin] = useState(false);
   const [newLockPin, setNewLockPin] = useState({ first: "", second: "", third: "", fourth: "" });
   const [createNewPin, setCreateNewPin] = useState(false);
-  const [theme, setTheme] = useState(userPreferences?.theme);
+  const [theme, setTheme] = useState(
+    userPreferences.theme ? userPreferences.theme : "bg-amber-300"
+  );
   const [newTheme, setNewTheme] = useState(
     userPreferences?.theme ? userPreferences?.theme : "bg-amber-300"
   );

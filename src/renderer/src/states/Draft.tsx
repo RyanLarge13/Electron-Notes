@@ -15,6 +15,7 @@ const Draft = (): JSX.Element => {
     userPreferences,
     noteToEdit,
     editDraft,
+    setNote,
     setDrafts,
     setAllData,
     setNoteToEdit,
@@ -23,11 +24,14 @@ const Draft = (): JSX.Element => {
 
   const [title, setTitle] = useState(noteToEdit ? noteToEdit.title : "");
   const [value, setValue] = useState(noteToEdit ? noteToEdit.htmlText : "");
+  const [changed, setChanged] = useState(false);
   const [locked, setLocked] = useState(noteToEdit ? noteToEdit.locked : false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const textThemeString = userPreferences?.theme?.replace("bg", "text");
+  const textThemeString = userPreferences?.theme
+    ? userPreferences.theme.replace("bg", "text")
+    : "text-amber-300";
 
   const modules = {
     toolbar: [
@@ -96,6 +100,7 @@ const Draft = (): JSX.Element => {
     });
     setLoading(false);
     setNoteToEdit(null);
+    setNote({ ...noteToEdit, htmlText: value });
     setDrafts((prevDrafts) => prevDrafts.filter((aNote) => aNote.noteid !== noteToEdit.noteid));
     navigate("/");
     createNewNote(token, newNote)
@@ -252,8 +257,9 @@ const Draft = (): JSX.Element => {
       });
       return { ...prevData, notes: newNotes };
     });
-    navigate("/");
     setNoteToEdit(null);
+    setNote({ ...noteToEdit, htmlText: value });
+    navigate("/");
     updateNote(token, updatedNote)
       .then(() => {
         if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
@@ -433,11 +439,15 @@ const Draft = (): JSX.Element => {
   return (
     <>
       <div
-        className={`fixed z-10 inset-0 ${
-          userPreferences.darkMode ? "bg-black" : "bg-white"
-        } bg-opacity-10 backdrop-blur-sm`}
+        className={`fixed z-20 inset-0 bg-black bg-opacity-20 backdrop-blur-sm`}
         onClick={() => {
-          noteToEdit && setNoteToEdit(null);
+          if (noteToEdit) {
+            setNoteToEdit(null);
+            if (changed) {
+              noteToEdit.htmlText = value;
+            }
+            setNote(noteToEdit);
+          }
           if (!noteToEdit && title) {
             saveNoteAsDraft();
           }
@@ -458,7 +468,7 @@ const Draft = (): JSX.Element => {
             onChange={(e) => setTitle(e.target.value)}
             className={`p-3 text-xl ${
               userPreferences.darkMode ? "bg-black" : "bg-white"
-            } focus:outline-none`}
+            } focus:outline-none rounded-md`}
           />
           <div className="flex gap-x-3">
             <button onClick={() => setLocked((prev) => !prev)}>
@@ -488,7 +498,12 @@ const Draft = (): JSX.Element => {
             modules={modules}
             formats={formats}
             value={value}
-            onChange={setValue}
+            onChange={(e) => {
+              if (!changed) {
+                setChanged(true);
+              }
+              setValue(e);
+            }}
             style={{
               height: "80%"
             }}

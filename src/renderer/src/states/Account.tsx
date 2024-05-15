@@ -75,7 +75,9 @@ const Account = (): JSX.Element => {
   const [newColor, setNewColor] = useState(folder ? folder.color : "bg-amber-300");
 
   const navigate = useNavigate();
-  const themeStringText = userPreferences?.theme?.replace("bg", "text");
+  const themeStringText = userPreferences?.theme
+    ? userPreferences.theme.replace("bg", "text")
+    : "text-amber-300";
 
   const addNewFolder = (): void => {
     navigate("/newfolder");
@@ -906,7 +908,7 @@ const Account = (): JSX.Element => {
         >
           <AiOutlineUsergroupAdd />
         </button>
-        <ConBubbles />
+        {/* <ConBubbles /> */}
       </div>
       {conOptions && (
         <>
@@ -997,7 +999,7 @@ const Account = (): JSX.Element => {
       {note && <NoteView />}
       {menu && <Menu />}
       {settings && <Settings />}
-      {createCon && <Connections />}
+      {/* {createCon && <Connections />} */}
       {move && move.isMoving && (
         <>
           <motion.div
