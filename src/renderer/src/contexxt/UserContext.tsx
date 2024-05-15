@@ -204,17 +204,15 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           (aFold) => aFold.parentFolderId === storedFolder
         );
         const notesToSet = allData.notes.filter((aNote) => aNote.folderId == storedFolder);
-        if (folderToSet) {
-          setFolder(folderToSet[0]);
-          setFolders(childFolders);
-          setMainTitle(folderToSet[0].title);
-        }
-        if (notesToSet) {
-          setNotes(notesToSet);
-        }
+        setFolder(folderToSet[0]);
+        setNotes(notesToSet);
+        setFolders(childFolders);
+        setMainTitle(folderToSet[0].title);
       } else {
         setIsInitialLoad(false);
         setFolder(null);
+        const childFolders = allData.folders.filter((aFold) => aFold.parentFolderId === null);
+        setFolders(childFolders);
       }
     }
   }, [isInitialLoad, allData]);
@@ -226,8 +224,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         const topNotes = allData.notes.filter(
           (aNote: Note) => aNote.folderId === null && !aNote.trashed
         );
-        setFolders(topFolders);
         setNotes(topNotes);
+        setFolders(topFolders);
         setMainTitle("Folders");
       } else {
         const subFolders = allData.folders.filter(
@@ -236,8 +234,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         const nestedNotes = allData.notes.filter(
           (aNote: Note) => aNote.folderId === folder.folderid && !aNote.trashed
         );
-        setFolders(subFolders);
         setNotes(nestedNotes);
+        setFolders(subFolders);
         setMainTitle(folder.title);
       }
     }

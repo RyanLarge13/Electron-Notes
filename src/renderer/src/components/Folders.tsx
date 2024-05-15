@@ -32,6 +32,7 @@ const Folders = (): JSX.Element => {
     setDraggedOverFolder,
     setMove,
     setUserPreferences,
+    setNotes,
     userPreferences,
     folders,
     token,
@@ -55,6 +56,7 @@ const Folders = (): JSX.Element => {
 
   const openFolder = (folder: Folder): void => {
     setNesting((prev) => [...prev, { title: folder.title, id: folder.folderid }]);
+    setNotes([]);
     setFolder(folder);
     const newPreferences = {
       ...userPreferences,
