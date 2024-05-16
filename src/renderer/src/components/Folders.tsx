@@ -391,12 +391,31 @@ const Folders = (): JSX.Element => {
       duplicateMultipleContents(token, newFolders, newNotes)
         .then((res) => {
           const updatedData = res.data.data;
-          console.log(updatedData);
+          const newFoldersArray = updatedData.newFoldersArray.map((fold) => {
+            return {
+              folderid: fold.folderid,
+              parentFolderId: fold.parentfolderid,
+              title: fold.title,
+              color: fold.color
+            };
+          });
+          const newNotesArray = updatedData.newNotesArray.map((aNote) => {
+            return {
+              noteid: aNote.noteid,
+              htmlText: aNote.htmlnotes,
+              folderId: aNote.folderid,
+              title: aNote.title,
+              createdAt: aNote.createdat,
+              updated: aNote.updated,
+              locked: aNote.locked,
+              trashed: aNote.trashed
+            };
+          });
           setAllData((prev) => {
             return {
               ...prev,
-              folders: [...oldFolders, ...updatedData.newFoldersArray],
-              notes: [...oldNotes, ...updatedData.newNotesArray]
+              folders: [...oldFolders, ...newFoldersArray],
+              notes: [...oldNotes, ...newNotesArray]
             };
           });
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
