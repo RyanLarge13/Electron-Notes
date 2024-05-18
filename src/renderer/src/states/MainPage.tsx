@@ -145,7 +145,6 @@ const MainPage = (): JSX.Element => {
   const handleUnloadChecks = (e): void => {
     const unsavedChanges = userPreferences.unsavedNotes;
     let unsavedNotes = [];
-    e.preventDefault();
     if (unsavedChanges.length > 0) {
       unsavedChanges.forEach((unsaved) => {
         const note = allData.notes.map((aNote) => aNote.noteid === unsaved.id);
@@ -156,6 +155,7 @@ const MainPage = (): JSX.Element => {
         }
       });
       setNotes(unsavedNotes);
+      e.preventDefault();
       setSystemNotif({
         show: true,
         title: "Unsaved Notes",
