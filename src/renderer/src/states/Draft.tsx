@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLock, FaSave, FaUnlock } from "react-icons/fa";
 import { createNewNote, updateNote } from "@renderer/utils/api";
@@ -15,6 +15,7 @@ const Draft = (): JSX.Element => {
     userPreferences,
     noteToEdit,
     editDraft,
+    setUserPreferences,
     setNote,
     setDrafts,
     setAllData,
@@ -27,6 +28,8 @@ const Draft = (): JSX.Element => {
   const [changed, setChanged] = useState(false);
   const [locked, setLocked] = useState(noteToEdit ? noteToEdit.locked : false);
   const [loading, setLoading] = useState(false);
+
+  let autoSaveInterval;
 
   const navigate = useNavigate();
   const textThemeString = userPreferences?.theme
@@ -65,8 +68,190 @@ const Draft = (): JSX.Element => {
     "clean"
   ];
 
+  useEffect(() => {
+    const contains = userPreferences.unsavedNotes.filter(
+      (unsaved) => unsaved.id === noteToEdit.noteid
+    );
+    if (contains.length > 0) {
+      setValue(contains[0].htmlText);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userPreferences.autosave === true && noteToEdit !== null && !editDraft) {
+      autoSaveInterval = setInterval(() => autoSaveNote(), 10000);
+    }
+    return () => {
+      clearInterval(autoSaveInterval);
+    };
+  }, []);
+
+  const turnoffAutoSave = (): void => {
+    const newPrefs = {
+      ...userPreferences,
+      autosave: false
+    };
+    try {
+      localStorage.setItem("preferences", JSON.stringify(newPrefs));
+      setUserPreferences(newPrefs);
+      clearInterval(autoSaveInterval);
+    } catch (err) {
+      console.log(err);
+      clearInterval(autoSaveInterval);
+      const newError = {
+        show: true,
+        title: "Auto Save Change Failed",
+        text: "There was an error with the application when trying to update your settings, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
+    }
+  };
+
+  const autoSaveNote = (): void => {
+    setChanged(false);
+    const updatedNote = {
+      notesId: noteToEdit.noteid,
+      title: title,
+      htmlNotes: value,
+      locked: locked,
+      folderId: noteToEdit.folderId,
+      updated: new Date()
+    };
+    updateNote(token, updatedNote)
+      .then(() => {
+        removeUnsavedChanges();
+        if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+          const newSuccess = {
+            show: true,
+            title: "Auto Save",
+            text: "note saved",
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: () =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              {
+                text: "turn off",
+                func: (): void => {
+                  turnoffAutoSave();
+                }
+              }
+            ]
+          };
+          setSystemNotif(newSuccess);
+        }
+      })
+      .catch((err) => {
+        if (err.response) {
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+            const newError = {
+              show: true,
+              title: "Issues Updating Note",
+              text: err.response.message,
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+        }
+        if (err.request) {
+          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+            const newError = {
+              show: true,
+              title: "Network Error",
+              text: "Our application was not able to reach the server, please check your internet connection and try again",
+              color: "bg-red-300",
+              hasCancel: true,
+              actions: [
+                {
+                  text: "close",
+                  func: () =>
+                    setSystemNotif({
+                      show: false,
+                      title: "",
+                      text: "",
+                      color: "",
+                      hasCancel: false,
+                      actions: []
+                    })
+                },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            };
+            setSystemNotif(newError);
+          }
+        }
+      });
+  };
+
+  const removeUnsavedChanges = (): void => {
+    let isUnsaved = false;
+    const unsaved = userPreferences.unsavedNotes;
+    for (let i = 0; i < unsaved.length; i++) {
+      if (unsaved[i].id === noteToEdit.noteid) {
+        isUnsaved = true;
+      }
+    }
+    if (isUnsaved) {
+      const newUnsaved = userPreferences.unsavedNotes.filter(
+        (unsaved: { id: string; htmlText: string }) => unsaved.id !== noteToEdit.noteid
+      );
+      const newPrefs = {
+        ...userPreferences,
+        unsavedNotes: newUnsaved
+      };
+      setUserPreferences(newPrefs);
+      localStorage.setItem("preferences", JSON.stringify(newPrefs));
+    }
+  };
+
   const saveNote = (): void => {
     setLoading(true);
+    if (noteToEdit && !editDraft) {
+      removeUnsavedChanges();
+    }
     if (!token) {
       setLoading(false);
       return;
@@ -157,7 +342,7 @@ const Draft = (): JSX.Element => {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
             const newError = {
               show: true,
-              title: "Issues Updating Folder",
+              title: "Issues Updating Note",
               text: err.response.message,
               color: "bg-red-300",
               hasCancel: true,
@@ -445,6 +630,15 @@ const Draft = (): JSX.Element => {
             setNoteToEdit(null);
             if (changed) {
               noteToEdit.htmlText = value;
+              const newPrefernces = {
+                ...userPreferences,
+                unsavedNotes: [
+                  ...userPreferences.unsavedNotes,
+                  { id: noteToEdit.noteid, htmlText: value }
+                ]
+              };
+              setUserPreferences(newPrefernces);
+              localStorage.setItem("preferences", JSON.stringify(newPrefernces));
             }
             setNote(noteToEdit);
           }

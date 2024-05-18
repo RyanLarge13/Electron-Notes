@@ -891,7 +891,7 @@ const Account = (): JSX.Element => {
           }
         }}
       >
-        <button
+        {/* <button
           onMouseEnter={() => {
             setTimeout(() => {
               setHoverConnections(true);
@@ -907,7 +907,7 @@ const Account = (): JSX.Element => {
           onClick={() => setConOptions((prev) => !prev)}
         >
           <AiOutlineUsergroupAdd />
-        </button>
+        </button> */}
         {/* <ConBubbles /> */}
       </div>
       {conOptions && (

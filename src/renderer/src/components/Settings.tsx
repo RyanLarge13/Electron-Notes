@@ -669,6 +669,43 @@ const Settings = (): JSX.Element => {
     }
   };
 
+  const setAutoSave = (): void => {
+    const isAutoSave = userPreferences.autosave;
+    const newPreferences = {
+      ...userPreferences,
+      autosave: !isAutoSave
+    };
+    try {
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+      setUserPreferences(newPreferences);
+    } catch (err) {
+      console.log(err);
+      const newError = {
+        show: true,
+        title: "Auto Save Change Failed",
+        text: "There was an error with the application when trying to update your settings, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          },
+          { text: "reload app", func: () => window.location.reload() }
+        ]
+      };
+      setSystemNotif(newError);
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -757,9 +794,10 @@ const Settings = (): JSX.Element => {
             ></div>
           </div>
         </button>
-
         <div
-          className={`${userPreferences.darkMode ? "bg-slate-800" : "bg-slate-300"} p-2 rounded-md`}
+          className={`${
+            userPreferences.darkMode ? "bg-slate-800" : "bg-slate-300"
+          } p-2 rounded-md my-5`}
         >
           <div className="flex justify-between items-center w-full">
             <p className="font-semibold">Sort By</p>
@@ -848,7 +886,6 @@ const Settings = (): JSX.Element => {
             </button>
           </div>
         </div>
-
         <button
           onClick={() =>
             setTheme((prev) => {
@@ -858,7 +895,7 @@ const Settings = (): JSX.Element => {
               return "bg-amber-300";
             })
           }
-          className="flex justify-between items-center my-3"
+          className="flex justify-between items-center my-5"
         >
           <p>Theme</p>
           <div
@@ -881,6 +918,22 @@ const Settings = (): JSX.Element => {
             <Colors setColor={setNewTheme} />
           </div>
         )}
+        <button onClick={() => setAutoSave()} className="flex justify-between items-center my-3">
+          <p>Auto Save Notes</p>
+          <div
+            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+            }`}
+          >
+            <div
+              className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                userPreferences.autosave
+                  ? "right-[1px] left-[50%] bg-green-200"
+                  : "left-[1px] right-[50%] bg-red-200"
+              } rounded-full`}
+            ></div>
+          </div>
+        </button>
         <button
           onClick={() => setConfirmOps((prev) => !prev)}
           className="flex justify-between items-center my-3"
@@ -1055,7 +1108,9 @@ const Settings = (): JSX.Element => {
           </div>
         )}
         <div
-          className={`${userPreferences.darkMode ? "bg-slate-800" : "bg-slate-300"} p-2 rounded-md`}
+          className={`${
+            userPreferences.darkMode ? "bg-slate-800" : "bg-slate-300"
+          } p-2 rounded-md my-5`}
         >
           <button
             onClick={() => setNotifyAll((prev) => !prev)}

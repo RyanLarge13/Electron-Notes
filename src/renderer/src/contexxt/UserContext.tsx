@@ -94,6 +94,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         order: order,
         filter: filter,
         savedFolder: null,
+        autoSave: false,
+        unsavedNotes: [],
         notify: {
           notifyAll: true,
           notifySuccess: true,
@@ -141,6 +143,16 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         } else {
           console.log("no filter in preferences");
           parsedPreferences.filter = "Title";
+        }
+        if ("unsavedNotes" in parsedPreferences) {
+          null;
+        } else {
+          parsedPreferences.unsavedNotes = [];
+        }
+        if ("autosave" in parsedPreferences) {
+          null;
+        } else {
+          parsedPreferences.autosave = false;
         }
         parsedPreferences.order ? setOrder(parsedPreferences.order) : setOrder(true);
         parsedPreferences.filter ? setFilter(parsedPreferences.filter) : setFilter("Title");

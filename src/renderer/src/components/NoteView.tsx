@@ -1,12 +1,21 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCopy, FaEdit, FaShareAlt, FaTrashAlt } from "react-icons/fa";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const NoteView = (): JSX.Element => {
-  const { setNote, setNoteToEdit, note, userPreferences, setSystemNotif } = useContext(UserContext);
+  const { note, userPreferences, setNote, setNoteToEdit, setSystemNotif } = useContext(UserContext);
+
+  const [htmlToRender, setHtmlToRender] = useState(note.htmlText);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const contains = userPreferences.unsavedNotes.filter((unsaved) => unsaved.id === note.noteid);
+    if (contains.length > 0) {
+      setHtmlToRender(contains[0].htmlText);
+    }
+  }, []);
 
   const editNote = (): void => {
     setNoteToEdit(note);
@@ -67,33 +76,33 @@ const NoteView = (): JSX.Element => {
       });
   };
 
-  const trashNote = (): void => {
-    setSystemNotif({
-      show: true,
-      title: `Delete Note ${note.title}`,
-      text: `Are you sure you want to delete note ${note.title}?`,
-      color: "bg-red-300",
-      hasCancel: true,
-      actions: [
-        {
-          text: "close",
-          func: (): void =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
-        },
-        { text: "trash note", func: (): void => {} },
-        { text: "delete", func: (): void => {} }
-      ]
-    });
-  };
+  // const trashNote = (): void => {
+  //   setSystemNotif({
+  //     show: true,
+  //     title: `Delete Note ${note.title}`,
+  //     text: `Are you sure you want to delete note ${note.title}?`,
+  //     color: "bg-red-300",
+  //     hasCancel: true,
+  //     actions: [
+  //       {
+  //         text: "close",
+  //         func: (): void =>
+  //           setSystemNotif({
+  //             show: false,
+  //             title: "",
+  //             text: "",
+  //             color: "",
+  //             hasCancel: false,
+  //             actions: []
+  //           })
+  //       },
+  //       { text: "trash note", func: (): void => {} },
+  //       { text: "delete", func: (): void => {} }
+  //     ]
+  //   });
+  // };
 
-  const shareNote = (): void => {};
+  // const shareNote = (): void => {};
 
   return (
     <>
@@ -116,18 +125,18 @@ const NoteView = (): JSX.Element => {
             <button onClick={() => copyNoteText()}>
               <FaCopy />
             </button>
-            <button onClick={() => shareNote()}>
+            {/* <button onClick={() => shareNote()}>
               <FaShareAlt />
-            </button>
+            </button> */}
             <button onClick={() => editNote()}>
               <FaEdit />
             </button>
-            <button onClick={() => trashNote()}>
+            {/* <button onClick={() => trashNote()}>
               <FaTrashAlt />
-            </button>
+            </button> */}
           </div>
         </div>
-        <div className="renderHtml mt-5" dangerouslySetInnerHTML={{ __html: note.htmlText }}></div>
+        <div className="renderHtml mt-5" dangerouslySetInnerHTML={{ __html: htmlToRender }}></div>
       </div>
     </>
   );

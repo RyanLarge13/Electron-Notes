@@ -1182,6 +1182,14 @@ const Notes = (): JSX.Element => {
     }
   };
 
+  const checkForUnsaved = (noteid): boolean => {
+    const isUnsaved = userPreferences.unsavedNotes.filter((unsaved) => unsaved.id === noteid);
+    if (isUnsaved.length > 0) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <div className="relative flex flex-wrap justify-start items-start gap-5 w-full my-10">
       {notesToRender.map((note) => (
@@ -1193,6 +1201,11 @@ const Notes = (): JSX.Element => {
           } p-3 rounded-md shadow-lg overflow-hidden relative cursor-pointer`}
           onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
         >
+          {checkForUnsaved(note.noteid) ? (
+            <div className="absolute bottom-10 rounded-l-md right-0 text-xs bg-red-500 p-1">
+              <p>Unsaved Changes</p>
+            </div>
+          ) : null}
           <div aria-hidden="true" className="absolute inset-0 radial-gradient"></div>
           <div
             className={`absolute right-0 bottom-0 p-1 z-10 ${

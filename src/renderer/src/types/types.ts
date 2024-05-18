@@ -93,6 +93,11 @@ type PreferencesNotify = {
   notifyErrors: boolean;
 };
 
+type unsavedNotesArray = {
+  id: string;
+  htmlText: string;
+};
+
 type UserPreferences = {
   confirm: boolean;
   notify: PreferencesNotify;
@@ -104,6 +109,8 @@ type UserPreferences = {
   order: boolean;
   filter: string;
   grid: boolean;
+  unsavedNotes: unsavedNotesArray[];
+  autosave: boolean;
 };
 
 type Move = {

@@ -33,6 +33,7 @@ const Folders = (): JSX.Element => {
     setMove,
     setUserPreferences,
     setNotes,
+    editCurrentFolder,
     userPreferences,
     folders,
     token,
@@ -1440,7 +1441,7 @@ const Folders = (): JSX.Element => {
     <div className="flex flex-wrap justify-start items-start gap-5 w-full mt-5">
       {folders.map((folder: Folder) => (
         <motion.div
-          drag
+          drag={!edit && !folderToChangeColor && !folderToRename && !editCurrentFolder}
           onDrag={handleDrag}
           dragSnapToOrigin={draggedInto === folder.folderid ? false : true}
           whileDrag={{ zIndex: 900, pointerEvents: "none" }}
@@ -1463,7 +1464,13 @@ const Folders = (): JSX.Element => {
           className={`relative w-60 h-40 ${
             userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
           } will-change-transform rounded-md shadow-lg p-2 flex flex-col justify-between cursor-pointer`}
-          onClick={() => !edit && !folderToRename && !folderToChangeColor && openFolder(folder)}
+          onClick={() =>
+            !edit &&
+            !folderToRename &&
+            !folderToChangeColor &&
+            !editCurrentFolder &&
+            openFolder(folder)
+          }
         >
           {folderToChangeColor && folderToChangeColor.folderid === folder.folderid && (
             <motion.div
