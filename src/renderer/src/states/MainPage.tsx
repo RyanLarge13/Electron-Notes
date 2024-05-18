@@ -21,6 +21,8 @@ const MainPage = (): JSX.Element => {
     setSystemNotif,
     setSearch,
     setUserPreferences,
+    setNotes,
+    allData,
     order,
     view,
     menu,
@@ -140,12 +142,62 @@ const MainPage = (): JSX.Element => {
     }
   }, [keyPresses]);
 
+  const handleUnloadChecks = (e): void => {
+    const unsavedChanges = userPreferences.unsavedNotes;
+    let unsavedNotes = [];
+    e.preventDefault();
+    if (unsavedChanges.length > 0) {
+      unsavedChanges.forEach((unsaved) => {
+        const note = allData.notes.map((aNote) => aNote.noteid === unsaved.id);
+        if (!note[0]) {
+          // renmove that from storage
+        } else {
+          unsavedNotes.push(note[0]);
+        }
+      });
+      setNotes(unsavedNotes);
+      setSystemNotif({
+        show: true,
+        title: "Unsaved Notes",
+        text: `You have unsaved changes to some notes, are you sure you don't want to save first?`,
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: (): void => {
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              });
+            }
+          },
+          {
+            text: "exit",
+            func: async (): Promise<void> => {
+              window.removeEventListener("beforeunload", handleUnloadChecks);
+              await window.closeWin.closeMainWin();
+            }
+          }
+        ]
+      });
+    } else {
+      null;
+    }
+  };
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
     window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("beforeunload", handleUnloadChecks);
     return () => {
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("keydown", handleKeyPress);
+      window.removeEventListener("beforeunload", handleUnloadChecks);
     };
   }, []);
 
@@ -270,7 +322,7 @@ const MainPage = (): JSX.Element => {
     <section
       onContextMenu={(e) => openOptions(e)}
       className={`${
-        userPreferences.darkMode ? "bg-[#223] text-white" : "bg-slate-100 text=black"
+        userPreferences?.darkMode ? "bg-[#223] text-white" : "bg-slate-100 text=black"
       } min-h-screen scrollbar-hide`}
     >
       <div className="text-rose-300 text-red-300 text-amber-300 text-yellow-300 text-lime-300 text-green-300 text-emerald-300 text-cyan-300 text-sky-300 text-blue-300 text-indigo-300 text-violet-300 text-fuchsia-300 text-pink-300"></div>

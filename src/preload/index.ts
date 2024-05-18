@@ -18,6 +18,9 @@ if (process.contextIsolated) {
       saveAsDocX: (content: string, title: string, username: string) =>
         ipcRenderer.invoke("saveDocX", content, title, username)
     });
+    contextBridge.exposeInMainWorld("closeWin", {
+      closeMainWin: () => ipcRenderer.invoke("closeMainWin")
+    });
   } catch (error) {
     console.error(error);
   }

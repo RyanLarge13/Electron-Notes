@@ -141,6 +141,10 @@ function createWindow(): void {
     }
   });
 
+  ipcMain.handle("closeMainWin", () => {
+    app.quit();
+  });
+
   mainWindow.loadFile(join(__dirname, "../renderer/index.html"), { hash: "login" });
   mainWindow.webContents.openDevTools();
 

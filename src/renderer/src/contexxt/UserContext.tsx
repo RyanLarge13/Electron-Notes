@@ -201,6 +201,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         })
         .catch((err) => {
           console.log(err);
+          fetchUser(token, false);
         });
     } else {
       setLoading(false);

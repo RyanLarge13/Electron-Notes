@@ -1196,7 +1196,7 @@ const Notes = (): JSX.Element => {
         <div
           onContextMenu={(e) => openNotesOptions(e, note)}
           key={note.noteid}
-          className={`${view === "list" ? "w-full" : "w-[45%]"} max-w-60 h-80 ${
+          className={`${view === "list" ? "w-full" : "w-[45%]"} max-w-[45%] h-80 ${
             userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
           } p-3 rounded-md shadow-lg overflow-hidden relative cursor-pointer`}
           onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
