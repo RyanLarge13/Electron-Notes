@@ -42,7 +42,9 @@ const NewFolder = (): JSX.Element => {
       createdAt: new Date()
     };
     setAllData((prevData) => {
-      const newFolders = [...prevData.folders, { ...newFolder, folderid: tempId }];
+      const newFolders = [...prevData.folders, { ...newFolder, folderid: tempId }].sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
       return { ...prevData, folders: newFolders };
     });
     navigate("/");
@@ -50,12 +52,14 @@ const NewFolder = (): JSX.Element => {
       .then((res) => {
         const newId = res.data.data[0].folderid;
         setAllData((prevData) => {
-          const updatedFolders = prevData.folders.map((fold) => {
-            if (fold.folderid === tempId) {
-              return { ...fold, folderid: newId };
-            }
-            return fold;
-          });
+          const updatedFolders = prevData.folders
+            .map((fold) => {
+              if (fold.folderid === tempId) {
+                return { ...fold, folderid: newId };
+              }
+              return fold;
+            })
+            .sort((a, b) => a.title.localeCompare(b.title));
           return {
             ...prevData,
             folders: updatedFolders

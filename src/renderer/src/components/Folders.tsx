@@ -1,6 +1,6 @@
 import { useContext, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Folder, Note } from "@renderer/types/types";
+import { AllData, Folder, Note } from "@renderer/types/types";
 import { CiFolderOn } from "react-icons/ci";
 import { TbNotes } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
@@ -553,7 +553,7 @@ const Folders = (): JSX.Element => {
       parentFolderId: folder.parentFolderId
     };
     try {
-      setAllData((prevData) => {
+      setAllData((prevData: AllData) => {
         const newFolders = [...prevData.folders, { ...newFolder, folderid: tempId }];
         return { ...prevData, folders: newFolders };
       });
@@ -713,12 +713,14 @@ const Folders = (): JSX.Element => {
     };
     try {
       setAllData((prevData) => {
-        const newFolders = prevData.folders.map((fold: Folder): Folder => {
-          if (fold.folderid === folderToRename.folderid) {
-            return { ...fold, title: renameText };
-          }
-          return fold;
-        });
+        const newFolders = prevData.folders
+          .map((fold: Folder): Folder => {
+            if (fold.folderid === folderToRename.folderid) {
+              return { ...fold, title: renameText };
+            }
+            return fold;
+          })
+          .sort((a, b) => a.title.localeCompare(b.title));
         return {
           ...prevData,
           folders: newFolders
@@ -757,12 +759,14 @@ const Folders = (): JSX.Element => {
         .catch((err) => {
           console.log(err);
           setAllData((prevData) => {
-            const newFolders = prevData.folders.map((fold: Folder): Folder => {
-              if (fold.folderid === folderToRename.folderid) {
-                return { ...fold, title: oldTitle };
-              }
-              return fold;
-            });
+            const newFolders = prevData.folders
+              .map((fold: Folder): Folder => {
+                if (fold.folderid === folderToRename.folderid) {
+                  return { ...fold, title: oldTitle };
+                }
+                return fold;
+              })
+              .sort((a, b) => a.title.localeCompare(b.title));
             return {
               ...prevData,
               folders: newFolders

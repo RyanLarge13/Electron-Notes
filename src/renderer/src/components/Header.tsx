@@ -17,15 +17,20 @@ const Header = (): JSX.Element => {
     setView,
     setEditCurrentFolder,
     setNotes,
+    setNote,
     setNesting,
     setEdit,
     setSearch,
     setUserPreferences,
+    setSettings,
+    settings,
+    menu,
     allData,
     view,
     mainTitle,
     editCurrentFolder,
     folder,
+    note,
     nesting,
     userPreferences,
     search
@@ -37,15 +42,17 @@ const Header = (): JSX.Element => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleNavBack = (e): void => {
+    const handleNavBack = (e: MouseEvent): void => {
       if (e.buttons === 8) {
+        e.preventDefault();
+        e.stopPropagation();
         goBack();
         return;
       }
     };
     window.addEventListener("mousedown", handleNavBack);
     return () => window.removeEventListener("mousedown", handleNavBack);
-  }, []);
+  }, [folder, mainTitle, note, settings, menu]);
 
   useEffect(() => {
     if (!search) {
@@ -74,7 +81,7 @@ const Header = (): JSX.Element => {
     if (editCurrentFolder) {
       setEditCurrentFolder(false);
     }
-    if (checkFolder()) {
+    if (!checkFolder()) {
       const newPreferences = {
         ...userPreferences,
         savedFolder: null
@@ -92,22 +99,39 @@ const Header = (): JSX.Element => {
   };
 
   const goBack = (): void => {
+    if (settings) {
+      setSettings(false);
+      return;
+    }
+    if (menu) {
+      setMenu(false);
+      return;
+    }
+    if (note) {
+      setNote(null);
+      return;
+    }
     if (editCurrentFolder) {
       setEditCurrentFolder(false);
     }
-    if (checkFolder() && !folder) {
+    if (checkFolder()) {
+      console.log("In custom sys folder");
       setNesting([]);
-      setFolders(allData.folders.filter((fold) => fold.parentFolderId === null));
+      setFolders(
+        allData.folders
+          .filter((fold) => fold.parentFolderId === null)
+          .sort((a, b) => a.title.localeCompare(b.title))
+      );
       setNotes(allData.notes.filter((aNote) => aNote.folderId === null));
       setMainTitle("Folders");
-      setFolder(folder);
       const newPreferences = {
         ...userPreferences,
         savedFolder: null
       };
       setUserPreferences(newPreferences);
       localStorage.setItem("preferences", JSON.stringify(newPreferences));
-      return setFolder(null);
+      setFolder(null);
+      return;
     }
     if (!folder?.parentFolderId) {
       setNesting([]);
@@ -118,7 +142,8 @@ const Header = (): JSX.Element => {
       };
       setUserPreferences(newPreferences);
       localStorage.setItem("preferences", JSON.stringify(newPreferences));
-      return setFolder(null);
+      setFolder(null);
+      return;
     }
     if (folder.parentFolderId) {
       const foundFolder = allData.folders.filter(
@@ -134,10 +159,17 @@ const Header = (): JSX.Element => {
       };
       setUserPreferences(newPreferences);
       localStorage.setItem("preferences", JSON.stringify(newPreferences));
-      return setFolder(foundFolder);
+      setFolder(foundFolder);
+      return;
     }
   };
 
+  const checkIfFolder = (): boolean => {
+    if (folder) {
+      return true;
+    }
+    return false;
+  };
   const checkFolder = (): boolean => {
     if (
       mainTitle === "All Notes" ||
@@ -145,9 +177,6 @@ const Header = (): JSX.Element => {
       mainTitle === "Drafts" ||
       mainTitle === "Trashed"
     ) {
-      return true;
-    }
-    if (folder) {
       return true;
     }
     return false;
@@ -167,7 +196,7 @@ const Header = (): JSX.Element => {
           <button onClick={() => setMenu(true)}>
             <BiMenuAltLeft />
           </button>
-          {checkFolder() && (
+          {checkFolder() || checkIfFolder() ? (
             <div>
               <button className="ml-3" onClick={() => goBack()}>
                 <IoReturnUpBackSharp />
@@ -176,7 +205,7 @@ const Header = (): JSX.Element => {
                 <FaHome />
               </button>
             </div>
-          )}
+          ) : null}
         </div>
         {search && (
           <motion.input

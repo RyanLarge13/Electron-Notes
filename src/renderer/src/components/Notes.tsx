@@ -2,7 +2,7 @@ import { useContext, useState, useRef, useEffect } from "react";
 import { createNewNote, deleteANote, moveNoteToTrash, updateNote } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
-import { TbNotes } from "react-icons/tb";
+import { TbEdit, TbNotes, TbTrash, TbX } from "react-icons/tb";
 import { Note } from "@renderer/types/types";
 import { v4 as uuidv4 } from "uuid";
 import cheerio from "cheerio";
@@ -21,6 +21,7 @@ const Notes = (): JSX.Element => {
     setEditDraft,
     setDrafts,
     setNotes,
+    contextMenu,
     drafts,
     mainTitle,
     notesToRender,
@@ -43,6 +44,12 @@ const Notes = (): JSX.Element => {
   const renameRef = useRef(null);
 
   const navigate = useNavigate();
+  //  const hoverBgString = userPreferences?.theme
+  //    ? userPreferences.theme.replace("300", "200")
+  //    : "bg-amber-200";
+  const textThemeString = userPreferences?.theme
+    ? userPreferences.theme.replace("bg", "text")
+    : "text-amber-300";
 
   useEffect(() => {
     if (pinInput && firstInput.current) {
@@ -279,7 +286,7 @@ const Notes = (): JSX.Element => {
     }
   };
 
-  const rename = (note): void => {
+  const rename = (note: Note): void => {
     setRenameANote(note);
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     if (renameRef.current) {
@@ -860,7 +867,7 @@ const Notes = (): JSX.Element => {
   };
 
   const saveFileToSystem = async (note: Note): Promise<void> => {
-    const plainText = extractText(note.htmlText, note.title);
+    const plainText = extractText(note.htmlText);
     await window.save.saveTxt(plainText);
     setContextMenu({
       show: false,
@@ -927,7 +934,7 @@ const Notes = (): JSX.Element => {
   };
 
   const saveFileToSysAsPdf = async (note: Note): Promise<void> => {
-    const plainText = extractText(note.htmlText, note.title);
+    const plainText = extractText(note.htmlText);
     await window.save.saveAsPdf(plainText, note.title);
     setContextMenu({
       show: false,
@@ -1182,7 +1189,7 @@ const Notes = (): JSX.Element => {
     }
   };
 
-  const checkForUnsaved = (noteid): boolean => {
+  const checkForUnsaved = (noteid: string): boolean => {
     const isUnsaved = userPreferences.unsavedNotes.filter((unsaved) => unsaved.id === noteid);
     if (isUnsaved.length > 0) {
       return true;
@@ -1202,14 +1209,17 @@ const Notes = (): JSX.Element => {
           onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
         >
           {checkForUnsaved(note.noteid) ? (
-            <div className="absolute bottom-10 rounded-l-md right-0 text-xs bg-red-500 p-1">
+            <div className="absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-red-500 pt-2 pb-1 px-3">
               <p>Unsaved Changes</p>
             </div>
           ) : null}
-          <div aria-hidden="true" className="absolute inset-0 radial-gradient"></div>
           <div
-            className={`absolute right-0 bottom-0 p-1 z-10 ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300 text-black"
+            aria-hidden="true"
+            className="absolute inset-0 radial-gradient pointer-events-none"
+          ></div>
+          <div
+            className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
+              userPreferences.darkMode ? "bg-slate-400 text-black" : "bg-slate-700 text-white"
             } rounded-tl-md`}
           >
             <p>
@@ -1221,7 +1231,7 @@ const Notes = (): JSX.Element => {
               })}
             </p>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center border-b border-b-slate-700 pb-1 mb-1">
             {renameANote && renameANote.noteid === note.noteid ? (
               <form onSubmit={changeTitle}>
                 <input
@@ -1233,9 +1243,33 @@ const Notes = (): JSX.Element => {
                 />
               </form>
             ) : (
-              <h3 className="font-semibold text-xl">{note.title}</h3>
+              <h3 className="font-semibold text-2xl">{note.title}</h3>
             )}
-            <TbNotes />
+            <div className="flex justify-between items-center gap-x-3">
+              <button
+                onClick={(e): void => {
+                  e.stopPropagation();
+                  if (renameANote) {
+                    setRenameANote(null);
+                    setRenameText("");
+                    return;
+                  }
+                  rename(note);
+                }}
+                className={`${textThemeString}`}
+              >
+                {renameANote && renameANote.noteid ? <TbX /> : <TbEdit />}
+              </button>
+              <button
+                onClick={(e): void => {
+                  e.stopPropagation();
+                  confirmTrash(note);
+                }}
+              >
+                <TbTrash className="text-red-500" />
+              </button>
+              <TbNotes className={`${textThemeString}`} />
+            </div>
           </div>
           {note.locked ? (
             <div className="absolute bottom-3 left-3">

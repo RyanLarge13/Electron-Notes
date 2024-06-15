@@ -234,6 +234,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     if (!isInitialLoad && allData) {
       if (!folder) {
         const topFolders = allData.folders.filter((fold: Folder) => fold.parentFolderId === null);
+        topFolders.sort((a: Folder, b: Folder) => a.title.localeCompare(b.title));
         const topNotes = allData.notes.filter(
           (aNote: Note) => aNote.folderId === null && !aNote.trashed
         );
@@ -242,8 +243,9 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setMainTitle("Folders");
       } else {
         const subFolders = allData.folders.filter(
-          (fold) => fold.parentFolderId === folder.folderid
+          (fold: Folder) => fold.parentFolderId === folder.folderid
         );
+        subFolders.sort((a, b) => a.title.localeCompare(b.title));
         const nestedNotes = allData.notes.filter(
           (aNote: Note) => aNote.folderId === folder.folderid && !aNote.trashed
         );
@@ -297,7 +299,10 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
 
   const uploadCache = async (data): Promise<void> => {
     await cacheHandler.updateData("user", data.user);
-    await cacheHandler.updateData("folders", data.folders);
+    await cacheHandler.updateData(
+      "folders",
+      data.folders.sort((a, b) => a.title.localeCompare(b.title))
+    );
     await cacheHandler.updateData("notes", data.notes);
   };
 

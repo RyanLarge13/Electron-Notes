@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { updateNote, updateFolder } from "@renderer/utils/api";
 import { useNavigate, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { AiOutlineUsergroupAdd } from "react-icons/ai";
+// import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { TbFilters } from "react-icons/tb";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
 import { IoMdShare } from "react-icons/io";
@@ -28,8 +28,8 @@ import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
 import Tree from "@renderer/components/Tree";
 import Colors from "@renderer/components/Colors";
-import Connections from "@renderer/components/Connections";
-import ConBubbles from "@renderer/components/ConBubbles";
+// import Connections from "@renderer/components/Connections";
+// import ConBubbles from "@renderer/components/ConBubbles";
 
 const Account = (): JSX.Element => {
   const {
@@ -47,7 +47,7 @@ const Account = (): JSX.Element => {
     setCreateCon,
     setHoverConnections,
     hoverConnections,
-    createCon,
+    // createCon,
     token,
     edit,
     editCurrentFolder,
@@ -415,7 +415,7 @@ const Account = (): JSX.Element => {
         .catch((err) => {
           console.log(err);
           setAllData((prevUser) => {
-            const newFolders = prevUser.folders.map((fold) => {
+            const newFolders = prevUser.folders.map((fold: Folder) => {
               if (fold.folderid === folderMoving.folderid) {
                 return { ...fold, folderid: prevIdFolderId };
               }

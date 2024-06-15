@@ -69,11 +69,13 @@ const Draft = (): JSX.Element => {
   ];
 
   useEffect(() => {
-    const contains = userPreferences.unsavedNotes.filter(
-      (unsaved) => unsaved.id === noteToEdit.noteid
-    );
-    if (contains.length > 0) {
-      setValue(contains[0].htmlText);
+    if (noteToEdit) {
+      const contains = userPreferences.unsavedNotes.filter(
+        (unsaved) => unsaved.id === noteToEdit.noteid
+      );
+      if (contains.length > 0) {
+        setValue(contains[0].htmlText);
+      }
     }
   }, []);
 
