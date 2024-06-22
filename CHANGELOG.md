@@ -51,7 +51,7 @@ No upcoming new releases
 
 - User preferences breaking application after updating dark/light mode or user pin
 
-#### Commits
+#### Commits for Issues
 
 1. [JSON.stringify Error](https://github.com/RyanLarge13/Electron-Notes/commit/cee2f6acbb1809b38d43544f2863390b24c184ca)
 
@@ -73,7 +73,7 @@ No upcoming new releases
 
 - No crucial fixes
 
-#### Commits
+#### Commits for Issues
 
 - No commits for fixed issues
 
@@ -93,7 +93,7 @@ No upcoming new releases
 
 - No crucial fixes
 
-#### Commits
+#### Commits for Issues
 
 - No commits for fixed issues
 
@@ -114,7 +114,7 @@ No upcoming new releases
 
 - No crucial fixes
 
-#### Commits
+#### Commits for Issues
 
 - No commits for fixed issues
 
@@ -135,6 +135,30 @@ No upcoming new releases
 
 - No crucial fixes
 
+#### Commits for Issues
+
+- No commits for fixed issues
+
+---
+
+## [1.4.0] - 02-04-2024
+
+### Added
+
+- Caching data
+
 #### Commits
+
+1. [Minor Updates](https://github.com/RyanLarge13/Electron-Notes/commit/d62bc4807d935c912d6bb104afbceb4537f53f0f)
+2. [Auto Save Features](https://github.com/RyanLarge13/Electron-Notes/commit/189f7168d0790189237004f8a5047dd99a02ff7c)
+3. [Bug Fix](https://github.com/RyanLarge13/Electron-Notes/commit/aa0ba6c66e6acfde3da9031ac910460783d819c5)
+4. [Save Folder Location](https://github.com/RyanLarge13/Electron-Notes/commit/39ce94d93936ff8f315b4f79476f439f3f8761da)
+5. [Duplicating folders](https://github.com/RyanLarge13/Electron-Notes/commit/39ce94d93936ff8f315b4f79476f439f3f8761da)
+
+### Fixed
+
+- No crucial fixes
+
+#### Commits for Issues
 
 - No commits for fixed issues
