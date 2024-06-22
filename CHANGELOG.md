@@ -33,7 +33,31 @@ All notable changes to this project are documented here.
 
 ## [unreleased]
 
-No upcoming new releases
+## [1.4.1] - 06-22-2024
+
+### Adding
+
+- Improved UI and design
+- Providing more color options
+- Removing non working features
+
+#### Commits
+
+1. [UI Updates](https://github.com/RyanLarge13/Electron-Notes/commit/711a19d2e1fb285c1aa095c875cfa0d995f5a651)
+2. [UI Updates](https://github.com/RyanLarge13/Electron-Notes/commit/45906d09f0a6d41300234a23c86c379ceaa05282)
+3. [Navigation Additions](https://github.com/RyanLarge13/Electron-Notes/commit/c26c8cf0e06605d2e93ba8097eac8d9440d7fcc7)
+
+### Fixed
+
+- No crucial fixes
+
+#### Commits for Issues
+
+- No commits for fixed issues
+
+---
+
+No other upcoming releases
 
 ## [Released]
 
@@ -141,11 +165,13 @@ No upcoming new releases
 
 ---
 
-## [1.4.0] - 02-04-2024
+## [1.4.0] - 04-04-2024
 
 ### Added
 
-- Caching data
+- Auto save notes feature
+- save what location the user left off on within their directories
+- Features for duplicating folders
 
 #### Commits
 
