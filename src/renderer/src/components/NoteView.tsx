@@ -138,6 +138,11 @@ const NoteView = (): JSX.Element => {
         </div>
         <div className="renderHtml mt-5" dangerouslySetInnerHTML={{ __html: htmlToRender }}></div>
       </div>
+      {/* <div
+        className={`fixed z-40 ${
+          userPreferences.darkMode ? "" : ""
+        } inset-10 hidden md:block md:left-[63%] bg-black bg-opacity-20 overflow-y-auto no-scroll-bar rounded-md shadow-md px-5 pb-5`}
+      ></div> */}
     </>
   );
 };

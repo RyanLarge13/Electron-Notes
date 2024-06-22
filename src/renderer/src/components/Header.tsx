@@ -272,13 +272,13 @@ const Header = (): JSX.Element => {
               >
                 Edit
               </button>
-              <button
+              {/* <button
                 className={`text-left p-3 ${
                   userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
                 } duration-200 w-full`}
               >
                 Pin Favorites
-              </button>
+              </button> */}
             </motion.div>
           )}
         </div>

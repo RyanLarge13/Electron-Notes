@@ -26,6 +26,7 @@ const MainPage = (): JSX.Element => {
     setSearch,
     setUserPreferences,
     setNotes,
+    setNote,
     allData,
     order,
     view,
@@ -143,6 +144,12 @@ const MainPage = (): JSX.Element => {
     }
     if (search && Escape) {
       setSearch(false);
+    }
+    if (note && Escape) {
+      setNote(null);
+    }
+    if (contextMenu && Escape) {
+      setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     }
   }, [keyPresses]);
 

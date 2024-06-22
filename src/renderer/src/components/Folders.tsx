@@ -64,6 +64,9 @@ const Folders = (): JSX.Element => {
   const renameRef = useRef(null);
 
   const navigate = useNavigate();
+  const textThemeString = userPreferences?.theme
+    ? userPreferences.theme.replace("bg", "text")
+    : "text-amber-300";
 
   const openFolder = (folder: Folder): void => {
     setNesting((prev) => [...prev, { title: folder.title, id: folder.folderid }]);
@@ -1563,7 +1566,9 @@ const Folders = (): JSX.Element => {
               className="absolute right-3 bottom-3"
             >
               {selectedForEdit.length > 0 && selectedForEdit.includes(folder.folderid) ? (
-                <FaCheckCircle className="text-amber-300" />
+                <FaCheckCircle
+                  className={`${textThemeString ? textThemeString : "text-amber-300"}`}
+                />
               ) : (
                 <FaRegCheckCircle />
               )}

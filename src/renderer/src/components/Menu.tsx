@@ -301,7 +301,7 @@ const Menu = (): JSX.Element => {
               />
             </div>
           </button>
-          <button
+          {/* <button
             className={`p-3 rounded-md shadow-md my-3 w-full ${
               userPreferences.darkMode
                 ? "bg-slate-700 hover:bg-slate-800"
@@ -324,7 +324,7 @@ const Menu = (): JSX.Element => {
                 className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
               />
             </div>
-          </button>
+          </button> */}
           <p className="text-2xl my-5">Folders</p>
           <Tree
             moving={false}

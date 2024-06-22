@@ -19,7 +19,7 @@ const ContextMenu = (): JSX.Element => {
             style={{ top: `${position.top}px`, left: `${position.left}px` }}
             className={`fixed ${
               userPreferences.darkMode ? "bg-slate-700" : "bg-slate-200"
-            } z-50 flex flex-col justify-start items-start w-60 shadow-sm`}
+            } z-50 flex flex-col justify-start items-start w-60 shadow-md`}
           >
             <div className={`${contextMenu.meta.color} w-full h-1`}></div>
             <p className="p-2 font-semibold">{contextMenu.meta.title && contextMenu.meta.title}</p>

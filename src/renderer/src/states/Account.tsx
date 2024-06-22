@@ -13,10 +13,18 @@ import {
   MdOutlineNoteAdd,
   MdGroupAdd,
   MdSelectAll,
-  MdTabUnselected
+  MdTabUnselected,
+  MdNotes
 } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
-import { FaArrowCircleRight, FaFolderPlus, FaHome, FaPlus } from "react-icons/fa";
+import {
+  FaArrowAltCircleDown,
+  FaArrowCircleRight,
+  FaFolder,
+  FaFolderPlus,
+  FaHome,
+  FaPlus
+} from "react-icons/fa";
 import { deleteMultipleFolders } from "@renderer/utils/api";
 import { Folder, Note } from "@renderer/types/types";
 import Folders from "@renderer/components/Folders";
@@ -28,6 +36,7 @@ import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
 import Tree from "@renderer/components/Tree";
 import Colors from "@renderer/components/Colors";
+import { BsArrowReturnRight, BsArrowRight } from "react-icons/bs";
 // import Connections from "@renderer/components/Connections";
 // import ConBubbles from "@renderer/components/ConBubbles";
 
@@ -1024,7 +1033,7 @@ const Account = (): JSX.Element => {
             <div className="flex justify-center items-center gap-x-5">
               <button
                 onClick={() => setSelectedFolder(null)}
-                className={`p-2 mt-3 flex justify-center items-center flex-1 gap-x-3 rounded-md text-black ${userPreferences.theme}`}
+                className={`p-2 mt-3 flex justify-center items-center shadow-md flex-1 gap-x-3 rounded-md text-black ${userPreferences.theme}`}
               >
                 Move <FaHome />
               </button>
@@ -1036,12 +1045,17 @@ const Account = (): JSX.Element => {
               </button>
             </div>
             <div className="mt-5">
-              <p
-                className={`rounded-md p-2 font-semibold ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-200 text-black"}`}
-              >
-                Move {move.itemTitle} from {folder ? folder.title : "Home"}{" "}
+              <div className="flex justify-start items-center gap-x-2">
+                <FaFolder className="inline" /> {folder ? folder.title : "Home"}
+              </div>
+              <div className="ml-2 flex justify-start items-center gap-x-2">
+                <BsArrowReturnRight className="inline" />{" "}
+                {move.type === "folder" ? <FaFolder /> : <MdNotes />}
+                {move.itemTitle}
+                <BsArrowRight className="inline" />
+                <FaFolder />
                 {selectedFolder ? selectedFolder.title : "Home"}
-              </p>
+              </div>
               <button
                 onClick={() => moveItem()}
                 className="py-2 px-3 w-full mt-3 rounded-md bg-green-300 shadow-md text-black hover:bg-green-200 duration-200 flex justify-center items-center gap-x-2"

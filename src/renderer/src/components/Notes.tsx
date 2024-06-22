@@ -15,6 +15,7 @@ import { Note } from "@renderer/types/types";
 import { v4 as uuidv4 } from "uuid";
 import cheerio from "cheerio";
 import UserContext from "@renderer/contexxt/UserContext";
+import { BsFiletypeDocx, BsFiletypeHtml, BsFiletypePdf, BsFiletypeTxt } from "react-icons/bs";
 
 const Notes = (): JSX.Element => {
   const {
@@ -1091,22 +1092,22 @@ const Notes = (): JSX.Element => {
         },
         {
           title: "save file as .txt",
-          icon: <FaSave />,
+          icon: <BsFiletypeTxt />,
           func: () => saveFileToSystem(note)
         },
         {
           title: "save file as .html",
-          icon: <FaSave />,
+          icon: <BsFiletypeHtml />,
           func: (): Promise<void> => saveFileToSysAsHtml(note)
         },
         {
           title: "save file as .pdf",
-          icon: <FaSave />,
+          icon: <BsFiletypePdf />,
           func: (): Promise<void> => saveFileToSysAsPdf(note)
         },
         {
           title: "save file as .docx",
-          icon: <FaSave />,
+          icon: <BsFiletypeDocx />,
           func: (): Promise<void> => saveFileToSysAsDocX(note)
         },
         {
@@ -1227,7 +1228,7 @@ const Notes = (): JSX.Element => {
           onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
         >
           {checkForUnsaved(note.noteid) ? (
-            <div className="absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-red-500 pt-2 pb-1 px-3">
+            <div className="absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-red-300 py-1 px-3">
               <p>Unsaved Changes</p>
             </div>
           ) : null}

@@ -973,7 +973,9 @@ const Settings = (): JSX.Element => {
           </div>
         </button>
         {lockPin && (
-          <form className="rounded-md shadow-md bg-slate-900 flex justify-start items-center gap-x-3">
+          <form
+            className={`${userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"} flex justify-start items-center gap-x-3`}
+          >
             <input
               ref={firstInput}
               value={newLockPin.first}
@@ -983,7 +985,7 @@ const Settings = (): JSX.Element => {
                 userPreferences.darkMode
                   ? "bg-slate-700 text-slate-300"
                   : "bg-slate-300 text-slate-700"
-              } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
+              } text-xl text-center font-semibold rounded-md shadow-sm outline ${userPreferences.theme ? userPreferences.theme.replace("bg", "outline") : "outline-slate-500"}`}
             />
             <input
               ref={secondInput}
@@ -1057,7 +1059,7 @@ const Settings = (): JSX.Element => {
                 placeholder="new username"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
-                className="text-sm p-2 bg-slate-700 text-white"
+                className={`text-sm p-2 w-full rounded-sm ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-300 text-black"}`}
               />
             </form>
           </div>
@@ -1089,18 +1091,18 @@ const Settings = (): JSX.Element => {
                 placeholder="current password"
                 value={currentPass}
                 onChange={(e) => setCurrentPass(e.target.value)}
-                className="text-sm p-2 bg-slate-700 text-white"
+                className={`text-sm p-2 w-full rounded-sm ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-300 text-black"}`}
               />
               <input
                 type="password"
                 placeholder="new password"
                 value={newPass}
                 onChange={(e) => setNewPass(e.target.value)}
-                className="text-sm p-2 bg-slate-700 text-white"
+                className={`text-sm p-2 w-full rounded-sm ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-300 text-black"}`}
               />
               <button
                 type="submit"
-                className="bg-amber-300 text-sm w-[195px] text-black p-2 font-semibold duration-200 hover:bg-black hover:text-white focus:bg-black focus:text-white focus:outline-none"
+                className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} rounded-sm text-sm w-[195px] text-black p-2 font-semibold duration-200`}
               >
                 {newPassLoading ? <ClipLoader size={18} /> : "Submit"}
               </button>
