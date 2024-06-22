@@ -4,7 +4,17 @@ import { AllData, Folder, Note } from "@renderer/types/types";
 import { CiFolderOn } from "react-icons/ci";
 import { TbNotes } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
-import { FaCheckCircle, FaRegCheckCircle } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaFolderPlus,
+  FaRegCheckCircle,
+  FaArrowCircleRight,
+  FaCopy,
+  FaEdit,
+  FaPaintBrush,
+  FaWindowClose,
+  FaPlusSquare
+} from "react-icons/fa";
 import { v4 as uuidv4 } from "uuid";
 import {
   createNewFolder,
@@ -1181,35 +1191,43 @@ const Folders = (): JSX.Element => {
       options: [
         {
           title: "new folder",
+          icon: <FaFolderPlus />,
           func: (): void => createNestedFolder(folder)
         },
         {
           title: "new note",
+          icon: <FaPlusSquare />,
           func: (): void => createNestedNote(folder)
         },
         {
           title: "move",
+          icon: <FaArrowCircleRight />,
           func: (): void => moveFolder(folder)
         },
-        {
-          title: "move contents",
-          // func: () => moveFolderCOntents(folder.folderid);
-          func: (): void => {}
-        },
+        // {
+        //   title: "move contents",
+        //   icon: <FaArrowCircleRight />,
+        //   // func: () => moveFolderCOntents(folder.folderid);
+        //   func: (): void => {}
+        // },
         {
           title: "duplicate",
+          icon: <FaCopy />,
           func: (): void => (userPreferences.confirm ? confirmDup(folder) : dupFolder(folder))
         },
         {
           title: "rename",
+          icon: <FaEdit />,
           func: (): void => renameFolder(folder)
         },
         {
           title: "change color",
+          icon: <FaPaintBrush />,
           func: (): void => changeFolderColor(folder)
         },
         {
           title: "delete",
+          icon: <FaWindowClose />,
           func: (): void =>
             userPreferences.confirm ? confirmDelete(folder) : deleteFolder(folder.folderid)
         }

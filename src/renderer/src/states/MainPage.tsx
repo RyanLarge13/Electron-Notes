@@ -6,6 +6,10 @@ import Account from "./Account";
 import ContextMenu from "@renderer/components/ContextMenu";
 import SystemNotif from "@renderer/components/SystemNotif";
 import UserContext from "@renderer/contexxt/UserContext";
+import { FaEdit, FaFolderPlus, FaList, FaPlusSquare } from "react-icons/fa";
+import { MdOutlineMenu } from "react-icons/md";
+import { PiSwap } from "react-icons/pi";
+import { IoSettings } from "react-icons/io5";
 
 const MainPage = (): JSX.Element => {
   const {
@@ -255,6 +259,7 @@ const MainPage = (): JSX.Element => {
       options: [
         {
           title: "new folder",
+          icon: <FaFolderPlus />,
           func: (): void => {
             setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             navigate("/newfolder");
@@ -262,6 +267,7 @@ const MainPage = (): JSX.Element => {
         },
         {
           title: "new note",
+          icon: <FaPlusSquare />,
           func: (): void => {
             setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             navigate("/newnote");
@@ -269,6 +275,7 @@ const MainPage = (): JSX.Element => {
         },
         {
           title: "menu",
+          icon: <MdOutlineMenu />,
           func: (): void => {
             setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             setMenu(true);
@@ -276,6 +283,7 @@ const MainPage = (): JSX.Element => {
         },
         {
           title: "edit",
+          icon: <FaEdit />,
           func: (): void => {
             setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             setEdit(true);
@@ -283,6 +291,7 @@ const MainPage = (): JSX.Element => {
         },
         {
           title: "change view",
+          icon: <PiSwap />,
           func: (): void => {
             setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             const newPreferences = {
@@ -296,6 +305,7 @@ const MainPage = (): JSX.Element => {
         },
         {
           title: "change order",
+          icon: <FaList />,
           func: (): void => {
             setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             setOrder((prevOrder) => !prevOrder);
@@ -303,10 +313,12 @@ const MainPage = (): JSX.Element => {
         },
         {
           title: "edit current folder",
+          icon: <FaEdit />,
           func: (): void => editCurrentFolder()
         },
         {
           title: "settings",
+          icon: <IoSettings />,
           func: (): void => {
             setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             setMenu(true);

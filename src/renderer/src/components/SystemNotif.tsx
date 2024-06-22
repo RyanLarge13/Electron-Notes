@@ -89,7 +89,7 @@ const SystemNotif = (): JSX.Element => {
                     setLoading(action.text);
                     action.func();
                   }}
-                  className="cursor-pointer hover:text-slate-300 duration-200 text-sm font-semibold"
+                  className={`cursor-pointer ${userPreferences.darkMode ? "hover:text-slate-300" : "hover:text-slate-600"} hover:text-slate-300 duration-200 text-sm font-semibold`}
                 >
                   {loading && loading === action.text ? (
                     <ClipLoader color="#fff" size={10} />

@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import UserContext from "@renderer/contexxt/UserContext";
 import { BsArrowsExpand } from "react-icons/bs";
 import { PiArrowsInLineVertical } from "react-icons/pi";
+import { Folder } from "@renderer/types/types";
 
 const NestedFolder = ({ moving, childFolders, parentId, level, open }) => {
   return (
@@ -35,7 +36,7 @@ const TreeSelect = ({ moving, folders, parentId, level, open }) => {
     <>
       {topFolders.length > 0 && (
         <>
-          {topFolders.map((fold) => (
+          {topFolders.map((fold: Folder) => (
             <div
               key={fold.folderid}
               style={{ marginLeft: level * 5 }}

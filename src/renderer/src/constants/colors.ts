@@ -1,18 +1,32 @@
 const colors = [
-  { color: 'bg-rose-300' },
-  { color: 'bg-red-300' },
-  { color: 'bg-amber-300' },
-  { color: 'bg-yellow-300' },
-  { color: 'bg-lime-300' },
-  { color: 'bg-green-300' },
-  { color: 'bg-emerald-300' },
-  { color: 'bg-cyan-300' },
-  { color: 'bg-sky-300' },
-  { color: 'bg-blue-300' },
-  { color: 'bg-indigo-300' },
-  { color: 'bg-violet-300' },
-  { color: 'bg-fuchsia-300' },
-  { color: 'bg-pink-300' }
-]
+  { color: "bg-rose-300" },
+  { color: "bg-red-300" },
+  { color: "bg-amber-300" },
+  { color: "bg-yellow-300" },
+  { color: "bg-lime-300" },
+  { color: "bg-green-300" },
+  { color: "bg-emerald-300" },
+  { color: "bg-cyan-300" },
+  { color: "bg-sky-300" },
+  { color: "bg-blue-300" },
+  { color: "bg-indigo-300" },
+  { color: "bg-violet-300" },
+  { color: "bg-fuchsia-300" },
+  { color: "bg-pink-300" },
+  { color: "bg-rose-600" },
+  { color: "bg-red-600" },
+  { color: "bg-amber-600" },
+  { color: "bg-yellow-600" },
+  { color: "bg-lime-600" },
+  { color: "bg-green-600" },
+  { color: "bg-emerald-600" },
+  { color: "bg-cyan-600" },
+  { color: "bg-sky-600" },
+  { color: "bg-blue-600" },
+  { color: "bg-indigo-600" },
+  { color: "bg-violet-600" },
+  { color: "bg-fuchsia-600" },
+  { color: "bg-pink-600" }
+];
 
-export default colors
+export default colors;

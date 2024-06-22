@@ -16,7 +16,7 @@ import {
   MdTabUnselected
 } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
-import { FaFolderPlus, FaHome } from "react-icons/fa";
+import { FaArrowCircleRight, FaFolderPlus, FaHome, FaPlus } from "react-icons/fa";
 import { deleteMultipleFolders } from "@renderer/utils/api";
 import { Folder, Note } from "@renderer/types/types";
 import Folders from "@renderer/components/Folders";
@@ -1011,7 +1011,7 @@ const Account = (): JSX.Element => {
           <motion.div
             initial={{ x: -10, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="fixed z-40 right-0 top-0 w-[80%] lg:w-[30%] p-5 rounded-l-md overflow-y-auto no-scroll-bar bottom-0 bg-slate-900"
+            className={`fixed z-40 right-0 top-0 w-[80%] lg:w-[30%] p-5 rounded-l-md overflow-y-auto no-scroll-bar bottom-0 ${userPreferences.darkMode ? "bg-slate-900" : "bg-slate-300"} `}
           >
             <Tree
               moving={true}
@@ -1021,30 +1021,32 @@ const Account = (): JSX.Element => {
               level={0}
               open={{ item: { title: null } }}
             />
-            <div className="flex justify-start items-center gap-x-5">
+            <div className="flex justify-center items-center gap-x-5">
               <button
                 onClick={() => setSelectedFolder(null)}
-                className="p-2 mt-3 flex  justify-center items-center gap-x-3 rounded-md bg-slate-700 shadow-md hover:bg-slate-800 duration-200"
+                className={`p-2 mt-3 flex justify-center items-center flex-1 gap-x-3 rounded-md text-black ${userPreferences.theme}`}
               >
                 Move <FaHome />
               </button>
               <button
                 onClick={() => navigate("/newfolder")}
-                className="p-2 mt-3 rounded-md bg-amber-300 shadow-md hover:bg-amber-200 text-black duration-200"
+                className="p-2 mt-3 rounded-md bg-amber-300 shadow-md flex-1 hover:bg-amber-200 text-black duration-200 flex justify-center items-center gap-x-2"
               >
-                Create Folder +
+                Create Folder <FaPlus />
               </button>
             </div>
-            <div className="mt-3">
-              <p>
-                Move {move.itemTitle} from {folder ? folder.title : "Home"} &rarr;{" "}
+            <div className="mt-5">
+              <p
+                className={`rounded-md p-2 font-semibold ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-200 text-black"}`}
+              >
+                Move {move.itemTitle} from {folder ? folder.title : "Home"}{" "}
                 {selectedFolder ? selectedFolder.title : "Home"}
               </p>
               <button
                 onClick={() => moveItem()}
-                className="py-2 px-3 mt-3 rounded-md bg-green-300 shadow-md text-black hover:bg-green-200 duration-200"
+                className="py-2 px-3 w-full mt-3 rounded-md bg-green-300 shadow-md text-black hover:bg-green-200 duration-200 flex justify-center items-center gap-x-2"
               >
-                Move &rarr;
+                Move <FaArrowCircleRight />
               </button>
             </div>
           </motion.div>

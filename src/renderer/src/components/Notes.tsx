@@ -1,7 +1,15 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { createNewNote, deleteANote, moveNoteToTrash, updateNote } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
-import { FaLock } from "react-icons/fa";
+import {
+  FaArrowCircleRight,
+  FaCopy,
+  FaEdit,
+  FaLock,
+  FaSave,
+  FaTrash,
+  FaWindowClose
+} from "react-icons/fa";
 import { TbEdit, TbNotes, TbTrash, TbX } from "react-icons/tb";
 import { Note } from "@renderer/types/types";
 import { v4 as uuidv4 } from "uuid";
@@ -1063,42 +1071,52 @@ const Notes = (): JSX.Element => {
       options: [
         {
           title: "edit",
+          icon: <FaEdit />,
           func: () => edit(note, false)
         },
         {
           title: "move",
+          icon: <FaArrowCircleRight />,
           func: () => move(note)
         },
         {
           title: "duplicate",
+          icon: <FaCopy />,
           func: () => (userPreferences.confirm ? confirmDuplicate(note) : duplicate(note))
         },
         {
           title: "rename",
+          icon: <FaEdit />,
           func: () => rename(note)
         },
         {
           title: "save file as .txt",
+          icon: <FaSave />,
           func: () => saveFileToSystem(note)
         },
         {
           title: "save file as .html",
+          icon: <FaSave />,
           func: (): Promise<void> => saveFileToSysAsHtml(note)
         },
         {
           title: "save file as .pdf",
+          icon: <FaSave />,
           func: (): Promise<void> => saveFileToSysAsPdf(note)
         },
         {
           title: "save file as .docx",
+          icon: <FaSave />,
           func: (): Promise<void> => saveFileToSysAsDocX(note)
         },
         {
           title: "move to trash",
+          icon: <FaTrash />,
           func: () => (userPreferences.confirm ? confirmTrash(note) : moveToTrash(note))
         },
         {
           title: "delete forever",
+          icon: <FaWindowClose />,
           func: () => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
         }
       ]
@@ -1222,13 +1240,15 @@ const Notes = (): JSX.Element => {
               userPreferences.darkMode ? "bg-slate-400 text-black" : "bg-slate-700 text-white"
             } rounded-tl-md`}
           >
-            <p>
+            <p className="text-slate-200">
               Last Updated On{" "}
-              {new Date(note.updated).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric"
-              })}
+              <span className="text-white">
+                {new Date(note.updated).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric"
+                })}
+              </span>
             </p>
           </div>
           <div className="flex justify-between items-center border-b border-b-slate-700 pb-1 mb-1">
