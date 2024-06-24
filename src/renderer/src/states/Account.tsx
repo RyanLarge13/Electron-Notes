@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { updateNote, updateFolder } from "@renderer/utils/api";
 import { useNavigate, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { v4 as uuidv4 } from "uuid";
 // import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { TbFilters } from "react-icons/tb";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
@@ -25,8 +26,8 @@ import {
   FaHome,
   FaPlus
 } from "react-icons/fa";
-import { deleteMultipleFolders } from "@renderer/utils/api";
-import { Folder, Note } from "@renderer/types/types";
+import { deleteMultipleFolders, moveManyFolders } from "@renderer/utils/api";
+import { AllData, Folder, Note } from "@renderer/types/types";
 import Folders from "@renderer/components/Folders";
 import Header from "@renderer/components/Header";
 import Notes from "@renderer/components/Notes";
@@ -102,27 +103,81 @@ const Account = (): JSX.Element => {
   };
 
   const moveAllSelected = (): void => {
-    // setMove({
-    //   isMoving: true,
-    //   from: selectedForEdit,
-    //   itemTitle: "Many",
-    //   item: null,
-    //   type: "folder"
-    // });
-    // try {
-    //   moveMultipleFolders(token, selectedForEdit, 1)
-    //     .then((res) => {
-    //       console.log(res);
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //     });
-    // } catch (err) {
-    //   console.log(err);
-    // }
+    const foldersToMove = allData.folders.map((fold: Folder) => {
+      if (selectedForEdit.some((id) => id === fold.folderid)) {
+        return fold;
+      }
+    });
+    setMove({
+      isMoving: true,
+      from: folder ? folder.folderid : null,
+      itemTitle: "Many",
+      item: foldersToMove,
+      type: "many"
+    });
   };
 
-  // const undoDeleteMany = (folders: Folder[]): void => {};
+  const moveMultipleFolders = (): void => {
+    setAllData((prevData: AllData): AllData => {
+      const newFolders = prevData.folders.map((fold: Folder) => {
+        if (!selectedForEdit.some((id) => id === fold.folderid)) {
+          return fold;
+        } else {
+          return {
+            ...fold,
+            parentFolderId: selectedFolder ? selectedFolder.folderid : null
+          };
+        }
+      });
+      const newData = {
+        ...prevData,
+        folders: newFolders
+      };
+      return newData;
+    });
+    setMove({
+      isMoving: false,
+      from: "",
+      itemTitle: "",
+      item: null,
+      type: ""
+    });
+    setEdit(false);
+    moveManyFolders(token, selectedForEdit, selectedFolder ? selectedFolder.folderid : null)
+      .then(() => {
+        setSelectedForEdit([]);
+        setSelectedFolder(null);
+        if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+          const newSuccess = {
+            show: true,
+            title: "Moved Folders",
+            text: "Successfully moved your folders",
+            color: "bg-green-300",
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              },
+              { text: "undo", func: (): void => {} }
+            ]
+          };
+          setSystemNotif(newSuccess);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        // Handle the failed case on the server side to revert the changes made to the moved contents
+      });
+  };
 
   const deleteAllSelected = (): void => {
     setAllData((prevData) => {
@@ -236,7 +291,7 @@ const Account = (): JSX.Element => {
 
   const moveItem = (): void => {
     if (move.type === "note") {
-      const noteMoving = move.item;
+      const noteMoving = move.item[0];
       const prevIdFolderId = noteMoving.folderId;
       const newNote = {
         notesId: noteMoving.noteid,
@@ -364,7 +419,7 @@ const Account = (): JSX.Element => {
         });
     }
     if (move.type === "folder") {
-      const folderMoving = move.item;
+      const folderMoving = move.item[0];
       const prevIdFolderId = folderMoving.folderid;
       const newFolder = {
         folderId: folderMoving.folderid,
@@ -1014,13 +1069,13 @@ const Account = (): JSX.Element => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed z-40 inset-0 bg-black backdrop-blur-sm bg-opacity-20"
+            className="fixed z-[990] inset-0 bg-black backdrop-blur-sm bg-opacity-20"
             onClick={() => setMove(null)}
           ></motion.div>
           <motion.div
             initial={{ x: -10, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className={`fixed z-40 right-0 top-0 w-[80%] lg:w-[30%] p-5 rounded-l-md overflow-y-auto no-scroll-bar bottom-0 ${userPreferences.darkMode ? "bg-slate-900" : "bg-slate-300"} `}
+            className={`fixed z-[999] right-0 top-0 w-[80%] lg:w-[30%] p-5 rounded-l-md overflow-y-auto no-scroll-bar bottom-0 ${userPreferences.darkMode ? "bg-slate-900" : "bg-slate-300"} `}
           >
             <Tree
               moving={true}
@@ -1050,14 +1105,14 @@ const Account = (): JSX.Element => {
               </div>
               <div className="ml-2 flex justify-start items-center gap-x-2">
                 <BsArrowReturnRight className="inline" />{" "}
-                {move.type === "folder" ? <FaFolder /> : <MdNotes />}
+                {move.type === "folder" || move.type === "many" ? <FaFolder /> : <MdNotes />}
                 {move.itemTitle}
                 <BsArrowRight className="inline" />
                 <FaFolder />
                 {selectedFolder ? selectedFolder.title : "Home"}
               </div>
               <button
-                onClick={() => moveItem()}
+                onClick={() => (move.type === "many" ? moveMultipleFolders() : moveItem())}
                 className="py-2 px-3 w-full mt-3 rounded-md bg-green-300 shadow-md text-black hover:bg-green-200 duration-200 flex justify-center items-center gap-x-2"
               >
                 Move <FaArrowCircleRight />

@@ -249,7 +249,7 @@ const Folders = (): JSX.Element => {
       isMoving: true,
       from: folder.folderid,
       itemTitle: folder.title,
-      item: folder,
+      item: [folder],
       type: "folder"
     });
   };

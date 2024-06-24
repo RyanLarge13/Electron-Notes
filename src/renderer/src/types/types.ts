@@ -118,7 +118,7 @@ type Move = {
   isMoving: boolean;
   from: string;
   itemTitle: string;
-  item: Note | Folder | null;
+  item: Note[] | Folder[] | null;
   type: string;
 };
 

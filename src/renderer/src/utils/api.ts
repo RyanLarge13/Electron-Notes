@@ -1,4 +1,3 @@
-import { Folder } from "@renderer/types/types";
 import Axios from "axios";
 import { AxiosResponse } from "axios";
 // const devUrl = "http://localhost:8080";
@@ -96,9 +95,9 @@ export const updateFolder = (token: string, folder): Promise<AxiosResponse> => {
   return res;
 };
 
-export const moveMultipleFolders = (
+export const moveManyFolders = (
   token: string,
-  foldersArr: Folder[],
+  foldersArr: string[],
   newParentId: string
 ): Promise<AxiosResponse> => {
   const res = Axios.patch(

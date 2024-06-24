@@ -458,7 +458,7 @@ const Notes = (): JSX.Element => {
       isMoving: true,
       from: note.folderId,
       itemTitle: note.title,
-      item: note,
+      item: [note],
       type: "note"
     });
   };

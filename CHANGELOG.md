@@ -40,6 +40,7 @@ All notable changes to this project are documented here.
 - Improved UI and design
 - Providing more color options
 - Removing non working features
+-
 
 #### Commits
 
