@@ -40,13 +40,14 @@ All notable changes to this project are documented here.
 - Improved UI and design
 - Providing more color options
 - Removing non working features
--
+- Moving Multiple folders
 
 #### Commits
 
 1. [UI Updates](https://github.com/RyanLarge13/Electron-Notes/commit/711a19d2e1fb285c1aa095c875cfa0d995f5a651)
 2. [UI Updates](https://github.com/RyanLarge13/Electron-Notes/commit/45906d09f0a6d41300234a23c86c379ceaa05282)
 3. [Navigation Additions](https://github.com/RyanLarge13/Electron-Notes/commit/c26c8cf0e06605d2e93ba8097eac8d9440d7fcc7)
+4. [Moving Multiple Folders](https://github.com/RyanLarge13/Electron-Notes/commit/170f12f1c4825338e39ea6e3411ffc7c7ee76fc7)
 
 ### Fixed
 
