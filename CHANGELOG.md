@@ -33,33 +33,7 @@ All notable changes to this project are documented here.
 
 ## [unreleased]
 
-## [1.4.1] - 06-22-2024
-
-### Adding
-
-- Improved UI and design
-- Providing more color options
-- Removing non working features
-- Moving Multiple folders
-
-#### Commits
-
-1. [UI Updates](https://github.com/RyanLarge13/Electron-Notes/commit/711a19d2e1fb285c1aa095c875cfa0d995f5a651)
-2. [UI Updates](https://github.com/RyanLarge13/Electron-Notes/commit/45906d09f0a6d41300234a23c86c379ceaa05282)
-3. [Navigation Additions](https://github.com/RyanLarge13/Electron-Notes/commit/c26c8cf0e06605d2e93ba8097eac8d9440d7fcc7)
-4. [Moving Multiple Folders](https://github.com/RyanLarge13/Electron-Notes/commit/170f12f1c4825338e39ea6e3411ffc7c7ee76fc7)
-
-### Fixed
-
-- No crucial fixes
-
-#### Commits for Issues
-
-- No commits for fixed issues
-
----
-
-No other upcoming releases
+No upcoming releases
 
 ## [Released]
 
@@ -182,6 +156,32 @@ No other upcoming releases
 3. [Bug Fix](https://github.com/RyanLarge13/Electron-Notes/commit/aa0ba6c66e6acfde3da9031ac910460783d819c5)
 4. [Save Folder Location](https://github.com/RyanLarge13/Electron-Notes/commit/39ce94d93936ff8f315b4f79476f439f3f8761da)
 5. [Duplicating folders](https://github.com/RyanLarge13/Electron-Notes/commit/39ce94d93936ff8f315b4f79476f439f3f8761da)
+
+### Fixed
+
+- No crucial fixes
+
+#### Commits for Issues
+
+- No commits for fixed issues
+
+---
+
+## [1.4.1] - 06-23-2024
+
+### Adding
+
+- Improved UI and design
+- Providing more color options
+- Removing non working features
+- Moving Multiple folders
+
+#### Commits
+
+1. [UI Updates](https://github.com/RyanLarge13/Electron-Notes/commit/711a19d2e1fb285c1aa095c875cfa0d995f5a651)
+2. [UI Updates](https://github.com/RyanLarge13/Electron-Notes/commit/45906d09f0a6d41300234a23c86c379ceaa05282)
+3. [Navigation Additions](https://github.com/RyanLarge13/Electron-Notes/commit/c26c8cf0e06605d2e93ba8097eac8d9440d7fcc7)
+4. [Moving Multiple Folders](https://github.com/RyanLarge13/Electron-Notes/commit/170f12f1c4825338e39ea6e3411ffc7c7ee76fc7)
 
 ### Fixed
 
