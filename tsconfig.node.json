@@ -6,5 +6,5 @@
     "strictNullChecks": false,
     "composite": true,
     "types": ["electron-vite/node"]
-  }
+  },
 }

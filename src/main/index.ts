@@ -48,7 +48,7 @@ function createWindow(): void {
     return { action: "deny" };
   });
 
-  ipcMain.handle("saveTxt", async (event, content, title) => {
+  ipcMain.handle("saveTxt", async (_, content, title) => {
     const documentsPath = app.getPath("documents");
     const defaultPath = documentsPath ? path.join(documentsPath, `${title}.txt`) : `${title}.txt`;
     const { filePath } = await dialog.showSaveDialog({
@@ -69,7 +69,7 @@ function createWindow(): void {
     }
   });
 
-  ipcMain.handle("saveHtml", async (event, content, title) => {
+  ipcMain.handle("saveHtml", async (_, content, title) => {
     const documentsPath = app.getPath("documents");
     const defaultPath = documentsPath ? path.join(documentsPath, `${title}.html`) : `${title}.html`;
     const { filePath } = await dialog.showSaveDialog({
@@ -90,7 +90,7 @@ function createWindow(): void {
     }
   });
 
-  ipcMain.handle("savePdf", async (event, content, title) => {
+  ipcMain.handle("savePdf", async (_, content, title) => {
     const documentsPath = app.getPath("documents");
     const defaultPath = documentsPath ? path.join(documentsPath, `${title}.pdf`) : `${title}.pdf`;
     const { filePath } = await dialog.showSaveDialog({
@@ -110,7 +110,7 @@ function createWindow(): void {
     }
   });
 
-  ipcMain.handle("saveDocX", async (event, content, title, username) => {
+  ipcMain.handle("saveDocX", async (_, content, title, username) => {
     const documentsPath = app.getPath("documents");
     const defaultPath = documentsPath ? path.join(documentsPath, `${title}.docx`) : `${title}.docx`;
     const { filePath } = await dialog.showSaveDialog({
