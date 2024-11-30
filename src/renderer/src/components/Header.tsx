@@ -189,7 +189,7 @@ const Header = (): JSX.Element => {
       )}
       <div
         className={`${
-          userPreferences.darkMode ? "bg-[#223]" : "bg-slate-100"
+          userPreferences.darkMode ? "bg-[#222]" : "bg-slate-100"
         } flex justify-between items-center w-full text-xl mt-20 sticky top-0 py-3 bg-opacity-75 backdrop-blur-sm bg-[#223] z-20`}
       >
         <div className="flex justify-start items-center gap-x-3">

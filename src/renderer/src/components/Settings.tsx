@@ -718,7 +718,7 @@ const Settings = (): JSX.Element => {
         initial={{ x: -10, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         className={`fixed no-scroll-bar flex flex-col justify-start z-40 right-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 ${
-          userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+          userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"
         } rounded-r-md overflow-y-auto no-scroll-bar`}
       >
         <button
@@ -734,8 +734,8 @@ const Settings = (): JSX.Element => {
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 userPreferences.darkMode
-                  ? "right-[1px] left-[50%] bg-green-200"
-                  : "left-[1px] right-[50%] bg-red-200"
+                  ? "right-[1px] left-[50%] bg-green-300"
+                  : "left-[1px] right-[50%] bg-red-300"
               } rounded-full`}
             ></div>
           </div>
@@ -761,8 +761,8 @@ const Settings = (): JSX.Element => {
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 userPreferences.grid
-                  ? "right-[1px] left-[50%] bg-green-200"
-                  : "left-[1px] right-[50%] bg-red-200"
+                  ? "right-[1px] left-[50%] bg-green-300"
+                  : "left-[1px] right-[50%] bg-red-300"
               } rounded-full`}
             ></div>
           </div>
@@ -788,15 +788,15 @@ const Settings = (): JSX.Element => {
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 userPreferences.order
-                  ? "right-[1px] left-[50%] bg-green-200"
-                  : "left-[1px] right-[50%] bg-red-200"
+                  ? "right-[1px] left-[50%] bg-green-300"
+                  : "left-[1px] right-[50%] bg-red-300"
               } rounded-full`}
             ></div>
           </div>
         </button>
         <div
           className={`${
-            userPreferences.darkMode ? "bg-slate-800" : "bg-slate-300"
+            userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"
           } p-2 rounded-md my-5`}
         >
           <div className="flex justify-between items-center w-full">
@@ -824,8 +824,8 @@ const Settings = (): JSX.Element => {
                 <div
                   className={`absolute top-[1px] bottom-[1px] duration-200 ${
                     filter === "Title"
-                      ? "right-[1px] left-[50%] bg-green-200"
-                      : "left-[1px] right-[50%] bg-red-200"
+                      ? "right-[1px] left-[50%] bg-green-300"
+                      : "left-[1px] right-[50%] bg-red-300"
                   } rounded-full`}
                 ></div>
               </div>
@@ -851,8 +851,8 @@ const Settings = (): JSX.Element => {
                 <div
                   className={`absolute top-[1px] bottom-[1px] duration-200 ${
                     filter === "Date"
-                      ? "right-[1px] left-[50%] bg-green-200"
-                      : "left-[1px] right-[50%] bg-red-200"
+                      ? "right-[1px] left-[50%] bg-green-300"
+                      : "left-[1px] right-[50%] bg-red-300"
                   } rounded-full`}
                 ></div>
               </div>
@@ -878,8 +878,8 @@ const Settings = (): JSX.Element => {
                 <div
                   className={`absolute top-[1px] bottom-[1px] duration-200 ${
                     filter === "Updated"
-                      ? "right-[1px] left-[50%] bg-green-200"
-                      : "left-[1px] right-[50%] bg-red-200"
+                      ? "right-[1px] left-[50%] bg-green-300"
+                      : "left-[1px] right-[50%] bg-red-300"
                   } rounded-full`}
                 ></div>
               </div>
@@ -905,7 +905,7 @@ const Settings = (): JSX.Element => {
           >
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                theme ? "right-[1px] left-[50%] bg-green-200" : "left-[1px] right-[50%] bg-red-200"
+                theme ? "right-[1px] left-[50%] bg-green-300" : "left-[1px] right-[50%] bg-red-300"
               } rounded-full`}
             ></div>
           </div>
@@ -928,8 +928,8 @@ const Settings = (): JSX.Element => {
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 userPreferences.autosave
-                  ? "right-[1px] left-[50%] bg-green-200"
-                  : "left-[1px] right-[50%] bg-red-200"
+                  ? "right-[1px] left-[50%] bg-green-300"
+                  : "left-[1px] right-[50%] bg-red-300"
               } rounded-full`}
             ></div>
           </div>
@@ -947,8 +947,8 @@ const Settings = (): JSX.Element => {
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 confirmOps
-                  ? "right-[1px] left-[50%] bg-green-200"
-                  : "left-[1px] right-[50%] bg-red-200"
+                  ? "right-[1px] left-[50%] bg-green-300"
+                  : "left-[1px] right-[50%] bg-red-300"
               } rounded-full`}
             ></div>
           </div>
@@ -966,8 +966,8 @@ const Settings = (): JSX.Element => {
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 lockPin
-                  ? "right-[1px] left-[50%] bg-green-200"
-                  : "left-[1px] right-[50%] bg-red-200"
+                  ? "right-[1px] left-[50%] bg-green-300"
+                  : "left-[1px] right-[50%] bg-red-300"
               } rounded-full`}
             ></div>
           </div>
@@ -1045,8 +1045,8 @@ const Settings = (): JSX.Element => {
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 username
-                  ? "right-[1px] left-[50%] bg-green-200"
-                  : "left-[1px] right-[50%] bg-red-200"
+                  ? "right-[1px] left-[50%] bg-green-300"
+                  : "left-[1px] right-[50%] bg-red-300"
               } rounded-full`}
             ></div>
           </div>
@@ -1077,8 +1077,8 @@ const Settings = (): JSX.Element => {
             <div
               className={`absolute top-[1px] bottom-[1px] duration-200 ${
                 password
-                  ? "right-[1px] left-[50%] bg-green-200"
-                  : "left-[1px] right-[50%] bg-red-200"
+                  ? "right-[1px] left-[50%] bg-green-300"
+                  : "left-[1px] right-[50%] bg-red-300"
               } rounded-full`}
             ></div>
           </div>
@@ -1111,7 +1111,7 @@ const Settings = (): JSX.Element => {
         )}
         <div
           className={`${
-            userPreferences.darkMode ? "bg-slate-800" : "bg-slate-300"
+            userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"
           } p-2 rounded-md my-5`}
         >
           <button
@@ -1127,8 +1127,8 @@ const Settings = (): JSX.Element => {
               <div
                 className={`absolute top-[1px] bottom-[1px] duration-200 ${
                   notifyAll
-                    ? "right-[1px] left-[50%] bg-green-200"
-                    : "left-[1px] right-[50%] bg-red-200"
+                    ? "right-[1px] left-[50%] bg-green-300"
+                    : "left-[1px] right-[50%] bg-red-300"
                 } rounded-full`}
               ></div>
             </div>
@@ -1147,8 +1147,8 @@ const Settings = (): JSX.Element => {
                 <div
                   className={`absolute top-[1px] bottom-[1px] duration-200 ${
                     notifyAll && notifySuccess
-                      ? "right-[1px] left-[50%] bg-green-200"
-                      : "left-[1px] right-[50%] bg-red-200"
+                      ? "right-[1px] left-[50%] bg-green-300"
+                      : "left-[1px] right-[50%] bg-red-300"
                   } rounded-full`}
                 ></div>
               </div>
@@ -1166,8 +1166,8 @@ const Settings = (): JSX.Element => {
                 <div
                   className={`absolute top-[1px] bottom-[1px] duration-200 ${
                     notifyAll && notifyErrors
-                      ? "right-[1px] left-[50%] bg-green-200"
-                      : "left-[1px] right-[50%] bg-red-200"
+                      ? "right-[1px] left-[50%] bg-green-300"
+                      : "left-[1px] right-[50%] bg-red-300"
                   } rounded-full`}
                 ></div>
               </div>

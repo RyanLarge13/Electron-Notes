@@ -191,7 +191,7 @@ const NewFolder = (): JSX.Element => {
   return (
     <>
       <div
-        className="fixed z-40 inset-0 bg-black bg-opacity-10 backdrop-blur-sm"
+        className="fixed z-[999] inset-0 bg-black bg-opacity-10 backdrop-blur-sm"
         onClick={() => {
           navigate("/");
           setSelectedFolder(null);
@@ -200,7 +200,7 @@ const NewFolder = (): JSX.Element => {
       <motion.section
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`fixed bottom-10 z-40 right-10 left-10 max-w-[500px] p-5 ${
+        className={`fixed bottom-10 z-[999] right-10 left-10 max-w-[500px] p-5 ${
           userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
         } rounded-md shadow-md`}
       >

@@ -35,7 +35,7 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
               style={{ marginLeft: level * 5 }}
               className={`w-full relative py-2 px-3 rounded-md ${
                 userPreferences.darkMode
-                  ? "bg-slate-700 hover:bg-slate-800 "
+                  ? "bg-[#333] hover:bg-[#444]"
                   : "bg-slate-200 hover:bg-slate-300"
               } duration-200 my-2 cursor-pointer`}
               onClick={(e) => {

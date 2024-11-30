@@ -1075,11 +1075,11 @@ const Account = (): JSX.Element => {
           <motion.div
             initial={{ x: -10, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className={`fixed z-[999] right-0 top-0 w-[80%] lg:w-[30%] p-5 rounded-l-md overflow-y-auto no-scroll-bar bottom-0 ${userPreferences.darkMode ? "bg-slate-900" : "bg-slate-300"} `}
+            className={`fixed z-[999] right-0 top-0 w-[80%] lg:w-[30%] p-5 rounded-l-md overflow-y-auto no-scroll-bar bottom-0 ${userPreferences.darkMode ? "bg-[#222]" : "bg-slate-300"} `}
           >
             <Tree
               moving={true}
-              folders={allData.folders.filter((fold) => fold.folderid !== move.from)}
+              folders={allData.folders}
               // folders={allData.folders.filter((fold) => move.from.some((f) => f !== fold.folderid))}
               parentId={null}
               level={0}

@@ -35,11 +35,11 @@ body::-webkit-scrollbar-thumb {
   width: 0px;
 }
 
-.radial-gradient {
+/* .radial-gradient {
   background: radial-gradient(transparent 90%, black 5%);
   opacity: 0.2;
   filter: blur(20px);
-}
+} */
 
 .renderHtml ul {
   list-style-type: disc;
@@ -58,4 +58,32 @@ body::-webkit-scrollbar-thumb {
   content: "";
   inset: 0;
   background-image: linear-gradient(to right, rgba(34, 34, 51, 0.8), transparent);
+}
+
+.my-masonry-grid {
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  margin-left: -30px;
+  width: 100%;
+}
+
+.my-masonry-grid_column {
+  background-clip: padding-box;
+}
+
+.my-masonry-grid-attachments {
+  display: flex;
+  margin-left: -5px;
+  width: auto;
+}
+
+.my-masonry-grid_column-attachments {
+  padding-left: 10px; /* gutter size */
+  padding-top: 10px;
+  background-clip: padding-box;
+}
+
+.mode-vert {
+  writing-mode: vertical-lr;
 }

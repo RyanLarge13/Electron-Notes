@@ -1487,7 +1487,7 @@ const Folders = (): JSX.Element => {
           }
           key={folder.folderid}
           className={`relative w-60 h-40 ${
-            userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+            userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
           } will-change-transform rounded-md shadow-lg p-2 flex flex-col justify-between cursor-pointer`}
           onClick={() =>
             !edit &&

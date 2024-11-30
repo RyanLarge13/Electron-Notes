@@ -1,15 +1,8 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { createNewNote, deleteANote, moveNoteToTrash, updateNote } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
-import {
-  FaArrowCircleRight,
-  FaCopy,
-  FaEdit,
-  FaLock,
-  FaSave,
-  FaTrash,
-  FaWindowClose
-} from "react-icons/fa";
+import { FaArrowCircleRight, FaCopy, FaEdit, FaLock, FaTrash, FaWindowClose } from "react-icons/fa";
+import Masonry from "react-masonry-css";
 import { TbEdit, TbNotes, TbTrash, TbX } from "react-icons/tb";
 import { Note } from "@renderer/types/types";
 import { v4 as uuidv4 } from "uuid";
@@ -59,6 +52,14 @@ const Notes = (): JSX.Element => {
   const textThemeString = userPreferences?.theme
     ? userPreferences.theme.replace("bg", "text")
     : "text-amber-300";
+
+  const breakpointColumnsObj = {
+    default: 1,
+    2500: 3,
+    1500: 2,
+    1024: 1,
+    100: 1
+  };
 
   useEffect(() => {
     if (pinInput && firstInput.current) {
@@ -1217,93 +1218,111 @@ const Notes = (): JSX.Element => {
   };
 
   return (
-    <div className="relative flex flex-wrap justify-start items-start gap-5 w-full my-10">
-      {notesToRender.map((note) => (
-        <div
-          onContextMenu={(e) => openNotesOptions(e, note)}
-          key={note.noteid}
-          className={`${view === "list" ? "w-full" : "w-[45%]"} max-w-[45%] h-80 ${
-            userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
-          } p-3 rounded-md shadow-lg overflow-hidden relative cursor-pointer`}
-          onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
-        >
-          {checkForUnsaved(note.noteid) ? (
-            <div className="absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-red-300 py-1 px-3">
-              <p>Unsaved Changes</p>
-            </div>
-          ) : null}
+    <div className="w-full py-10">
+      <Masonry
+        breakpointCols={breakpointColumnsObj}
+        className="my-masonry-grid px-5"
+        columnClassName="my-masonry-grid_column"
+      >
+        {notesToRender.map((note) => (
           <div
-            aria-hidden="true"
-            className="absolute inset-0 radial-gradient pointer-events-none"
-          ></div>
-          <div
-            className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
-              userPreferences.darkMode ? "bg-slate-400 text-black" : "bg-slate-700 text-white"
-            } rounded-tl-md`}
+            onContextMenu={(e) => openNotesOptions(e, note)}
+            key={note.noteid}
+            className={`${
+              userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
+            } p-4 rounded-md shadow-lg relative cursor-pointer m-3`}
+            onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
-            <p className="text-slate-200">
-              Last Updated On{" "}
-              <span className="text-white">
-                {new Date(note.updated).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric"
-                })}
-              </span>
-            </p>
-          </div>
-          <div className="flex justify-between items-center border-b border-b-slate-700 pb-1 mb-1">
-            {renameANote && renameANote.noteid === note.noteid ? (
-              <form onSubmit={changeTitle}>
-                <input
-                  ref={renameRef}
-                  value={renameText}
-                  onChange={(e) => setRenameText(e.target.value)}
-                  placeholder={note.title}
-                  className="focus:outline-none font-semibold text-xl bg-transparent"
-                />
-              </form>
-            ) : (
-              <h3 className="font-semibold text-2xl">{note.title}</h3>
-            )}
-            <div className="flex justify-between items-center gap-x-3">
-              <button
-                onClick={(e): void => {
-                  e.stopPropagation();
-                  if (renameANote) {
-                    setRenameANote(null);
-                    setRenameText("");
-                    return;
-                  }
-                  rename(note);
-                }}
-                className={`${textThemeString}`}
-              >
-                {renameANote && renameANote.noteid ? <TbX /> : <TbEdit />}
-              </button>
-              <button
-                onClick={(e): void => {
-                  e.stopPropagation();
-                  confirmTrash(note);
-                }}
-              >
-                <TbTrash className="text-red-500" />
-              </button>
-              <TbNotes className={`${textThemeString}`} />
-            </div>
-          </div>
-          {note.locked ? (
-            <div className="absolute bottom-3 left-3">
-              <FaLock className="text-red-300" />
-            </div>
-          ) : (
+            {checkForUnsaved(note.noteid) ? (
+              <div className="absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-gradient-to-tr from-orange-300 to-red-400 py-1 px-3">
+                <p>Unsaved Changes</p>
+              </div>
+            ) : null}
             <div
-              className="mt-3 renderHtml"
-              dangerouslySetInnerHTML={{ __html: note.htmlText }}
+              aria-hidden="true"
+              className="absolute inset-0 radial-gradient pointer-events-none"
             ></div>
-          )}
-        </div>
-      ))}
+            <div
+              className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
+                userPreferences.darkMode
+                  ? "bg-gradient-to-tr from-slate-700 to-slate-900 text-black"
+                  : "bg-gradient-to-tr from-slate-500 to-slate-700 text-white"
+              } rounded-tl-md`}
+            >
+              <p className="text-slate-200">
+                Last Updated On{" "}
+                <span className="text-white">
+                  {new Date(note.updated).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                  })}
+                </span>
+              </p>
+            </div>
+            <div className="flex justify-between items-center pb-1 mb-1">
+              {renameANote && renameANote.noteid === note.noteid ? (
+                <form onSubmit={changeTitle}>
+                  <input
+                    ref={renameRef}
+                    value={renameText}
+                    onChange={(e) => setRenameText(e.target.value)}
+                    placeholder={note.title}
+                    className="focus:outline-none font-semibold text-xl bg-transparent"
+                  />
+                </form>
+              ) : (
+                <h3 className="font-semibold text-2xl">{note.title}</h3>
+              )}
+              <div className="flex justify-between items-center gap-x-3 text-lg">
+                <button
+                  onClick={(e): void => {
+                    e.stopPropagation();
+                    if (renameANote) {
+                      setRenameANote(null);
+                      setRenameText("");
+                      return;
+                    }
+                    rename(note);
+                  }}
+                  className={`${textThemeString}`}
+                >
+                  {renameANote && renameANote.noteid ? <TbX /> : <TbEdit />}
+                </button>
+                <button
+                  onClick={(e): void => {
+                    e.stopPropagation();
+                    confirmTrash(note);
+                  }}
+                >
+                  <TbTrash className="text-red-500" />
+                </button>
+                <TbNotes className={`${textThemeString}`} />
+              </div>
+            </div>
+            {note.locked ? (
+              <div className="absolute bottom-3 left-3">
+                <FaLock className="text-red-300" />
+              </div>
+            ) : (
+              <div
+                className="mt-3 renderHtml"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    note.htmlText.slice(
+                      0,
+                      note.htmlText.length / 5 < 500
+                        ? note.htmlText.length / 5 < 100
+                          ? 100
+                          : 500
+                        : 500
+                    ) + " ..."
+                }}
+              ></div>
+            )}
+          </div>
+        ))}
+      </Masonry>
       {pinInput && (
         <>
           <div

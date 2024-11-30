@@ -1,12 +1,18 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { FaCopy, FaEdit, FaShareAlt, FaTrashAlt } from "react-icons/fa";
 import UserContext from "@renderer/contexxt/UserContext";
+import { IoCloseCircle } from "react-icons/io5";
+import { MdDragHandle } from "react-icons/md";
+import { CiDesktop, CiMaximize1, CiMinimize1 } from "react-icons/ci";
+import { Tooltip } from "react-tooltip";
 
 const NoteView = (): JSX.Element => {
   const { note, userPreferences, setNote, setNoteToEdit, setSystemNotif } = useContext(UserContext);
 
   const [htmlToRender, setHtmlToRender] = useState(note.htmlText);
+  const [minimize, setMinimize] = useState(false);
 
   const navigate = useNavigate();
 
@@ -16,6 +22,10 @@ const NoteView = (): JSX.Element => {
       setHtmlToRender(contains[0].htmlText);
     }
   }, []);
+
+  const minimizeWin = () => {
+    setMinimize(true);
+  };
 
   const editNote = (): void => {
     setNoteToEdit(note);
@@ -106,29 +116,101 @@ const NoteView = (): JSX.Element => {
 
   return (
     <>
+      {/* {!minimize ? ( */}
       <div
-        className={`fixed z-40 inset-0 bg-black backdrop-blur-sm bg-opacity-20`}
-        onClick={() => setNote(null)}
+        className={`${minimize ? "bg-transparent" : "bg-black backdrop-blur-sm bg-opacity-20"} fixed z-40 inset-0`}
+        onClick={() => (minimize ? setMinimize(false) : setNote(null))}
       ></div>
-      <div
+      {/* ) : null} */}
+      <motion.div
+        drag={true}
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: 1,
+          width: minimize ? "30px" : null,
+          height: minimize ? "300px" : null,
+          left: minimize ? 0 : null
+        }}
+        whileDrag={{ outline: "2px solid rgba(255,255,255,0.5" }}
         className={`fixed z-40 ${
           userPreferences.darkMode ? "bg-black" : "bg-white"
-        } inset-10 overflow-y-auto no-scroll-bar rounded-md shadow-md px-5 pb-5`}
+        } inset-10 right-[55%] overflow-y-auto origin-bottom no-scroll-bar rounded-md shadow-md pb-5`}
       >
+        {minimize ? (
+          <div className="p-2">
+            <CiMaximize1 />
+            <p className="mode-vert mt-10 ml-[-5px]">{note.title}</p>
+          </div>
+        ) : null}
         <div
-          className={`flex justify-between items-center sticky top-0 right-0 left-0 ${
-            userPreferences.darkMode ? "bg-black" : "bg-white"
-          } bg-opacity-20 backdrop-blur-sm`}
+          className={`p-2 sticky z-[40] top-0 bg-slate-700 rounded-md flex justify-between items-center ${minimize ? "hidden" : ""}`}
+        >
+          <p>
+            Created On{" "}
+            {new Date(note.createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric"
+            })}
+          </p>
+          <div className="flex justify-between items-center gap-x-3">
+            <Tooltip id="move-note" />
+            <Tooltip id="pin-note" />
+            <Tooltip id="new-win-note" />
+            <Tooltip id="close-note" />
+            <button
+              className="cursor-move text-xl"
+              data-tooltip-id="move-note"
+              data-tooltip-content="Move Around Your Note"
+            >
+              <MdDragHandle />
+            </button>
+            <button
+              onClick={() => minimizeWin()}
+              data-tooltip-id="pin-note"
+              data-tooltip-content="Minimize Your Note"
+            >
+              <CiMinimize1 />
+            </button>
+            <button
+              data-tooltip-id="new-win-note"
+              data-tooltip-content="Open Your Note In New Window"
+            >
+              <CiDesktop />
+            </button>
+            <button
+              data-tooltip-id="close-note"
+              data-tooltip-content="Close Note"
+              onClick={() => setNote(null)}
+            >
+              <IoCloseCircle />
+            </button>
+          </div>
+        </div>
+        <div
+          className={`${minimize ? "hidden" : ""} flex justify-between items-center sticky top-10 right-0 left-0 ${
+            userPreferences.darkMode ? "bg-gradient-to-tr from-black to-slate-900" : "bg-white"
+          } bg-opacity-20 backdrop-blur-sm px-5 rounded-md`}
         >
           <p className="text-3xl py-4">{note.title}</p>
           <div className="flex justify-center items-center gap-x-3">
-            <button onClick={() => copyNoteText()}>
+            <Tooltip id="copy-note" />
+            <Tooltip id="edit-note" />
+            <button
+              data-tooltip-id="copy-note"
+              data-tooltip-content="Copy Note As HTML"
+              onClick={() => copyNoteText()}
+            >
               <FaCopy />
             </button>
             {/* <button onClick={() => shareNote()}>
               <FaShareAlt />
             </button> */}
-            <button onClick={() => editNote()}>
+            <button
+              data-tooltip-id="edit-note"
+              data-tooltip-content="Edit Your Note"
+              onClick={() => editNote()}
+            >
               <FaEdit />
             </button>
             {/* <button onClick={() => trashNote()}>
@@ -136,8 +218,11 @@ const NoteView = (): JSX.Element => {
             </button> */}
           </div>
         </div>
-        <div className="renderHtml mt-5" dangerouslySetInnerHTML={{ __html: htmlToRender }}></div>
-      </div>
+        <div
+          className={`renderHtml mt-5 px-5 ${minimize ? "hidden" : ""}`}
+          dangerouslySetInnerHTML={{ __html: htmlToRender }}
+        ></div>
+      </motion.div>
       {/* <div
         className={`fixed z-40 ${
           userPreferences.darkMode ? "" : ""

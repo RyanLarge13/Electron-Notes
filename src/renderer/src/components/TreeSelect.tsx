@@ -40,7 +40,7 @@ const TreeSelect = ({ moving, folders, parentId, level, open }) => {
             <div
               key={fold.folderid}
               style={{ marginLeft: level * 5 }}
-              className="w-full relative py-2 px-3 rounded-md bg-slate-700 hover:bg-slate-800 duration-200 my-2 cursor-pointer"
+              className="w-full relative py-2 px-3 rounded-md bg-[#333] hover:bg-[#444] duration-200 my-2 cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 moving

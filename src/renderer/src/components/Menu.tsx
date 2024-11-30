@@ -230,7 +230,7 @@ const Menu = (): JSX.Element => {
         initial={{ x: -10, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         className={`fixed flex flex-col justify-between z-40 left-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 ${
-          userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+          userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"
         } rounded-r-md overflow-y-auto no-scroll-bar`}
       >
         <div className="mb-10">
@@ -239,7 +239,7 @@ const Menu = (): JSX.Element => {
             onClick={() => showAllNotes()}
             className={`p-3 rounded-md shadow-md my-3 ${
               userPreferences.darkMode
-                ? "bg-slate-700 hover:bg-slate-800"
+                ? "bg-[#333] hover:bg-[#444]"
                 : "bg-slate-300 hover:bg-slate-400"
             } w-full flex justify-between items-center duration-200`}
           >
@@ -255,7 +255,7 @@ const Menu = (): JSX.Element => {
             onClick={() => showAllLocked()}
             className={`p-3 rounded-md shadow-md my-3 ${
               userPreferences.darkMode
-                ? "bg-slate-700 hover:bg-slate-800"
+                ? "bg-[#333] hover:bg-[#444]"
                 : "bg-slate-300 hover:bg-slate-400"
             } w-full flex justify-between items-center duration-200`}
           >
@@ -273,7 +273,7 @@ const Menu = (): JSX.Element => {
             onClick={() => showAllDrafts()}
             className={`p-3 rounded-md shadow-md my-3 ${
               userPreferences.darkMode
-                ? "bg-slate-700 hover:bg-slate-800"
+                ? "bg-[#333] hover:bg-[#444]"
                 : "bg-slate-300 hover:bg-slate-400"
             } w-full flex justify-between items-center duration-200`}
           >
@@ -289,7 +289,7 @@ const Menu = (): JSX.Element => {
             onClick={(): void => showAllTrashed()}
             className={`p-3 rounded-md shadow-md my-3 w-full ${
               userPreferences.darkMode
-                ? "bg-slate-700 hover:bg-slate-800"
+                ? "bg-[#333] hover:bg-[#444]"
                 : "bg-slate-300 hover:bg-slate-400"
             } flex justify-between items-center duration-200`}
           >
@@ -304,7 +304,7 @@ const Menu = (): JSX.Element => {
           {/* <button
             className={`p-3 rounded-md shadow-md my-3 w-full ${
               userPreferences.darkMode
-                ? "bg-slate-700 hover:bg-slate-800"
+                ? "bg-[#333] hover:bg-[#444]"
                 : "bg-slate-300 hover:bg-slate-400"
             } flex justify-between items-center duration-200`}
           >
@@ -361,9 +361,21 @@ const Menu = (): JSX.Element => {
           >
             Logout &rarr;
           </button>
+          <a
+            href="https://github.com/RyanLarge13/Electron-Notes/issues"
+            target="_blank"
+            rel="noreferrer"
+            className={`p-2 rounded-md shadow-md ${
+              userPreferences.theme
+                ? `${userPreferences.theme} hover:${hoverBgString}`
+                : "bg-amber-300 hover:bg-amber-200"
+            } mb-3 text-center text-black w-full duration-200 block`}
+          >
+            Report A Bug
+          </a>
           <button
             onClick={() => confirmDeleteAccount()}
-            className="p-2 text-slate-700 rounded-md shadow-md bg-red-300 w-full hover:bg-red-200 duration-200"
+            className="p-2 text-red-500 underline rounded-md shadow-md w-full text-sm duration-200"
           >
             Delete Account
           </button>
