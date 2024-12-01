@@ -60,7 +60,7 @@ const SystemNotif = (): JSX.Element => {
             exit={{ x: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className={`fixed top-10 z-[999] p-3  pb-0 rounded-md shadow-md ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              userPreferences.darkMode ? "bg-[#444]" : "bg-slate-300"
             } w-[90vw] left-[5vw] max-w-[400px]`}
             onPointerDown={() =>
               !systemNotif.hasCancel ? setSystemNotif({ ...systemNotif, hasCancel: true }) : null

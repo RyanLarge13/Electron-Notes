@@ -43,6 +43,10 @@ const Folders = (): JSX.Element => {
     setMove,
     setUserPreferences,
     setNotes,
+    noteIsMoving,
+    noteDrag,
+    noteDragging,
+    setNoteDragFolder,
     editCurrentFolder,
     userPreferences,
     folders,
@@ -1462,6 +1466,17 @@ const Folders = (): JSX.Element => {
     }
   };
 
+  const handleNoteDrag = (folder) => {
+    if (noteIsMoving) {
+      return;
+    }
+    console.log("mouse over");
+    if (noteDrag && noteDragging !== null) {
+      console.log("note exists and is dragging, setting folder");
+      setNoteDragFolder(folder);
+    }
+  };
+
   return (
     <div className="flex flex-wrap justify-start items-start gap-5 w-full mt-5">
       {folders.map((folder: Folder) => (
@@ -1477,7 +1492,7 @@ const Folders = (): JSX.Element => {
             onDragEnd(e);
           }}
           animate={draggedInto == folder.folderid ? { scale: 0 } : { scale: 1 }}
-          onMouseEnter={(e) => (dragging ? handleDragOver(e, folder) : null)}
+          onMouseEnter={(e) => (dragging ? handleDragOver(e, folder) : handleNoteDrag(folder))}
           whileHover={
             !folderToChangeColor
               ? draggedInto === folder.folderid

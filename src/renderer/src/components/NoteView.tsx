@@ -118,32 +118,37 @@ const NoteView = (): JSX.Element => {
     <>
       {/* {!minimize ? ( */}
       <div
-        className={`${minimize ? "bg-transparent" : "bg-black backdrop-blur-sm bg-opacity-20"} fixed z-40 inset-0`}
+        className={`${minimize ? "bg-transparent pointer-events-none" : "bg-black backdrop-blur-sm bg-opacity-20"} fixed z-40 inset-0`}
         onClick={() => (minimize ? setMinimize(false) : setNote(null))}
       ></div>
       {/* ) : null} */}
       <motion.div
         drag={true}
+        dragConstraints={{ top: 0, bottom: 250, right: 1000, left: 0 }}
+        dragSnapToOrigin={minimize}
         initial={{ opacity: 0 }}
         animate={{
           opacity: 1,
           width: minimize ? "30px" : null,
           height: minimize ? "300px" : null,
-          left: minimize ? 0 : null
+          left: minimize ? 0 : null,
+          top: minimize ? 150 : null
         }}
         whileDrag={{ outline: "2px solid rgba(255,255,255,0.5" }}
-        className={`fixed z-40 ${
-          userPreferences.darkMode ? "bg-black" : "bg-white"
+        className={`${minimize ? "bg-[#444]" : ""} fixed z-40 ${
+          userPreferences.darkMode ? "bg-[#222]" : "bg-white"
         } inset-10 right-[55%] overflow-y-auto origin-bottom no-scroll-bar rounded-md shadow-md pb-5`}
       >
         {minimize ? (
           <div className="p-2">
-            <CiMaximize1 />
+            <button onClick={() => setMinimize(false)}>
+              <CiMaximize1 />
+            </button>
             <p className="mode-vert mt-10 ml-[-5px]">{note.title}</p>
           </div>
         ) : null}
         <div
-          className={`p-2 sticky z-[40] top-0 bg-slate-700 rounded-md flex justify-between items-center ${minimize ? "hidden" : ""}`}
+          className={`p-2 sticky z-[40] top-0 bg-[#333] rounded-t-md flex justify-between items-center ${minimize ? "hidden" : ""}`}
         >
           <p>
             Created On{" "}
@@ -189,10 +194,10 @@ const NoteView = (): JSX.Element => {
         </div>
         <div
           className={`${minimize ? "hidden" : ""} flex justify-between items-center sticky top-10 right-0 left-0 ${
-            userPreferences.darkMode ? "bg-gradient-to-tr from-black to-slate-900" : "bg-white"
-          } bg-opacity-20 backdrop-blur-sm px-5 rounded-md`}
+            userPreferences.darkMode ? "bg-[#444]" : "bg-white"
+          } p-3 rounded-b-md`}
         >
-          <p className="text-3xl py-4">{note.title}</p>
+          <p className="text-3xl">{note.title}</p>
           <div className="flex justify-center items-center gap-x-3">
             <Tooltip id="copy-note" />
             <Tooltip id="edit-note" />

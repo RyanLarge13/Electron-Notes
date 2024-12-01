@@ -15,7 +15,8 @@ import {
   MdGroupAdd,
   MdSelectAll,
   MdTabUnselected,
-  MdNotes
+  MdNotes,
+  MdDateRange
 } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 import {
@@ -37,7 +38,8 @@ import Menu from "@renderer/components/Menu";
 import Settings from "@renderer/components/Settings";
 import Tree from "@renderer/components/Tree";
 import Colors from "@renderer/components/Colors";
-import { BsArrowReturnRight, BsArrowRight } from "react-icons/bs";
+import { BsAlphabet, BsArrowReturnRight, BsArrowRight } from "react-icons/bs";
+import { TiTime } from "react-icons/ti";
 // import Connections from "@renderer/components/Connections";
 // import ConBubbles from "@renderer/components/ConBubbles";
 
@@ -708,13 +710,13 @@ const Account = (): JSX.Element => {
             exit={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className={`fixed top-5 left-5 padding-3 z-50 ${
-              userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+              userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
             } rounded-md shadow-md flex justify-evenly items-center gap-3`}
           >
             <button
               onClick={() => cancelEdit()}
               className={`flex justify-between items-center text-xs p-3 ${
-                userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
               } duration-200 w-40`}
             >
               Cancel
@@ -723,7 +725,7 @@ const Account = (): JSX.Element => {
             <button
               onClick={() => selectAllFolders()}
               className={`flex justify-between items-center text-xs p-3 ${
-                userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
               } duration-200 w-40`}
             >
               Select All
@@ -733,7 +735,7 @@ const Account = (): JSX.Element => {
               <button
                 onClick={() => setSelectedForEdit([])}
                 className={`flex justify-between items-center text-xs p-3 ${
-                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                  userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                 } duration-200 w-40`}
               >
                 Un-Select All
@@ -745,7 +747,7 @@ const Account = (): JSX.Element => {
                 <button
                   onClick={() => deleteAllSelected()}
                   className={`flex justify-between items-center text-xs p-3 ${
-                    userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                    userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                   } duration-200 w-40`}
                 >
                   {selectedForEdit.length < 2 ? "Delete" : "Delete All"}
@@ -754,7 +756,7 @@ const Account = (): JSX.Element => {
                 <button
                   onClick={() => moveAllSelected()}
                   className={`flex justify-between items-center text-xs p-3 ${
-                    userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                    userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                   } duration-200 w-40`}
                 >
                   {selectedForEdit.length < 2 ? "Move" : "Move All"}
@@ -812,12 +814,12 @@ const Account = (): JSX.Element => {
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               className={`${
-                userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+                userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
               } z-40 rounded-md shadow-md absolute top-0 right-5 flex flex-col justify-between items-start w-40 text-sm`}
             >
               <button
-                className={`text-left p-3 ${
-                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                className={`text-left p-3 flex justify-between items-center ${
+                  userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                 } duration-200 w-full`}
                 onClick={() => {
                   setFilterOptions(false);
@@ -852,10 +854,11 @@ const Account = (): JSX.Element => {
                 }}
               >
                 Title
+                <BsAlphabet />
               </button>
               <button
-                className={`text-left p-3 ${
-                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                className={`text-left p-3 flex justify-between items-center ${
+                  userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                 } duration-200 w-full`}
                 onClick={() => {
                   setFilterOptions(false);
@@ -890,10 +893,11 @@ const Account = (): JSX.Element => {
                 }}
               >
                 Date
+                <MdDateRange />
               </button>
               <button
-                className={`text-left p-3 ${
-                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                className={`text-left p-3 flex justify-between items-center ${
+                  userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                 } duration-200 w-full`}
                 onClick={() => {
                   setFilterOptions(false);
@@ -928,6 +932,7 @@ const Account = (): JSX.Element => {
                 }}
               >
                 Updated
+                <TiTime />
               </button>
             </motion.div>
           </>

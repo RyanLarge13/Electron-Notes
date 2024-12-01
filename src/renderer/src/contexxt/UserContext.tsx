@@ -41,6 +41,12 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [noteToEdit, setNoteToEdit] = useState(null);
   const [settings, setSettings] = useState(false);
   const [move, setMove] = useState(null);
+
+  const [noteDrag, setNoteDrag] = useState(false);
+  const [noteDragging, setNoteDragging] = useState(null);
+  const [noteDragFolder, setNoteDragFolder] = useState(null);
+  const [noteIsMoving, setNoteIsMoving] = useState(false);
+
   const [editCurrentFolder, setEditCurrentFolder] = useState(false);
   const [drafts, setDrafts] = useState([]);
   const [search, setSearch] = useState(false);
@@ -514,7 +520,15 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         shareRequests,
         setShareRequests,
         sharedNotes,
-        setSharedNotes
+        setSharedNotes,
+        noteDrag,
+        setNoteDrag,
+        noteIsMoving,
+        setNoteIsMoving,
+        noteDragFolder,
+        setNoteDragFolder,
+        noteDragging,
+        setNoteDragging
       }}
     >
       {children}

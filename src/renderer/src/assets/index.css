@@ -87,3 +87,21 @@ body::-webkit-scrollbar-thumb {
 .mode-vert {
   writing-mode: vertical-lr;
 }
+
+.fade-inset-black::after,
+.fade-inset-black::before {
+  position: absolute;
+  content: "";
+  width: 100%;
+  height: 100%;
+}
+
+.fade-inset-black::after {
+  content: "";
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 50px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(255, 255, 255, 0));
+  z-index: 999;
+}

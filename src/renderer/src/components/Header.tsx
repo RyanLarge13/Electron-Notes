@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { BiMenuAltLeft } from "react-icons/bi";
+import { BiEdit, BiGrid, BiListUl, BiMenuAltLeft, BiPlus } from "react-icons/bi";
 import { IoIosSearch } from "react-icons/io";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { IoReturnUpBackSharp } from "react-icons/io5";
@@ -7,6 +7,7 @@ import { FaHome } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import UserContext from "@renderer/contexxt/UserContext";
+import { PiPlus } from "react-icons/pi";
 
 const Header = (): JSX.Element => {
   const {
@@ -190,7 +191,7 @@ const Header = (): JSX.Element => {
       <div
         className={`${
           userPreferences.darkMode ? "bg-[#222]" : "bg-slate-100"
-        } flex justify-between items-center w-full text-xl mt-20 sticky top-0 py-3 bg-opacity-75 backdrop-blur-sm bg-[#223] z-20`}
+        } flex justify-between items-center w-full text-xl mt-20 sticky top-0 py-3 bg-opacity-75 backdrop-blur-sm bg-[#222] z-20`}
       >
         <div className="flex justify-start items-center gap-x-3">
           <button onClick={() => setMenu(true)}>
@@ -230,8 +231,8 @@ const Header = (): JSX.Element => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className={`${
-                userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
-              } rounded-md shadow-md absolute top-0 right-5 flex flex-col justify-between items-start w-40 text-sm`}
+                userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
+              } rounded-md shadow-md absolute top-0 right-5 overflow-hidden flex flex-col justify-between items-start w-40 text-sm`}
             >
               <button
                 onClick={() => {
@@ -244,36 +245,39 @@ const Header = (): JSX.Element => {
                   setUserPreferences(newPreferences);
                   setView((prev) => (prev === "list" ? "grid" : "list"));
                 }}
-                className={`text-left p-3 ${
-                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                className={`text-left p-3 flex justify-between items-center ${
+                  userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                 } duration-200 w-full`}
               >
                 {view === "list" ? "Grid" : "List"}
+                {view === "list" ? <BiGrid /> : <BiListUl />}
               </button>
               <button
                 onClick={() => {
                   navigate("/newfolder");
                   setOptionMenu(false);
                 }}
-                className={`text-left p-3 ${
-                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                className={`text-left p-3 flex justify-between items-center ${
+                  userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                 } duration-200 w-full`}
               >
                 Create Folder
+                <BiPlus />
               </button>
               <button
                 onClick={() => {
                   setOptionMenu(false);
                   setEdit(true);
                 }}
-                className={`text-left p-3 ${
-                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                className={`text-left p-3 flex justify-between items-center ${
+                  userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                 } duration-200 w-full`}
               >
                 Edit
+                <BiEdit />
               </button>
               {/* <button
-                className={`text-left p-3 ${
+                className={`text-left p-3 flex justify-between items-center ${
                   userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
                 } duration-200 w-full`}
               >

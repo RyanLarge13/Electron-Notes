@@ -652,7 +652,7 @@ const Draft = (): JSX.Element => {
       ></div>
       <div
         className={`fixed inset-10 right-[55%] rounded-md shadow-md ${
-          userPreferences.darkMode ? "bg-black" : "bg-white"
+          userPreferences.darkMode ? "bg-[#222]" : "bg-white"
         } z-40`}
       >
         <div className="flex justify-between items-center pr-5">
@@ -663,7 +663,7 @@ const Draft = (): JSX.Element => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={`p-3 text-xl ${
-              userPreferences.darkMode ? "bg-black" : "bg-white"
+              userPreferences.darkMode ? "bg-[#222]" : "bg-white"
             } focus:outline-none rounded-md`}
           />
           <div className="flex gap-x-3">
@@ -688,7 +688,7 @@ const Draft = (): JSX.Element => {
             </button>
           </div>
         </div>
-        <div className="h-full">
+        <div className="h-full bg-[#222]">
           <ReactQuill
             theme="snow"
             modules={modules}

@@ -7,6 +7,7 @@ import { TbEdit, TbNotes, TbTrash, TbX } from "react-icons/tb";
 import { Note } from "@renderer/types/types";
 import { v4 as uuidv4 } from "uuid";
 import cheerio from "cheerio";
+import { motion } from "framer-motion";
 import UserContext from "@renderer/contexxt/UserContext";
 import { BsFiletypeDocx, BsFiletypeHtml, BsFiletypePdf, BsFiletypeTxt } from "react-icons/bs";
 
@@ -23,14 +24,19 @@ const Notes = (): JSX.Element => {
     setEditDraft,
     setDrafts,
     setNotes,
-    contextMenu,
+    noteDragging,
+    setNoteIsMoving,
+    setNoteDragFolder,
+    noteIsMoving,
     drafts,
     mainTitle,
     notesToRender,
     token,
-    view,
     userPreferences,
-    user
+    user,
+    setNoteDragging,
+    setNoteDrag,
+    noteDragFolder
   } = useContext(UserContext);
 
   const [pinInput, setPinInput] = useState(false);
@@ -1217,6 +1223,67 @@ const Notes = (): JSX.Element => {
     return false;
   };
 
+  const moveNote = () => {
+    // Move note
+    setNoteDrag(false);
+    setNoteDragFolder(null);
+    setNoteIsMoving(false);
+    setNoteDragging(null);
+  };
+
+  const handleDragEnd = (e) => {
+    console.log("drag end");
+    if (!noteDragFolder) {
+      setNoteDragging(null);
+      setNoteDrag(false);
+      return;
+    }
+    if (noteDragFolder) {
+      setNoteIsMoving(true);
+    }
+    const newPrompt = {
+      show: true,
+      title: "Move Note",
+      text: `Move note ${noteDragging.title} to folder ${noteDragFolder.title}?`,
+      color: "bg-green-300",
+      hasCancel: true,
+      actions: [
+        {
+          text: "cancel",
+          func: (): void => {
+            setNoteDrag(false);
+            setNoteDragFolder(null);
+            setNoteIsMoving(false);
+            setNoteDragging(null);
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            });
+          }
+        },
+        {
+          text: "confirm",
+          func: (): void => moveNote()
+        }
+      ]
+    };
+    setSystemNotif(newPrompt);
+  };
+
+  let calledTwice = false;
+  const isNoteMoving = (): boolean => {
+    let move = false;
+    setTimeout(() => {
+      move = noteIsMoving;
+    }, 100);
+    calledTwice = true;
+    return move;
+  };
+
   return (
     <div className="w-full py-10">
       <Masonry
@@ -1224,13 +1291,23 @@ const Notes = (): JSX.Element => {
         className="my-masonry-grid px-5"
         columnClassName="my-masonry-grid_column"
       >
-        {notesToRender.map((note) => (
-          <div
+        {notesToRender.map((note: Note) => (
+          <motion.div
+            whileHover={{ backgroundColor: userPreferences.darkMode ? "#444" : "#fff" }}
+            drag={true}
+            dragSnapToOrigin={isNoteMoving()}
+            onDragStart={() => {
+              setNoteDragging(note);
+              setNoteDrag(true);
+            }}
+            onDragEnd={(e) => handleDragEnd(e)}
+            animate={{ scale: noteIsMoving && noteDragging.noteid === note.noteid ? 0 : 1 }}
+            whileDrag={{ pointerEvents: "none" }}
             onContextMenu={(e) => openNotesOptions(e, note)}
             key={note.noteid}
             className={`${
               userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
-            } p-4 rounded-md shadow-lg relative cursor-pointer m-3`}
+            } p-4 rounded-md shadow-lg relative cursor-pointer m-3 pointer-events-auto`}
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
             {checkForUnsaved(note.noteid) ? (
@@ -1245,7 +1322,7 @@ const Notes = (): JSX.Element => {
             <div
               className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
                 userPreferences.darkMode
-                  ? "bg-gradient-to-tr from-slate-700 to-slate-900 text-black"
+                  ? "bg-[#222] text-black"
                   : "bg-gradient-to-tr from-slate-500 to-slate-700 text-white"
               } rounded-tl-md`}
             >
@@ -1260,7 +1337,7 @@ const Notes = (): JSX.Element => {
                 </span>
               </p>
             </div>
-            <div className="flex justify-between items-center pb-1 mb-1">
+            <div className="flex justify-between items-start gap-x-3 pb-1 mb-1">
               {renameANote && renameANote.noteid === note.noteid ? (
                 <form onSubmit={changeTitle}>
                   <input
@@ -1274,7 +1351,7 @@ const Notes = (): JSX.Element => {
               ) : (
                 <h3 className="font-semibold text-2xl">{note.title}</h3>
               )}
-              <div className="flex justify-between items-center gap-x-3 text-lg">
+              <div className="flex mt-2 justify-between items-center gap-x-3 text-lg">
                 <button
                   onClick={(e): void => {
                     e.stopPropagation();
@@ -1320,7 +1397,7 @@ const Notes = (): JSX.Element => {
                 }}
               ></div>
             )}
-          </div>
+          </motion.div>
         ))}
       </Masonry>
       {pinInput && (
