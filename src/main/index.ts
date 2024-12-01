@@ -145,6 +145,31 @@ function createWindow(): void {
     app.quit();
   });
 
+  ipcMain.handle("openNoteInNewWindow", (_, note) => {
+    const noteWindow = new BrowserWindow({
+      width: 1000,
+      height: 600,
+      parent: mainWindow, // Tie the new window to the main window
+      title: note.title,
+      autoHideMenuBar: true,
+      modal: false, // Change to true if you want it as a modal
+      webPreferences: {
+        preload: join(__dirname, "../preload/index.js"),
+        sandbox: false,
+        contextIsolation: true
+      }
+    });
+
+    noteWindow.loadFile(join(__dirname, "../../public/windows/newNote/index.html"));
+
+    noteWindow.webContents.openDevTools();
+
+    // Once the new window is ready, send the note data to it
+    noteWindow.webContents.once("did-finish-load", () => {
+      noteWindow.webContents.send("display-note", note);
+    });
+  });
+
   mainWindow.loadFile(join(__dirname, "../renderer/index.html"), { hash: "login" });
   mainWindow.webContents.openDevTools();
 

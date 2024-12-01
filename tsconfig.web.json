@@ -6,8 +6,10 @@
     "src/renderer/src/**/*.tsx",
     "src/renderer/src/**/*.js",
     "src/preload/*.d.ts",
-    "src/renderer/src/threads/*"
-  ],
+    "src/renderer/src/threads/*", 
+    "src/renderer/childWindows/*.ts",
+    "src/renderer/childWindows/*.tsx"  
+],
   "compilerOptions": {
     "strict": false,
     "strictNullChecks": false,
@@ -17,7 +19,8 @@
     "paths": {
       "@renderer/*": [
         "src/renderer/src/*",
-        "src/renderer/src/threads/*"
+        "src/renderer/src/threads/*",
+        "src/renderer/src/childWindows/*"
       ]
     }
   }

@@ -7,6 +7,7 @@ import { IoCloseCircle } from "react-icons/io5";
 import { MdDragHandle } from "react-icons/md";
 import { CiDesktop, CiMaximize1, CiMinimize1 } from "react-icons/ci";
 import { Tooltip } from "react-tooltip";
+import { Note } from "@renderer/types/types";
 
 const NoteView = (): JSX.Element => {
   const { note, userPreferences, setNote, setNoteToEdit, setSystemNotif } = useContext(UserContext);
@@ -114,6 +115,10 @@ const NoteView = (): JSX.Element => {
 
   // const shareNote = (): void => {};
 
+  const openWindow = async (note: Note): Promise<void> => {
+    await window.openNewWin.openNoteInNewWindow(note);
+  };
+
   return (
     <>
       {/* {!minimize ? ( */}
@@ -178,6 +183,7 @@ const NoteView = (): JSX.Element => {
               <CiMinimize1 />
             </button>
             <button
+              onClick={() => openWindow(note)}
               data-tooltip-id="new-win-note"
               data-tooltip-content="Open Your Note In New Window"
             >

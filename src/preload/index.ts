@@ -21,6 +21,10 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld("closeWin", {
       closeMainWin: () => ipcRenderer.invoke("closeMainWin")
     });
+
+    contextBridge.exposeInMainWorld("openNewWin", {
+      openNoteInNewWindow: (note) => ipcRenderer.invoke("openNoteInNewWindow", note)
+    });
   } catch (error) {
     console.error(error);
   }
