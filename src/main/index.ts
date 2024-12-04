@@ -154,13 +154,13 @@ function createWindow(): void {
       autoHideMenuBar: true,
       modal: false, // Change to true if you want it as a modal
       webPreferences: {
-        preload: join(__dirname, "../preload/index.js"),
+        preload: join(__dirname, "../preload/noteWinPreload.js"),
         sandbox: false,
         contextIsolation: true
       }
     });
 
-    noteWindow.loadFile(join(__dirname, "../../public/windows/newNote/index.html"));
+    noteWindow.loadFile(join(__dirname, "../renderer/windows/newNote/index.html"));
 
     noteWindow.webContents.openDevTools();
 
