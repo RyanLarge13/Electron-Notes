@@ -117,6 +117,7 @@ const NoteView = (): JSX.Element => {
 
   const openWindow = async (note: Note): Promise<void> => {
     await window.openNewWin.openNoteInNewWindow(note);
+    setNote(null);
   };
 
   return (

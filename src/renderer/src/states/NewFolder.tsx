@@ -201,7 +201,7 @@ const NewFolder = (): JSX.Element => {
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         className={`fixed bottom-10 z-[999] right-10 left-10 max-w-[500px] p-5 ${
-          userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+          userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"
         } rounded-md shadow-md`}
       >
         <div

@@ -114,20 +114,12 @@ body::-webkit-scrollbar-thumb {
   border: none !important;
 }
 
-.ql-snow .ql-toolbar .ql-picker-label,
-.ql-snow .ql-toolbar .ql-picker-item,
-.ql-snow .ql-toolbar button,
-.ql-snow .ql-toolbar svg {
-  color: #888 !important;
-  fill: #888 !important;
-}
-
-.ql-snow .ql-toolbar button.ql-active,
-.ql-snow .ql-toolbar svg.ql-active {
-  color: aqua !important;
-  fill: aqua !important;
-}
-
-.ql-snow .ql-toolbar {
+.ql-toolbar.ql-snow {
   border: none !important;
+  color: #fff !important;
+}
+
+.ql-fill {
+  color: #fff !important;
+  fill: #fff;
 }

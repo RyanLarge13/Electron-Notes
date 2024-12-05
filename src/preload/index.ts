@@ -10,6 +10,14 @@ const api = {};
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld("electron", electronAPI);
+
+    // Message from note window
+    contextBridge.exposeInMainWorld("noteUpdate", {
+      receiveCustomData: (callback) =>
+        ipcRenderer.on("note-data-from-custom", (_, data) => callback(data))
+    });
+    // Message from note window
+
     contextBridge.exposeInMainWorld("api", api);
     contextBridge.exposeInMainWorld("save", {
       saveTxt: (content: string, title: string) => ipcRenderer.invoke("saveTxt", content, title),

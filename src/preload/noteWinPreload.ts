@@ -13,7 +13,7 @@ if (process.contextIsolated) {
       ipcRenderer.on("display-note", (_, note) => callback(note));
     },
     sendNoteUpdate: (updatedNote) => {
-      ipcRenderer.send("note-updated", updatedNote);
+      ipcRenderer.send("note-update", updatedNote);
     }
   });
 } else {

@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import ReactQuill from "react-quill";
 import UserContext from "@renderer/contexxt/UserContext";
 import "react-quill/dist/quill.snow.css";
+import "../assets/quill.css";
 
 const Draft = (): JSX.Element => {
   const {

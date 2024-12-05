@@ -86,6 +86,38 @@ const Account = (): JSX.Element => {
   const [newTitle, setNewTitle] = useState("");
   const [newColor, setNewColor] = useState(folder ? folder.color : "bg-amber-300");
 
+  window.noteUpdate.receiveCustomData((data) => {
+    if (!allData) {
+      return;
+    }
+    if (!allData.notes || !allData.folders) {
+      return;
+    }
+    if (allData.notes.length < 1 || allData.folders.length < 1) {
+      return;
+    }
+
+    const text = data.text;
+    const noteId = data.id;
+
+    setAllData((prev: AllData) => {
+      return {
+        folders: prev.folders,
+        user: prev.user,
+        notes: prev.notes.map((note: Note) => {
+          if (note.noteid === noteId) {
+            return {
+              ...note,
+              htmlText: text
+            };
+          } else {
+            return note;
+          }
+        })
+      };
+    });
+  });
+
   const navigate = useNavigate();
   const themeStringText = userPreferences?.theme
     ? userPreferences.theme.replace("bg", "text")

@@ -1,18 +1,26 @@
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import "../../../src/assets/quill.css";
+import { Note } from "@renderer/types/types";
 
 const App = (): JSX.Element => {
   const [value, setValue] = useState("");
+  const [noteId, setNoteId] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    window.electron.onDisplayNote((note) => {
+    window.electron.onDisplayNote((note: Note) => {
       setValue(note.htmlText);
+      setNoteId(note.noteid);
       setLoading(false);
       console.log(note);
     });
   }, []);
+
+  const sendDataToFrontEnd = (e: string): void => {
+    window.electron.sendNoteUpdate({ text: e, id: noteId });
+  };
 
   const modules = {
     toolbar: [
@@ -57,12 +65,10 @@ const App = (): JSX.Element => {
             modules={modules}
             formats={formats}
             value={value}
-            // onChange={(e) => {
-            //   if (!changed) {
-            //     setChanged(true);
-            //   }
-            //   setValue(e);
-            // }}
+            onChange={(e) => {
+              sendDataToFrontEnd(e);
+              setValue(e);
+            }}
             style={{
               height: "80%"
             }}

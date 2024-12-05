@@ -1274,16 +1274,6 @@ const Notes = (): JSX.Element => {
     setSystemNotif(newPrompt);
   };
 
-  let calledTwice = false;
-  const isNoteMoving = (): boolean => {
-    let move = false;
-    setTimeout(() => {
-      move = noteIsMoving;
-    }, 100);
-    calledTwice = true;
-    return move;
-  };
-
   return (
     <div className="w-full py-10">
       <Masonry
@@ -1295,7 +1285,7 @@ const Notes = (): JSX.Element => {
           <motion.div
             whileHover={{ backgroundColor: userPreferences.darkMode ? "#444" : "#fff" }}
             drag={true}
-            dragSnapToOrigin={isNoteMoving()}
+            dragSnapToOrigin={true}
             onDragStart={() => {
               setNoteDragging(note);
               setNoteDrag(true);
@@ -1311,7 +1301,7 @@ const Notes = (): JSX.Element => {
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
             {checkForUnsaved(note.noteid) ? (
-              <div className="absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-gradient-to-tr from-orange-300 to-red-400 py-1 px-3">
+              <div className="text-black absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-gradient-to-tr from-orange-300 to-red-400 py-1 px-3">
                 <p>Unsaved Changes</p>
               </div>
             ) : null}

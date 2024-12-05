@@ -170,6 +170,11 @@ function createWindow(): void {
     });
   });
 
+  // Send note data back to main window for live updates
+  ipcMain.on("note-update", (_, data) => {
+    mainWindow.webContents.send("note-data-from-custom", data);
+  });
+
   mainWindow.loadFile(join(__dirname, "../renderer/index.html"), { hash: "login" });
   mainWindow.webContents.openDevTools();
 
