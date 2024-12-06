@@ -1,7 +1,15 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { createNewNote, deleteANote, moveNoteToTrash, updateNote } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
-import { FaArrowCircleRight, FaCopy, FaEdit, FaLock, FaTrash, FaWindowClose } from "react-icons/fa";
+import {
+  FaArrowCircleRight,
+  FaCopy,
+  FaDesktop,
+  FaEdit,
+  FaLock,
+  FaTrash,
+  FaWindowClose
+} from "react-icons/fa";
 import Masonry from "react-masonry-css";
 import { TbEdit, TbNotes, TbTrash, TbX } from "react-icons/tb";
 import { Note } from "@renderer/types/types";
@@ -1017,6 +1025,12 @@ const Notes = (): JSX.Element => {
     }
   };
 
+  const openWindow = async (note: Note): Promise<void> => {
+    await window.openNewWin.openNoteInNewWindow(note);
+    setNote(null);
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+  };
+
   const openNotesOptions = (event, note: Note): void => {
     event.preventDefault();
     event.stopPropagation();
@@ -1081,6 +1095,11 @@ const Notes = (): JSX.Element => {
           title: "edit",
           icon: <FaEdit />,
           func: () => edit(note, false)
+        },
+        {
+          title: "open in new window",
+          icon: <FaDesktop />,
+          func: () => openWindow(note)
         },
         {
           title: "move",

@@ -14,6 +14,9 @@ if (process.contextIsolated) {
     },
     sendNoteUpdate: (updatedNote) => {
       ipcRenderer.send("note-update", updatedNote);
+    },
+    sendNoteSave: (note) => {
+      ipcRenderer.send("note-save", note);
     }
   });
 } else {

@@ -57,6 +57,7 @@ const Account = (): JSX.Element => {
     setFolder,
     setSystemNotif,
     setCreateCon,
+    setUserPreferences,
     setHoverConnections,
     hoverConnections,
     // createCon,
@@ -117,6 +118,62 @@ const Account = (): JSX.Element => {
       };
     });
   });
+
+  window.noteUpdate.saveNoteFromWindow((newNote: Note) => {
+    removeUnsavedChanges(newNote.noteid);
+    if (!token) {
+      return;
+    }
+    const staticNote = {
+      notesId: newNote.noteid,
+      htmlNotes: newNote.htmlText,
+      ...newNote
+    };
+    // { notesId: string; htmlNotes: string; locked: boolean; title: string; folderId: string }
+    updateNote(token, staticNote);
+    setSystemNotif({
+      show: true,
+      title: "Updated",
+      text: `${newNote.title} was updated`,
+      color: userPreferences.theme,
+      hasCancel: false,
+      actions: [
+        {
+          text: "close",
+          func: (): void =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        }
+      ]
+    });
+  });
+
+  const removeUnsavedChanges = (noteId): void => {
+    let isUnsaved = false;
+    const unsaved = userPreferences.unsavedNotes;
+    for (let i = 0; i < unsaved.length; i++) {
+      if (unsaved[i].id === noteId) {
+        isUnsaved = true;
+      }
+    }
+    if (isUnsaved) {
+      const newUnsaved = userPreferences.unsavedNotes.filter(
+        (unsaved: { id: string; htmlText: string }) => unsaved.id !== noteId
+      );
+      const newPrefs = {
+        ...userPreferences,
+        unsavedNotes: newUnsaved
+      };
+      setUserPreferences(newPrefs);
+      localStorage.setItem("preferences", JSON.stringify(newPrefs));
+    }
+  };
 
   const navigate = useNavigate();
   const themeStringText = userPreferences?.theme
@@ -1018,12 +1075,12 @@ const Account = (): JSX.Element => {
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             className={`rounded-md shadow-md fixed top-10 right-10 ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-200"
+              userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"
             } flex flex-col justify-center items-center font-bold w-40`}
           >
             <button
               className={`flex justify-between items-center w-full py-3 px-4 ${
-                userPreferences.darkMode ? "hover:bg-slate-600" : "hover:bg-slate-300"
+                userPreferences.darkMode ? "hover:bg-[#333]" : "hover:bg-slate-300"
               }`}
               onClick={() => {
                 setConOptions(false);
@@ -1052,9 +1109,7 @@ const Account = (): JSX.Element => {
         className={`fixed bottom-3 right-3 rounded-full ${
           userPreferences.theme ? themeStringText : "text-amber-300"
         } ${
-          userPreferences.darkMode
-            ? "bg-slate-600 hover:bg-slate-500"
-            : "bg-slate-300 hover:bg-slate-400"
+          userPreferences.darkMode ? "bg-[#333] hover:bg-[#444]" : "bg-slate-300 hover:bg-slate-400"
         } duration-200 w-10 h-10 flex justify-center items-center shadow-sm`}
         onClick={() => setOptions((prev) => !prev)}
       >
@@ -1067,12 +1122,12 @@ const Account = (): JSX.Element => {
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             className={`rounded-md shadow-md fixed bottom-10 right-10 ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-200"
-            } flex flex-col justify-center items-center font-bold w-40`}
+              userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
+            } flex flex-col justify-center items-center font-bold w-40 overflow-hidden`}
           >
             <button
               className={`flex justify-between items-center w-full py-3 px-4 ${
-                userPreferences.darkMode ? "hover:bg-slate-600" : "hover:bg-slate-300"
+                userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-400"
               }`}
               onClick={() => {
                 setOptions(false);
@@ -1084,7 +1139,7 @@ const Account = (): JSX.Element => {
             </button>
             <button
               className={`flex justify-between items-center w-full py-3 px-4 ${
-                userPreferences.darkMode ? "hover:bg-slate-600" : "hover:bg-slate-300"
+                userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-[#333]"
               }`}
               onClick={() => {
                 setOptions(false);

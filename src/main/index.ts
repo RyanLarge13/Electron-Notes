@@ -162,7 +162,7 @@ function createWindow(): void {
 
     noteWindow.loadFile(join(__dirname, "../renderer/windows/newNote/index.html"));
 
-    noteWindow.webContents.openDevTools();
+    // noteWindow.webContents.openDevTools();
 
     // Once the new window is ready, send the note data to it
     noteWindow.webContents.once("did-finish-load", () => {
@@ -175,8 +175,12 @@ function createWindow(): void {
     mainWindow.webContents.send("note-data-from-custom", data);
   });
 
+  ipcMain.on("note-save", (_, note) => {
+    mainWindow.webContents.send("note-save-from-custom", note);
+  });
+
   mainWindow.loadFile(join(__dirname, "../renderer/index.html"), { hash: "login" });
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.

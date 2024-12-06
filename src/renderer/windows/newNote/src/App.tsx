@@ -3,8 +3,10 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "../../../src/assets/quill.css";
 import { Note } from "@renderer/types/types";
+import { FaSave } from "react-icons/fa";
 
 const App = (): JSX.Element => {
+  const [theNote, setTheNote] = useState(null);
   const [value, setValue] = useState("");
   const [noteId, setNoteId] = useState("");
   const [loading, setLoading] = useState(true);
@@ -14,12 +16,21 @@ const App = (): JSX.Element => {
       setValue(note.htmlText);
       setNoteId(note.noteid);
       setLoading(false);
+      setTheNote(note);
       console.log(note);
     });
   }, []);
 
   const sendDataToFrontEnd = (e: string): void => {
     window.electron.sendNoteUpdate({ text: e, id: noteId });
+  };
+
+  const saveNote = (): void => {
+    const newNote = {
+      ...theNote,
+      htmlText: value
+    };
+    window.electron.sendNoteSave(newNote);
   };
 
   const modules = {
@@ -55,24 +66,34 @@ const App = (): JSX.Element => {
   ];
 
   return (
-    <section className="min-h-screen bg-[#222] text-white">
+    <section className="min-h-screen bg-[#222] text-white relative">
+      {!loading ? (
+        <button
+          onClick={() => saveNote()}
+          className="absolute bottom-3 right-3 text-lg text-amber-300"
+        >
+          <FaSave />
+        </button>
+      ) : null}
       <div className="h-full bg-[#222] text-whites">
         {loading ? (
           <p>Loading....</p>
         ) : (
-          <ReactQuill
-            theme="snow"
-            modules={modules}
-            formats={formats}
-            value={value}
-            onChange={(e) => {
-              sendDataToFrontEnd(e);
-              setValue(e);
-            }}
-            style={{
-              height: "80%"
-            }}
-          />
+          <>
+            <ReactQuill
+              theme="snow"
+              modules={modules}
+              formats={formats}
+              value={value}
+              onChange={(e) => {
+                sendDataToFrontEnd(e);
+                setValue(e);
+              }}
+              style={{
+                height: "80%"
+              }}
+            />
+          </>
         )}
       </div>
     </section>

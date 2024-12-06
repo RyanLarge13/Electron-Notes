@@ -14,7 +14,9 @@ if (process.contextIsolated) {
     // Message from note window
     contextBridge.exposeInMainWorld("noteUpdate", {
       receiveCustomData: (callback) =>
-        ipcRenderer.on("note-data-from-custom", (_, data) => callback(data))
+        ipcRenderer.on("note-data-from-custom", (_, data) => callback(data)),
+      saveNoteFromWindow: (callback) =>
+        ipcRenderer.on("note-save-from-custom", (_, data) => callback(data))
     });
     // Message from note window
 

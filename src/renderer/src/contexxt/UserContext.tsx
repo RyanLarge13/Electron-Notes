@@ -226,7 +226,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setFolder(folderToSet[0]);
         setNotes(notesToSet);
         setFolders(childFolders);
-        setMainTitle(folderToSet[0].title);
+        setMainTitle(folderToSet[0].title || "Folders");
       } else {
         setIsInitialLoad(false);
         setFolder(null);
