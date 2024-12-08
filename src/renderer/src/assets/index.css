@@ -53,6 +53,30 @@ body::-webkit-scrollbar-thumb {
   margin-bottom: 0.5em;
 }
 
+.renderHtml h1 {
+  font-size: 2em;
+}
+
+.renderHtml h2 {
+  font-size: 1.5em;
+}
+
+.renderHtml h3 {
+  font-size: 1em;
+}
+
+.renderHtml h4 {
+  font-size: 0.8em;
+}
+
+.renderHtml h5 {
+  font-size: 1.6em;
+}
+
+.renderHtml h6 {
+  font-size: 0.5em;
+}
+
 .nesting-div::after {
   position: absolute;
   content: "";
@@ -79,8 +103,6 @@ body::-webkit-scrollbar-thumb {
 }
 
 .my-masonry-grid_column-attachments {
-  padding-left: 10px; /* gutter size */
-  padding-top: 10px;
   background-clip: padding-box;
 }
 

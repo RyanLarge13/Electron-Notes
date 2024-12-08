@@ -3,10 +3,13 @@ import { createNewNote, deleteANote, moveNoteToTrash, updateNote } from "@render
 import { useNavigate } from "react-router-dom";
 import {
   FaArrowCircleRight,
+  FaArrowRight,
   FaCopy,
   FaDesktop,
   FaEdit,
+  FaFolder,
   FaLock,
+  FaSave,
   FaTrash,
   FaWindowClose
 } from "react-icons/fa";
@@ -18,6 +21,8 @@ import cheerio from "cheerio";
 import { motion } from "framer-motion";
 import UserContext from "@renderer/contexxt/UserContext";
 import { BsFiletypeDocx, BsFiletypeHtml, BsFiletypePdf, BsFiletypeTxt } from "react-icons/bs";
+import { MdCancel, MdUpdate } from "react-icons/md";
+import { IoRemoveCircle } from "react-icons/io5";
 
 const Notes = (): JSX.Element => {
   const {
@@ -32,6 +37,12 @@ const Notes = (): JSX.Element => {
     setEditDraft,
     setDrafts,
     setNotes,
+    setSearch,
+    setFolder,
+    setUserPreferences,
+    allData,
+    folder,
+    search,
     noteDragging,
     setNoteIsMoving,
     setNoteDragFolder,
@@ -52,6 +63,7 @@ const Notes = (): JSX.Element => {
   const [awaitingNote, setAwaitingNote] = useState(null);
   const [renameANote, setRenameANote] = useState(null);
   const [renameText, setRenameText] = useState("");
+  const [unsavedChangesOptions, setUnsavedChangesOptions] = useState(null);
 
   const firstInput = useRef(null);
   const secondInput = useRef(null);
@@ -1031,6 +1043,33 @@ const Notes = (): JSX.Element => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
 
+  const lockNote = (note: Note): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    const newNote = {
+      notesId: note.noteid,
+      htmlNotes: note.htmlText,
+      locked: !note.locked,
+      title: note.title,
+      folderId: note.folderId
+    };
+    updateNote(token, newNote);
+    setAllData((prev) => {
+      return {
+        ...prev,
+        notes: prev.notes.map((aNote) => {
+          if (aNote.noteid === note.noteid) {
+            return {
+              ...note,
+              locked: !note.locked
+            };
+          } else {
+            return aNote;
+          }
+        })
+      };
+    });
+  };
+
   const openNotesOptions = (event, note: Note): void => {
     event.preventDefault();
     event.stopPropagation();
@@ -1116,6 +1155,13 @@ const Notes = (): JSX.Element => {
           icon: <FaEdit />,
           func: () => rename(note)
         },
+        !note.locked
+          ? {
+              title: "lock",
+              icon: <FaLock />,
+              func: () => lockNote(note)
+            }
+          : null,
         {
           title: "save file as .txt",
           icon: <BsFiletypeTxt />,
@@ -1242,6 +1288,28 @@ const Notes = (): JSX.Element => {
     return false;
   };
 
+  const removeUnsavedChanges = (note): void => {
+    setUnsavedChangesOptions(null);
+    let isUnsaved = false;
+    const unsaved = userPreferences.unsavedNotes;
+    for (let i = 0; i < unsaved.length; i++) {
+      if (unsaved[i].id === note.noteid) {
+        isUnsaved = true;
+      }
+    }
+    if (isUnsaved) {
+      const newUnsaved = userPreferences.unsavedNotes.filter(
+        (unsaved: { id: string; htmlText: string }) => unsaved.id !== note.noteid
+      );
+      const newPrefs = {
+        ...userPreferences,
+        unsavedNotes: newUnsaved
+      };
+      setUserPreferences(newPrefs);
+      localStorage.setItem("preferences", JSON.stringify(newPrefs));
+    }
+  };
+
   const moveNote = () => {
     // Move note
     setNoteDrag(false);
@@ -1293,6 +1361,10 @@ const Notes = (): JSX.Element => {
     setSystemNotif(newPrompt);
   };
 
+  const saveNote = (note: Note): void => {
+    console.log(note);
+  };
+
   return (
     <div className="w-full py-10">
       <Masonry
@@ -1310,18 +1382,76 @@ const Notes = (): JSX.Element => {
               setNoteDrag(true);
             }}
             onDragEnd={(e) => handleDragEnd(e)}
-            animate={{ scale: noteIsMoving && noteDragging.noteid === note.noteid ? 0 : 1 }}
+            animate={{
+              scale: noteIsMoving && noteDragging.noteid === note.noteid ? 0 : 1,
+              backgroundColor: userPreferences.darkMode ? "#333" : "#e2e8f0",
+              minHeight: note.locked ? "125px" : "125px"
+            }}
             whileDrag={{ pointerEvents: "none" }}
             onContextMenu={(e) => openNotesOptions(e, note)}
             key={note.noteid}
-            className={`${
-              userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
-            } p-4 rounded-md shadow-lg relative cursor-pointer m-3 pointer-events-auto`}
+            className={`${search && folder === null ? "my-14" : "my-5"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
+            {search && folder === null ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSearch(false);
+                  setFolder(allData.folders.find((fold) => fold.folderid === note.folderId));
+                }}
+                className={`absolute top-[-35px] left-0 right-0 z-20 duration-200 ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444] text-white" : "bg-slate-200 hover:bg-slate-300 text-black"} p-2 rounded-t-md`}
+              >
+                <p className="flex justify-center items-center gap-x-3 text-xs">
+                  In <FaFolder />
+                  <FaArrowRight />
+                  {allData.folders.find((fold) => fold.folderid === note.folderId).title}
+                </p>
+              </button>
+            ) : null}
             {checkForUnsaved(note.noteid) ? (
-              <div className="text-black absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-gradient-to-tr from-orange-300 to-red-400 py-1 px-3">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setUnsavedChangesOptions(note);
+                }}
+                className="text-black hover:translate-x-5 duration-200 absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-gradient-to-tr from-orange-300 to-red-400 py-1 px-3"
+              >
                 <p>Unsaved Changes</p>
+              </button>
+            ) : null}
+            {unsavedChangesOptions !== null && unsavedChangesOptions.noteid === note.noteid ? (
+              <div className="duration-200 flex flex-col justify-center items-center absolute bottom-8 rounded-md shadow-md right-[-100px] text-xs bg-gradient-to-tr bg-[#222] text-white z-40">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    saveNote(note);
+                  }}
+                  className="rounded-t-sm w-full min-w-[100px] hover:bg-[#444] duration-200 bg-[#333] px-3 py-1 flex justify-between items-center"
+                >
+                  save
+                  <FaSave />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeUnsavedChanges(note);
+                  }}
+                  className="w-full hover:bg-[#444] duration-200 bg-[#333] px-3 py-1 flex justify-between items-center"
+                >
+                  discard
+                  <IoRemoveCircle />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setUnsavedChangesOptions(null);
+                  }}
+                  className="rounded-b-sm w-full hover:bg-[#444] duration-200 bg-[#333] px-3 py-1 flex justify-between items-center"
+                >
+                  cancel
+                  <MdCancel />
+                </button>
               </div>
             ) : null}
             <div
@@ -1335,8 +1465,8 @@ const Notes = (): JSX.Element => {
                   : "bg-gradient-to-tr from-slate-500 to-slate-700 text-white"
               } rounded-tl-md`}
             >
-              <p className="text-slate-200">
-                Last Updated On{" "}
+              <p className="text-slate-200 flex justify-center items-center gap-x-1">
+                <MdUpdate className="text-lg" />
                 <span className="text-white">
                   {new Date(note.updated).toLocaleDateString("en-US", {
                     month: "short",
@@ -1387,7 +1517,7 @@ const Notes = (): JSX.Element => {
               </div>
             </div>
             {note.locked ? (
-              <div className="absolute bottom-3 left-3">
+              <div className="absolute bottom-3 left-3 shadow-md">
                 <FaLock className="text-red-300" />
               </div>
             ) : (
@@ -1416,11 +1546,11 @@ const Notes = (): JSX.Element => {
               setPin({ first: "", second: "", third: "", fourth: "" });
               setPinInput(false);
             }}
-            className="fixed bg-transparent inset-0"
+            className="fixed bg-transparent inset-0 shadow-md"
           ></div>
           <form
             className={`p-5 fixed bottom-5 left-5 rounded-md shadow-md ${
-              userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+              userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-200 text-black"
             } flex justify-center items-center gap-x-5`}
           >
             <input
@@ -1429,20 +1559,16 @@ const Notes = (): JSX.Element => {
               type="password"
               onChange={(e) => handlePinInput(e, "first")}
               className={`w-10 h-10 p-3 ${
-                userPreferences.darkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-300 text-slate-700"
-              } text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
+                userPreferences.darkMode ? "bg-[#444]" : "bg-slate-300"
+              } text-2xl text-center font-semibold rounded-md shadow-sm outline-none focus:outline-none duration-200 focus:shadow-md`}
             />
             <input
               ref={secondInput}
               value={pin.second}
               type="password"
               className={`w-10 h-10 p-3 ${
-                userPreferences.darkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-300 text-slate-700"
-              } text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
+                userPreferences.darkMode ? "bg-[#444]" : "bg-slate-300"
+              } text-2xl text-center font-semibold rounded-md shadow-sm outline-none focus:outline-none duration-200 focus:shadow-md`}
               onChange={(e) => handlePinInput(e, "second")}
             />
             <input
@@ -1450,10 +1576,8 @@ const Notes = (): JSX.Element => {
               value={pin.third}
               type="password"
               className={`w-10 h-10 p-3 ${
-                userPreferences.darkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-300 text-slate-700"
-              } text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
+                userPreferences.darkMode ? "bg-[#444]" : "bg-slate-300"
+              } text-2xl text-center font-semibold rounded-md shadow-sm outline-none focus:outline-none duration-200 focus:shadow-md`}
               onChange={(e) => handlePinInput(e, "third")}
             />
             <input
@@ -1461,10 +1585,8 @@ const Notes = (): JSX.Element => {
               value={pin.fourth}
               type="password"
               className={`w-10 h-10 p-3 ${
-                userPreferences.darkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-300 text-slate-700"
-              } text-2xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
+                userPreferences.darkMode ? "bg-[#444]" : "bg-slate-300"
+              } text-2xl text-center font-semibold rounded-md shadow-sm outline-none focus:outline-none duration-200 focus:shadow-md`}
               onChange={(e) => handlePinInput(e, "fourth")}
             />
           </form>

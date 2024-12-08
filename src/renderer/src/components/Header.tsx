@@ -7,7 +7,6 @@ import { FaHome } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import UserContext from "@renderer/contexxt/UserContext";
-import { PiPlus } from "react-icons/pi";
 
 const Header = (): JSX.Element => {
   const {
@@ -54,6 +53,12 @@ const Header = (): JSX.Element => {
     window.addEventListener("mousedown", handleNavBack);
     return () => window.removeEventListener("mousedown", handleNavBack);
   }, [folder, mainTitle, note, settings, menu]);
+
+  useEffect(() => {
+    if (search && !searchText && folder === null) {
+      setNotes([]);
+    }
+  }, [search]);
 
   useEffect(() => {
     if (!search) {
@@ -212,6 +217,7 @@ const Header = (): JSX.Element => {
           <motion.input
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            autoFocus={true}
             type="text"
             onChange={(e) => setSearchText(e.target.value)}
             placeholder={!folder ? "search all notes" : `search notes in ${folder.title}`}

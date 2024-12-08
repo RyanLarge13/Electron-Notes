@@ -32,7 +32,7 @@ const ContextMenu = (): JSX.Element => {
                 onClick={() => option.func()}
               >
                 <p>{option.title}</p>
-                <p className="text-xs text-slate-200">{option.icon}</p>
+                <p className="text-xs">{option.icon}</p>
               </button>
             ))}
           </div>
