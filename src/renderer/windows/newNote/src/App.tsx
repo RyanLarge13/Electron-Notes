@@ -10,14 +10,15 @@ const App = (): JSX.Element => {
   const [value, setValue] = useState("");
   const [noteId, setNoteId] = useState("");
   const [loading, setLoading] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    window.electron.onDisplayNote((note: Note) => {
+    window.electron.onDisplayNote((note: Note, theme: boolean) => {
       setValue(note.htmlText);
       setNoteId(note.noteid);
       setLoading(false);
       setTheNote(note);
-      console.log(note);
+      setDarkMode(theme);
     });
   }, []);
 
@@ -66,7 +67,9 @@ const App = (): JSX.Element => {
   ];
 
   return (
-    <section className="min-h-screen bg-[#222] text-white relative">
+    <section
+      className={`min-h-screen ${darkMode ? "bg-[#222] text-white" : "bg-white text-black"} relative`}
+    >
       {!loading ? (
         <button
           onClick={() => saveNote()}
@@ -75,7 +78,7 @@ const App = (): JSX.Element => {
           <FaSave />
         </button>
       ) : null}
-      <div className="h-full bg-[#222] text-whites">
+      <div className="h-full">
         {loading ? (
           <p>Loading....</p>
         ) : (

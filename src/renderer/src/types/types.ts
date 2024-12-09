@@ -41,7 +41,7 @@ export type User = {
 
 export type ContextMenuOption = {
   title: string;
-  icon: string;
+  icon: JSX.Element;
   func: CallableFunction;
 };
 

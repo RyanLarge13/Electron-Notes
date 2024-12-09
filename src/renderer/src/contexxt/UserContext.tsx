@@ -50,6 +50,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [editCurrentFolder, setEditCurrentFolder] = useState(false);
   const [drafts, setDrafts] = useState([]);
   const [search, setSearch] = useState(false);
+  const [folderSearch, setFolderSearch] = useState(false);
+  const [folderSearchText, setFolderSearchText] = useState("");
   const [trashedNotes, setTrashedNotes] = useState([]);
   const [createCon, setCreateCon] = useState(false);
   const [systemNotif, setSystemNotif] = useState({
@@ -528,7 +530,11 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         noteDragFolder,
         setNoteDragFolder,
         noteDragging,
-        setNoteDragging
+        setNoteDragging,
+        folderSearch,
+        setFolderSearch,
+        folderSearchText,
+        setFolderSearchText
       }}
     >
       {children}

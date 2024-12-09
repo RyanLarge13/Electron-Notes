@@ -1,4 +1,4 @@
-import { useContext, useState, useRef, useEffect } from "react";
+import { useContext, useState, useRef, useEffect, PointerEventHandler } from "react";
 import { createNewNote, deleteANote, moveNoteToTrash, updateNote } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
 import {
@@ -21,7 +21,7 @@ import cheerio from "cheerio";
 import { motion } from "framer-motion";
 import UserContext from "@renderer/contexxt/UserContext";
 import { BsFiletypeDocx, BsFiletypeHtml, BsFiletypePdf, BsFiletypeTxt } from "react-icons/bs";
-import { MdCancel, MdUpdate } from "react-icons/md";
+import { MdCancel, MdDeleteForever, MdRestore, MdUpdate } from "react-icons/md";
 import { IoRemoveCircle } from "react-icons/io5";
 
 const Notes = (): JSX.Element => {
@@ -1038,7 +1038,7 @@ const Notes = (): JSX.Element => {
   };
 
   const openWindow = async (note: Note): Promise<void> => {
-    await window.openNewWin.openNoteInNewWindow(note);
+    await window.openNewWin.openNoteInNewWindow(note, userPreferences.darkMode);
     setNote(null);
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
@@ -1093,15 +1093,26 @@ const Notes = (): JSX.Element => {
         options: [
           {
             title: "move out of trash",
-            func: () => moveToTrash(note)
+            func: (): void => {
+              moveToTrash(note);
+            },
+            icon: <MdRestore />
           },
           {
             title: "delete forever",
-            func: () => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
+            func: (): void => {
+              if (userPreferences.confirm) {
+                confirmDelete(note);
+              } else {
+                deleteNote(note);
+              }
+            },
+            icon: <MdDeleteForever />
           }
         ]
       };
-      return setContextMenu(newMenu);
+      setContextMenu(newMenu);
+      return;
     }
     if (mainTitle === "Drafts") {
       const newMenu = {
@@ -1113,11 +1124,13 @@ const Notes = (): JSX.Element => {
         options: [
           {
             title: "edit",
-            func: (): void => edit(note, true)
+            func: (): void => edit(note, true),
+            icon: <FaEdit />
           },
           {
             title: "delete forever",
-            func: () => (userPreferences.confirm ? confirmDeleteDraft(note) : deleteDraft(note))
+            func: () => (userPreferences.confirm ? confirmDeleteDraft(note) : deleteDraft(note)),
+            icon: <MdDeleteForever />
           }
         ]
       };
@@ -1155,13 +1168,12 @@ const Notes = (): JSX.Element => {
           icon: <FaEdit />,
           func: () => rename(note)
         },
-        !note.locked
-          ? {
-              title: "lock",
-              icon: <FaLock />,
-              func: () => lockNote(note)
-            }
-          : null,
+        !note.locked && {
+          title: "lock",
+          icon: <FaLock />,
+          func: () => lockNote(note)
+        },
+
         {
           title: "save file as .txt",
           icon: <BsFiletypeTxt />,
@@ -1185,12 +1197,12 @@ const Notes = (): JSX.Element => {
         {
           title: "move to trash",
           icon: <FaTrash />,
-          func: () => (userPreferences.confirm ? confirmTrash(note) : moveToTrash(note))
+          func: (): void => (userPreferences.confirm ? confirmTrash(note) : moveToTrash(note))
         },
         {
           title: "delete forever",
           icon: <FaWindowClose />,
-          func: () => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
+          func: (): void => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
         }
       ]
     };
@@ -1310,7 +1322,7 @@ const Notes = (): JSX.Element => {
     }
   };
 
-  const moveNote = () => {
+  const moveNote = (): void => {
     // Move note
     setNoteDrag(false);
     setNoteDragFolder(null);
@@ -1318,7 +1330,7 @@ const Notes = (): JSX.Element => {
     setNoteDragging(null);
   };
 
-  const handleDragEnd = (e) => {
+  const handleDragEnd = (): void => {
     console.log("drag end");
     if (!noteDragFolder) {
       setNoteDragging(null);
@@ -1362,7 +1374,56 @@ const Notes = (): JSX.Element => {
   };
 
   const saveNote = (note: Note): void => {
-    console.log(note);
+    // Close the options menu
+    setUnsavedChangesOptions(null);
+
+    // Send the updated note to the server
+    const updatedText = userPreferences.unsavedNotes.find(
+      (aNote) => aNote.id === note.noteid
+    ).htmlText;
+    const newNote = {
+      ...note,
+      notesId: note.noteid,
+      htmlNotes: updatedText,
+      updated: new Date()
+    };
+    updateNote(token, newNote);
+
+    // Update state preferences && storage
+    const newUnsaved = userPreferences.unsavedNotes.filter(
+      (unsaved: { id: string; htmlText: string }) => unsaved.id !== note.noteid
+    );
+    const newPrefs = {
+      ...userPreferences,
+      unsavedNotes: newUnsaved
+    };
+    setUserPreferences(newPrefs);
+    localStorage.setItem("preferences", JSON.stringify(newPrefs));
+
+    // Display notification
+    if (userPreferences.notify.notifySuccess || userPreferences.notify.notifyAll) {
+      setSystemNotif({
+        show: true,
+        title: `${note.title}`,
+        text: `${note.title} was saved successfully`,
+        color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`,
+        hasCancel: false,
+        actions: [
+          {
+            text: "close",
+            func: (): void =>
+              setSystemNotif({
+                show: false,
+                title: "",
+                text: "",
+                color: "",
+                hasCancel: false,
+                actions: []
+              })
+          }
+        ]
+      });
+    }
   };
 
   return (
@@ -1381,7 +1442,7 @@ const Notes = (): JSX.Element => {
               setNoteDragging(note);
               setNoteDrag(true);
             }}
-            onDragEnd={(e) => handleDragEnd(e)}
+            onDragEnd={() => handleDragEnd()}
             animate={{
               scale: noteIsMoving && noteDragging.noteid === note.noteid ? 0 : 1,
               backgroundColor: userPreferences.darkMode ? "#333" : "#e2e8f0",
@@ -1390,7 +1451,7 @@ const Notes = (): JSX.Element => {
             whileDrag={{ pointerEvents: "none" }}
             onContextMenu={(e) => openNotesOptions(e, note)}
             key={note.noteid}
-            className={`${search && folder === null ? "my-14" : "my-5"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
+            className={`${search && folder === null ? "my-16" : "my-5"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
             {search && folder === null ? (
@@ -1421,38 +1482,49 @@ const Notes = (): JSX.Element => {
               </button>
             ) : null}
             {unsavedChangesOptions !== null && unsavedChangesOptions.noteid === note.noteid ? (
-              <div className="duration-200 flex flex-col justify-center items-center absolute bottom-8 rounded-md shadow-md right-[-100px] text-xs bg-gradient-to-tr bg-[#222] text-white z-40">
-                <button
+              <>
+                <div
+                  className="bg-transparent fixed z-40 inset-0"
                   onClick={(e) => {
                     e.stopPropagation();
-                    saveNote(note);
+                    setUnsavedChangesOptions(false);
                   }}
-                  className="rounded-t-sm w-full min-w-[100px] hover:bg-[#444] duration-200 bg-[#333] px-3 py-1 flex justify-between items-center"
+                ></div>
+                <div
+                  className={`duration-200 flex flex-col justify-center items-center absolute bottom-8 rounded-md shadow-md right-[-100px] text-xs bg-gradient-to-tr ${userPreferences.darkMode ? "bg-[#222] text-white" : "bg-slate-100 text-black"} z-40`}
                 >
-                  save
-                  <FaSave />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeUnsavedChanges(note);
-                  }}
-                  className="w-full hover:bg-[#444] duration-200 bg-[#333] px-3 py-1 flex justify-between items-center"
-                >
-                  discard
-                  <IoRemoveCircle />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setUnsavedChangesOptions(null);
-                  }}
-                  className="rounded-b-sm w-full hover:bg-[#444] duration-200 bg-[#333] px-3 py-1 flex justify-between items-center"
-                >
-                  cancel
-                  <MdCancel />
-                </button>
-              </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      saveNote(note);
+                    }}
+                    className={`rounded-t-sm w-full min-w-[100px] ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444]" : "bg-slate-100 hover:bg-slate-200"} duration-200 bg-[#333] px-3 py-1 flex justify-between items-center`}
+                  >
+                    save
+                    <FaSave />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeUnsavedChanges(note);
+                    }}
+                    className={`w-full ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444]" : "bg-slate-100 hover:bg-slate-200"} duration-200 bg-[#333] px-3 py-1 flex justify-between items-center`}
+                  >
+                    discard
+                    <IoRemoveCircle />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setUnsavedChangesOptions(null);
+                    }}
+                    className={`rounded-b-sm w-full ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444]" : "bg-slate-100 hover:bg-slate-200"} duration-200 bg-[#333] px-3 py-1 flex justify-between items-center`}
+                  >
+                    cancel
+                    <MdCancel />
+                  </button>
+                </div>
+              </>
             ) : null}
             <div
               aria-hidden="true"
@@ -1460,14 +1532,12 @@ const Notes = (): JSX.Element => {
             ></div>
             <div
               className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
-                userPreferences.darkMode
-                  ? "bg-[#222] text-black"
-                  : "bg-gradient-to-tr from-slate-500 to-slate-700 text-white"
+                userPreferences.darkMode ? "bg-[#222] text-white" : "bg-white text-black"
               } rounded-tl-md`}
             >
-              <p className="text-slate-200 flex justify-center items-center gap-x-1">
+              <p className="flex justify-center items-center gap-x-1">
                 <MdUpdate className="text-lg" />
-                <span className="text-white">
+                <span>
                   {new Date(note.updated).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",

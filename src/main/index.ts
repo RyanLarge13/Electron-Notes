@@ -145,7 +145,7 @@ function createWindow(): void {
     app.quit();
   });
 
-  ipcMain.handle("openNoteInNewWindow", (_, note) => {
+  ipcMain.handle("openNoteInNewWindow", (_, note, darkMode) => {
     const noteWindow = new BrowserWindow({
       width: 1000,
       height: 600,
@@ -166,7 +166,7 @@ function createWindow(): void {
 
     // Once the new window is ready, send the note data to it
     noteWindow.webContents.once("did-finish-load", () => {
-      noteWindow.webContents.send("display-note", note);
+      noteWindow.webContents.send("display-note", note, darkMode);
     });
   });
 

@@ -116,7 +116,7 @@ const NoteView = (): JSX.Element => {
   // const shareNote = (): void => {};
 
   const openWindow = async (note: Note): Promise<void> => {
-    await window.openNewWin.openNoteInNewWindow(note);
+    await window.openNewWin.openNoteInNewWindow(note, userPreferences.darkMode);
     setNote(null);
   };
 
@@ -141,7 +141,7 @@ const NoteView = (): JSX.Element => {
           top: minimize ? 150 : null
         }}
         whileDrag={{ outline: "2px solid rgba(255,255,255,0.5" }}
-        className={`${minimize ? "bg-[#444]" : ""} fixed z-40 ${
+        className={`${minimize ? "shadow-lg shadow-black" : "shadow-md"} fixed z-40 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
         } inset-10 right-[55%] overflow-y-auto origin-bottom no-scroll-bar rounded-md shadow-md pb-5`}
       >
@@ -154,7 +154,7 @@ const NoteView = (): JSX.Element => {
           </div>
         ) : null}
         <div
-          className={`p-2 sticky z-[40] top-0 bg-[#333] rounded-t-md flex justify-between items-center ${minimize ? "hidden" : ""}`}
+          className={`p-2 sticky z-[40] top-0 ${userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"} rounded-t-md flex justify-between items-center ${minimize ? "hidden" : ""}`}
         >
           <p>
             Created On{" "}

@@ -43,6 +43,7 @@ const Folders = (): JSX.Element => {
     setMove,
     setUserPreferences,
     setNotes,
+    folderSearchText,
     noteIsMoving,
     noteDrag,
     noteDragging,
@@ -1262,7 +1263,6 @@ const Folders = (): JSX.Element => {
   const handleDragOver = (e, folder: Folder): void => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Drag over event triggered for folder:", folder);
     setDraggedOverFolder(folder);
   };
 
@@ -1470,9 +1470,7 @@ const Folders = (): JSX.Element => {
     if (noteIsMoving) {
       return;
     }
-    console.log("mouse over");
     if (noteDrag && noteDragging !== null) {
-      console.log("note exists and is dragging, setting folder");
       setNoteDragFolder(folder);
     }
   };
@@ -1491,7 +1489,14 @@ const Folders = (): JSX.Element => {
             setDraggedInto(folder.folderid);
             onDragEnd(e);
           }}
-          animate={draggedInto == folder.folderid ? { scale: 0 } : { scale: 1 }}
+          animate={{
+            scale: draggedInto == folder.folderid ? 0 : 1,
+            outline:
+              folder.title.toLowerCase().includes(folderSearchText.toLowerCase()) &&
+              folderSearchText !== ""
+                ? `2px solid ${userPreferences.darkMode ? "#eee" : "#111"}`
+                : "0px"
+          }}
           onMouseEnter={(e) => (dragging ? handleDragOver(e, folder) : handleNoteDrag(folder))}
           whileHover={
             !folderToChangeColor

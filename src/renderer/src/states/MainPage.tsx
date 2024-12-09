@@ -6,10 +6,13 @@ import Account from "./Account";
 import ContextMenu from "@renderer/components/ContextMenu";
 import SystemNotif from "@renderer/components/SystemNotif";
 import UserContext from "@renderer/contexxt/UserContext";
-import { FaEdit, FaFolderPlus, FaList, FaPlusSquare } from "react-icons/fa";
+import { FaEdit, FaFolderPlus, FaList, FaPlusSquare, FaSearch } from "react-icons/fa";
 import { MdOutlineMenu } from "react-icons/md";
 import { PiSwap } from "react-icons/pi";
 import { IoSettings } from "react-icons/io5";
+import { BiSearch } from "react-icons/bi";
+import { TbFolderSearch } from "react-icons/tb";
+import { LuFileSearch } from "react-icons/lu";
 
 const MainPage = (): JSX.Element => {
   const {
@@ -27,6 +30,12 @@ const MainPage = (): JSX.Element => {
     setUserPreferences,
     setNotes,
     setNote,
+    setFolder,
+    folders,
+    setFolderSearchText,
+    setFolderSearch,
+    folderSearch,
+    folderSearchText,
     allData,
     order,
     view,
@@ -150,6 +159,10 @@ const MainPage = (): JSX.Element => {
     }
     if (contextMenu && Escape) {
       setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    }
+    if (folderSearch && Escape) {
+      setFolderSearch(false);
+      setFolderSearchText("");
     }
   }, [keyPresses]);
 
@@ -281,6 +294,23 @@ const MainPage = (): JSX.Element => {
           }
         },
         {
+          title: "search folders",
+          icon: <TbFolderSearch />,
+          func: (): void => {
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+            setFolderSearchText("");
+            setFolderSearch(true);
+          }
+        },
+        {
+          title: "search notes",
+          icon: <LuFileSearch />,
+          func: (): void => {
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+            setSearch(true);
+          }
+        },
+        {
           title: "menu",
           icon: <MdOutlineMenu />,
           func: (): void => {
@@ -337,6 +367,21 @@ const MainPage = (): JSX.Element => {
     setContextMenu(newMenu);
   };
 
+  const openFolderFromSearch = (): void => {
+    if (folderSearchText === "") {
+      return;
+    }
+    const foldersAvailable = folders.filter((aFold) =>
+      aFold.title.toLowerCase().includes(folderSearchText.toLowerCase())
+    );
+    if (foldersAvailable.length > 1) {
+      return;
+    } else {
+      setFolder(foldersAvailable[0]);
+      setFolderSearchText("");
+    }
+  };
+
   return (
     <section
       onContextMenu={(e) => openOptions(e)}
@@ -351,7 +396,38 @@ const MainPage = (): JSX.Element => {
         !user ? (
           <Login />
         ) : (
-          <Account />
+          <>
+            {folderSearch ? (
+              <>
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => {
+                    setFolderSearchText("");
+                    setFolderSearch(false);
+                  }}
+                ></div>
+                <div
+                  className={`fixed top-10 left-10 z-40 ${userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-200 text-black"} p-3 rounded-md shadow-md`}
+                >
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      openFolderFromSearch();
+                    }}
+                  >
+                    <input
+                      className="bg-transparent focus:outline-none outline-none w-full mr-5 text-sm"
+                      autoFocus={true}
+                      placeholder="Search Folders"
+                      value={folderSearchText}
+                      onChange={(e) => setFolderSearchText(e.target.value)}
+                    />
+                  </form>
+                </div>
+              </>
+            ) : null}
+            <Account />
+          </>
         )
       ) : (
         <div className="fixed z-[999] w-screen h-screen flex justify-center items-center">

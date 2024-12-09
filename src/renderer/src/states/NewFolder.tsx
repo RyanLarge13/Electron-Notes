@@ -210,7 +210,7 @@ const NewFolder = (): JSX.Element => {
         <p>Create a new folder</p>
         <form onSubmit={createFolder}>
           <input
-            placeholder="title"
+            placeholder="Title"
             autoFocus={true}
             value={title}
             onChange={(e) => setTitle(e.target.value)}

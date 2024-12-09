@@ -33,7 +33,8 @@ if (process.contextIsolated) {
     });
 
     contextBridge.exposeInMainWorld("openNewWin", {
-      openNoteInNewWindow: (note) => ipcRenderer.invoke("openNoteInNewWindow", note)
+      openNoteInNewWindow: (note, darkMode) =>
+        ipcRenderer.invoke("openNoteInNewWindow", note, darkMode)
     });
   } catch (error) {
     console.error(error);

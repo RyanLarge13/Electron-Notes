@@ -10,7 +10,7 @@ const api = {};
 if (process.contextIsolated) {
   contextBridge.exposeInMainWorld("electron", {
     onDisplayNote: (callback) => {
-      ipcRenderer.on("display-note", (_, note) => callback(note));
+      ipcRenderer.on("display-note", (_, note, darkMode) => callback(note, darkMode));
     },
     sendNoteUpdate: (updatedNote) => {
       ipcRenderer.send("note-update", updatedNote);

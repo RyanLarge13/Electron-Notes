@@ -633,15 +633,15 @@ const Draft = (): JSX.Element => {
             setNoteToEdit(null);
             if (changed) {
               noteToEdit.htmlText = value;
-              const newPrefernces = {
+              const newPreferences = {
                 ...userPreferences,
                 unsavedNotes: [
                   ...userPreferences.unsavedNotes,
                   { id: noteToEdit.noteid, htmlText: value }
                 ]
               };
-              setUserPreferences(newPrefernces);
-              localStorage.setItem("preferences", JSON.stringify(newPrefernces));
+              setUserPreferences(newPreferences);
+              localStorage.setItem("preferences", JSON.stringify(newPreferences));
             }
             setNote(noteToEdit);
           }
@@ -689,7 +689,7 @@ const Draft = (): JSX.Element => {
             </button>
           </div>
         </div>
-        <div className="h-full bg-[#222]">
+        <div className={`h-full ${userPreferences.darkMode ? "bg-[#222]" : "bg-white"}`}>
           <ReactQuill
             theme="snow"
             modules={modules}
