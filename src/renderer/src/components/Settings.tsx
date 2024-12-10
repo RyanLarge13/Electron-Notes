@@ -4,6 +4,9 @@ import UserContext from "@renderer/contexxt/UserContext";
 import Colors from "./Colors";
 import { updatePassword, updateUsername } from "@renderer/utils/api";
 import { ClipLoader } from "react-spinners";
+import { LuList } from "react-icons/lu";
+import { BiGrid } from "react-icons/bi";
+import { CiGrid42 } from "react-icons/ci";
 
 const Settings = (): JSX.Element => {
   const {
@@ -744,27 +747,25 @@ const Settings = (): JSX.Element => {
           onClick={() => {
             const newPreferences = {
               ...userPreferences,
-              grid: view === "list" ? true : false
+              layout: view === "list" ? "masonry" : view === "masonry" ? "grid" : "list"
             };
             localStorage.setItem("preferences", JSON.stringify(newPreferences));
             setUserPreferences(newPreferences);
-            setView((prevView) => (prevView === "list" ? "grid" : "list"));
+            setView((prevView) =>
+              prevView === "list" ? "masonry" : view === "masonry" ? "grid" : "list"
+            );
           }}
           className="flex justify-between items-center my-3"
         >
-          <p>Grid View</p>
+          <p>View</p>
           <div
-            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+            className={`ml-3 flex justify-center gap-x-3 px-3 items-center relative text-xl h-[25px] shadow-md rounded-full cursor-pointer ${
               userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
             }`}
           >
-            <div
-              className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                userPreferences.grid
-                  ? "right-[1px] left-[50%] bg-green-300"
-                  : "left-[1px] right-[50%] bg-red-300"
-              } rounded-full`}
-            ></div>
+            <LuList className={`${view === "list" ? "text-green-300" : "text-red-300"}`} />
+            <BiGrid className={`${view === "grid" ? "text-green-300" : "text-red-300"}`} />
+            <CiGrid42 className={`${view === "masonry" ? "text-green-300" : "text-red-300"}`} />
           </div>
         </button>
         <button

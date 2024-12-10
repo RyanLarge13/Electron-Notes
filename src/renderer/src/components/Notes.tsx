@@ -40,6 +40,7 @@ const Notes = (): JSX.Element => {
     setSearch,
     setFolder,
     setUserPreferences,
+    view,
     allData,
     folder,
     search,
@@ -79,13 +80,27 @@ const Notes = (): JSX.Element => {
     ? userPreferences.theme.replace("bg", "text")
     : "text-amber-300";
 
-  const breakpointColumnsObj = {
-    default: 1,
-    2500: 3,
-    1500: 2,
-    1024: 1,
-    100: 1
-  };
+  const masonryBreakPoints =
+    view === "list"
+      ? {
+          default: 1,
+          100: 1
+        }
+      : view === "grid"
+        ? {
+            default: 1,
+            2500: 2,
+            1500: 2,
+            1024: 1,
+            100: 1
+          }
+        : {
+            default: 1,
+            2500: 3,
+            1500: 2,
+            1024: 1,
+            100: 1
+          };
 
   useEffect(() => {
     if (pinInput && firstInput.current) {
@@ -1429,7 +1444,7 @@ const Notes = (): JSX.Element => {
   return (
     <div className="w-full py-10">
       <Masonry
-        breakpointCols={breakpointColumnsObj}
+        breakpointCols={masonryBreakPoints}
         className="my-masonry-grid px-5"
         columnClassName="my-masonry-grid_column"
       >
@@ -1451,7 +1466,7 @@ const Notes = (): JSX.Element => {
             whileDrag={{ pointerEvents: "none" }}
             onContextMenu={(e) => openNotesOptions(e, note)}
             key={note.noteid}
-            className={`${search && folder === null ? "my-16" : "my-5"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
+            className={`${search && folder === null ? "my-16" : "my-5"} ${view === "list" ? "h-80 overflow-y-clip" : view === "grid" ? "h-80 overflow-y-clip" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
             {search && folder === null ? (

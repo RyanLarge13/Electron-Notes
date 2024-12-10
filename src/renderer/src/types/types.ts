@@ -109,7 +109,7 @@ type UserPreferences = {
   commands: Commands[];
   order: boolean;
   filter: string;
-  grid: boolean;
+  layout: string;
   unsavedNotes: unsavedNotesArray[];
   autosave: boolean;
 };

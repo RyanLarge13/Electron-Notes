@@ -98,7 +98,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         darkMode: true,
         theme: "",
         confirm: true,
-        grid: false,
+        layout: "masonry",
         order: order,
         filter: filter,
         savedFolder: null,
@@ -134,11 +134,11 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           { text: "search", command: "ctrl + s", active: true }
         ]);
         parsedPreferences.commands = newCommands;
-        if ("grid" in parsedPreferences) {
+        if ("layout" in parsedPreferences) {
           null;
         } else {
-          console.log("No grid in parsed prefs");
-          parsedPreferences.grid = false;
+          console.log("No layout in parsed prefs");
+          parsedPreferences.layout = "masonry";
         }
         if ("order" in parsedPreferences) {
           null;
@@ -164,7 +164,11 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         }
         parsedPreferences.order ? setOrder(parsedPreferences.order) : setOrder(true);
         parsedPreferences.filter ? setFilter(parsedPreferences.filter) : setFilter("Title");
-        parsedPreferences.grid ? setView("grid") : setView("list");
+        parsedPreferences.layout === "grid"
+          ? setView("grid")
+          : parsedPreferences.layout === "list"
+            ? setView("list")
+            : setView("masonry");
         setUserPreferences(parsedPreferences);
         localStorage.setItem("preferences", JSON.stringify(parsedPreferences));
       } catch (err) {
@@ -296,7 +300,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const installCache = (data): void => {
     const cachedAllData = {
       user: data[0][0],
-      folders: data[1],
+      folders: data[1].sort((a: Folder, b: Folder) => a.title.localeCompare(b.title)),
       notes: data[2]
     };
     setAllData(cachedAllData);

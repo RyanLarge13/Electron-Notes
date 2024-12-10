@@ -333,11 +333,13 @@ const MainPage = (): JSX.Element => {
             setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
             const newPreferences = {
               ...userPreferences,
-              grid: view === "list" ? true : false
+              layout: view === "list" ? "masonry" : view === "grid" ? "list" : "grid"
             };
             localStorage.setItem("preferences", JSON.stringify(newPreferences));
             setUserPreferences(newPreferences);
-            setView((prevView) => (prevView === "list" ? "grid" : "list"));
+            setView((prevView) =>
+              prevView === "list" ? "masonry" : view === "grid" ? "list" : "grid"
+            );
           }
         },
         {
