@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { AllData, Folder, Note } from "@renderer/types/types";
 import { CiFolderOn } from "react-icons/ci";
@@ -67,11 +67,29 @@ const Folders = (): JSX.Element => {
   const [draggedInto, setDraggedInto] = useState("");
 
   const renameRef = useRef(null);
+  const folderRefs = useRef([]);
 
   const navigate = useNavigate();
   const textThemeString = userPreferences?.theme
     ? userPreferences.theme.replace("bg", "text")
     : "text-amber-300";
+
+  useEffect(() => {
+    if (folderSearchText !== "" && folderRefs.current && folderRefs.current.length > 0) {
+      const search = folderSearchText.toLowerCase();
+      const possibleElements = folderRefs.current.filter((refData) =>
+        refData.title.includes(search)
+      );
+      if (possibleElements.length === 1) {
+        if (possibleElements[0].el) {
+          const elem = possibleElements[0].el;
+          requestAnimationFrame(() => {
+            elem.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }
+      }
+    }
+  }, [folderSearchText]);
 
   const openFolder = (folder: Folder): void => {
     setNesting((prev) => [...prev, { title: folder.title, id: folder.folderid }]);
@@ -132,9 +150,12 @@ const Folders = (): JSX.Element => {
         folderId: folder.folderid,
         title: `New Note inside of the ${folder.title} folder`,
         htmlText: "<p>Change me!!</p>",
-        locked: false
+        locked: false,
+        createdAt: new Date(),
+        updated: new Date(),
+        trashed: false
       };
-      setAllData((prevData) => {
+      setAllData((prevData: AllData) => {
         const newData = {
           ...prevData,
           notes: [...prevData.notes, noteToPush]
@@ -568,7 +589,8 @@ const Folders = (): JSX.Element => {
     const newFolder = {
       title: folder.title,
       color: folder.color,
-      parentFolderId: folder.parentFolderId
+      parentFolderId: folder.parentFolderId,
+      createdAt: new Date()
     };
     try {
       setAllData((prevData: AllData) => {
@@ -1466,7 +1488,7 @@ const Folders = (): JSX.Element => {
     }
   };
 
-  const handleNoteDrag = (folder) => {
+  const handleNoteDrag = (folder): void => {
     if (noteIsMoving) {
       return;
     }
@@ -1477,8 +1499,15 @@ const Folders = (): JSX.Element => {
 
   return (
     <div className="flex flex-wrap justify-start items-start gap-5 w-full mt-5">
-      {folders.map((folder: Folder) => (
+      {folders.map((folder: Folder, index: number) => (
         <motion.div
+          ref={(el) => {
+            if (el) {
+              folderRefs.current[index] = { el, title: folder.title.toLowerCase() };
+            } else {
+              folderRefs.current[index] = null;
+            }
+          }}
           drag={!edit && !folderToChangeColor && !folderToRename && !editCurrentFolder}
           onDrag={handleDrag}
           dragSnapToOrigin={draggedInto === folder.folderid ? false : true}
@@ -1506,7 +1535,7 @@ const Folders = (): JSX.Element => {
               : { scale: 1 }
           }
           key={folder.folderid}
-          className={`relative w-60 h-40 ${
+          className={`relative w-60 h-40 scroll-m-40 ${
             userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
           } will-change-transform rounded-md shadow-lg p-2 flex flex-col justify-between cursor-pointer`}
           onClick={() =>
