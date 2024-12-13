@@ -3,6 +3,8 @@ import { ContextProps, Folder, Note } from "@renderer/types/types";
 import { getuserData } from "@renderer/utils/api";
 import "@renderer/threads/handleConnections";
 import LocalCache from "../utils/cache";
+import { FaFolderPlus, FaPlusSquare } from "react-icons/fa";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const UserContext = createContext({} as ContextProps);
 
@@ -67,22 +69,6 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     meta: { title: "", color: "" },
     options: []
   });
-  // const [userPreferences, setUserPreferences] = useState({
-  //   confirm: true,
-  //   darkMode: true,
-  //   grid: false,
-  //   order: true,
-  //   filter: "Title",
-  //   savedFolder: null,
-  //   notify: {
-  //     notifyAll: true,
-  //     notifySuccess: true,
-  //     notifyErrors: true
-  //   },
-  //   lockPin: [1, 2, 3, 4],
-  //   theme: "bg-amber-300",
-  //   commands: []
-  // });
 
   const [userPreferences, setUserPreferences] = useState(
     JSON.parse(localStorage.getItem("preferences"))
@@ -109,6 +95,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           notifySuccess: true,
           notifyErrors: true
         },
+        quickActions: [0, 1],
         lockPin: [1, 2, 3, 4],
         commands: [
           { text: "new folder", command: "ctrl + alt + f", active: true },
@@ -161,6 +148,11 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           null;
         } else {
           parsedPreferences.autosave = false;
+        }
+        if ("quickActions" in parsedPreferences) {
+          null;
+        } else {
+          parsedPreferences.quickActions = [0, 1];
         }
         parsedPreferences.order ? setOrder(parsedPreferences.order) : setOrder(true);
         parsedPreferences.filter ? setFilter(parsedPreferences.filter) : setFilter("Title");

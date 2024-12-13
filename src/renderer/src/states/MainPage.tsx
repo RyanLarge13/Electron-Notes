@@ -6,13 +6,14 @@ import Account from "./Account";
 import ContextMenu from "@renderer/components/ContextMenu";
 import SystemNotif from "@renderer/components/SystemNotif";
 import UserContext from "@renderer/contexxt/UserContext";
-import { FaEdit, FaFolderPlus, FaList, FaPlusSquare, FaSearch } from "react-icons/fa";
+import { FaEdit, FaFolderPlus, FaList, FaPlusSquare } from "react-icons/fa";
 import { MdOutlineMenu } from "react-icons/md";
-import { PiSwap } from "react-icons/pi";
-import { IoSettings } from "react-icons/io5";
-import { BiSearch } from "react-icons/bi";
+import { PiPlusMinus, PiSwap } from "react-icons/pi";
 import { TbFolderSearch } from "react-icons/tb";
 import { LuFileSearch } from "react-icons/lu";
+import { Tooltip } from "react-tooltip";
+import { ContextMenuOption } from "@renderer/types/types";
+import { IoSettings } from "react-icons/io5";
 
 const MainPage = (): JSX.Element => {
   const {
@@ -65,6 +66,8 @@ const MainPage = (): JSX.Element => {
     g: false,
     Escape: false
   });
+  const [quickActionsNew, setQuickActionsNew] = useState(false);
+  const [quickActionsSelected, setQuickActionsSelected] = useState([]);
 
   const navigate = useNavigate();
 
@@ -257,6 +260,96 @@ const MainPage = (): JSX.Element => {
     setEditCurrentFolder(true);
   };
 
+  const quickActions: ContextMenuOption[] = [
+    {
+      title: "new folder",
+      icon: <FaFolderPlus />,
+      func: (): void => {
+        setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        navigate("/newfolder");
+      }
+    },
+    {
+      title: "new note",
+      icon: <FaPlusSquare />,
+      func: (): void => {
+        setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        navigate("/newnote");
+      }
+    },
+    {
+      title: "search folders",
+      icon: <TbFolderSearch />,
+      func: (): void => {
+        setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        setFolderSearchText("");
+        setFolderSearch(true);
+      }
+    },
+    {
+      title: "search notes",
+      icon: <LuFileSearch />,
+      func: (): void => {
+        setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        setSearch(true);
+      }
+    },
+    {
+      title: "menu",
+      icon: <MdOutlineMenu />,
+      func: (): void => {
+        setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        setMenu(true);
+      }
+    },
+    {
+      title: "edit",
+      icon: <FaEdit />,
+      func: (): void => {
+        setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        setEdit(true);
+      }
+    },
+    {
+      title: "change view",
+      icon: <PiSwap />,
+      func: (): void => {
+        setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        const newPreferences = {
+          ...userPreferences,
+          layout: view === "list" ? "masonry" : view === "grid" ? "list" : "grid"
+        };
+        localStorage.setItem("preferences", JSON.stringify(newPreferences));
+        setUserPreferences(newPreferences);
+        setView((prevView) =>
+          prevView === "list" ? "masonry" : view === "grid" ? "list" : "grid"
+        );
+      }
+    },
+    {
+      title: "change order",
+      icon: <FaList />,
+      func: (): void => {
+        setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        setOrder((prevOrder) => !prevOrder);
+      }
+    },
+    {
+      title: "edit current folder",
+      icon: <FaEdit />,
+      func: (): void => editCurrentFolder()
+    },
+    {
+      title: "settings",
+      icon: <IoSettings />,
+      func: (): void => {
+        setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        setMenu(true);
+        setSettings(true);
+      }
+    }
+  ];
+
   const openOptions = (e): void => {
     if (!user || loading || note || noteToEdit) return;
     e.preventDefault();
@@ -276,95 +369,7 @@ const MainPage = (): JSX.Element => {
         title: "options",
         color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`
       },
-      options: [
-        {
-          title: "new folder",
-          icon: <FaFolderPlus />,
-          func: (): void => {
-            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-            navigate("/newfolder");
-          }
-        },
-        {
-          title: "new note",
-          icon: <FaPlusSquare />,
-          func: (): void => {
-            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-            navigate("/newnote");
-          }
-        },
-        {
-          title: "search folders",
-          icon: <TbFolderSearch />,
-          func: (): void => {
-            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-            setFolderSearchText("");
-            setFolderSearch(true);
-          }
-        },
-        {
-          title: "search notes",
-          icon: <LuFileSearch />,
-          func: (): void => {
-            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-            setSearch(true);
-          }
-        },
-        {
-          title: "menu",
-          icon: <MdOutlineMenu />,
-          func: (): void => {
-            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-            setMenu(true);
-          }
-        },
-        {
-          title: "edit",
-          icon: <FaEdit />,
-          func: (): void => {
-            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-            setEdit(true);
-          }
-        },
-        {
-          title: "change view",
-          icon: <PiSwap />,
-          func: (): void => {
-            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-            const newPreferences = {
-              ...userPreferences,
-              layout: view === "list" ? "masonry" : view === "grid" ? "list" : "grid"
-            };
-            localStorage.setItem("preferences", JSON.stringify(newPreferences));
-            setUserPreferences(newPreferences);
-            setView((prevView) =>
-              prevView === "list" ? "masonry" : view === "grid" ? "list" : "grid"
-            );
-          }
-        },
-        {
-          title: "change order",
-          icon: <FaList />,
-          func: (): void => {
-            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-            setOrder((prevOrder) => !prevOrder);
-          }
-        },
-        {
-          title: "edit current folder",
-          icon: <FaEdit />,
-          func: (): void => editCurrentFolder()
-        },
-        {
-          title: "settings",
-          icon: <IoSettings />,
-          func: (): void => {
-            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-            setMenu(true);
-            setSettings(true);
-          }
-        }
-      ]
+      options: quickActions
     };
     setContextMenu(newMenu);
   };
@@ -382,6 +387,25 @@ const MainPage = (): JSX.Element => {
       setFolder(foldersAvailable[0]);
       setFolderSearchText("");
     }
+  };
+
+  const addActionToList = (index: number): void => {
+    let found = false;
+    const newActionsMap = userPreferences.quickActions.map((int) => {
+      if (int === index) {
+        found = true;
+        return 999;
+      } else {
+        return int;
+      }
+    });
+    const newActions = newActionsMap.filter((int) => int !== 999);
+    if (!found) {
+      newActions.push(index);
+    }
+    const newPreferences = { ...userPreferences, quickActions: newActions };
+    setUserPreferences(newPreferences);
+    localStorage.setItem("preferences", JSON.stringify(newPreferences));
   };
 
   return (
@@ -429,6 +453,63 @@ const MainPage = (): JSX.Element => {
               </>
             ) : null}
             <Account />
+            <Tooltip id="quick-actions" />
+            <div className="fixed bottom-5 left-5 bg-transparent flex flex-col gap-3 justify-end items-center">
+              {userPreferences.quickActions.map((actionIndex, index) => (
+                <>
+                  <Tooltip id={quickActions[actionIndex].title} />
+                  <button
+                    key={index}
+                    onClick={() => quickActions[actionIndex].func()}
+                    onContextMenu={(e) => {
+                      e.stopPropagation();
+                    }}
+                    data-tooltip-content={quickActions[actionIndex].title}
+                    data-tooltip-id={quickActions[actionIndex].title}
+                    className="rounded-full p-3 shadow-md bg-[#333] text-lg text-white"
+                  >
+                    {quickActions[actionIndex].icon}
+                  </button>
+                </>
+              ))}
+              <button
+                onClick={() => setQuickActionsNew((prev) => !prev)}
+                data-tooltip-content="quick actions"
+                data-tooltip-id="quick-actions"
+                className="rounded-full p-3 shadow-md bg-[#333] text-lg text-white"
+              >
+                <PiPlusMinus />
+              </button>
+            </div>
+            {quickActionsNew ? (
+              <>
+                <div
+                  className="fixed z-[999] inset-0 bg-black bg-opacity-10 backdrop-blur-sm"
+                  onClick={() => {
+                    setQuickActionsNew(false);
+                  }}
+                ></div>
+                <div className="fixed inset-y-40 inset-x-60 z-[999] bg-[#222] p-5 shadow-md">
+                  <p className="text-lg">Quick Action Select</p>
+                  <div className="grid grid-cols-4 p-10 justify-center items-center gap-3 h-full">
+                    {quickActions.map((action, index) => (
+                      <button
+                        onClick={() => addActionToList(index)}
+                        key={action.title}
+                        className="flex flex-col gap-y-1 justify-center items-center"
+                      >
+                        <div
+                          className={`p-3 rounded-full w-min ${userPreferences.darkMode ? (userPreferences.quickActions.includes(index) ? "bg-slate-400 text-black" : "bg-slate-300 text-black") : userPreferences.quickActions.includes(index) ? "bg-[#333] text-white" : "bg-[#444] text-white"} shadow-md`}
+                        >
+                          <p>{action.icon}</p>
+                        </div>
+                        <p className="text-xs text-center">{action.title}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : null}
           </>
         )
       ) : (

@@ -110,6 +110,7 @@ type UserPreferences = {
   order: boolean;
   filter: string;
   layout: string;
+  quickActions: number[];
   unsavedNotes: unsavedNotesArray[];
   autosave: boolean;
 };
