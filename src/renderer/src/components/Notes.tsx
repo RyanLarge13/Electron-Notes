@@ -1,5 +1,11 @@
 import { useContext, useState, useRef, useEffect, PointerEventHandler } from "react";
-import { createNewNote, deleteANote, moveNoteToTrash, updateNote } from "@renderer/utils/api";
+import {
+  createNewNote,
+  deleteANote,
+  moveNoteToTrash,
+  updateFavoriteOnNote,
+  updateNote
+} from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
 import {
   FaArrowCircleRight,
@@ -20,7 +26,14 @@ import { v4 as uuidv4 } from "uuid";
 import cheerio from "cheerio";
 import { motion } from "framer-motion";
 import UserContext from "@renderer/contexxt/UserContext";
-import { BsFiletypeDocx, BsFiletypeHtml, BsFiletypePdf, BsFiletypeTxt } from "react-icons/bs";
+import {
+  BsFiletypeDocx,
+  BsFiletypeHtml,
+  BsFiletypePdf,
+  BsFiletypeTxt,
+  BsStar,
+  BsStarFill
+} from "react-icons/bs";
 import { MdCancel, MdDeleteForever, MdRestore, MdUpdate } from "react-icons/md";
 import { IoRemoveCircle } from "react-icons/io5";
 
@@ -1441,6 +1454,10 @@ const Notes = (): JSX.Element => {
     }
   };
 
+  const updateFavorite = (newFavorite: boolean, noteId: string): void => {
+    updateFavoriteOnNote(token, noteId, newFavorite).then((res) => {});
+  };
+
   return (
     <div className="w-full py-10">
       <Masonry
@@ -1451,6 +1468,8 @@ const Notes = (): JSX.Element => {
         {notesToRender.map((note: Note) => (
           <motion.div
             whileHover={{ backgroundColor: userPreferences.darkMode ? "#444" : "#fff" }}
+            initial={{ opacity: 0.25 }}
+            whileInView={{ opacity: 1 }}
             drag={true}
             dragSnapToOrigin={true}
             onDragStart={() => {
@@ -1469,6 +1488,12 @@ const Notes = (): JSX.Element => {
             className={`${search && folder === null ? "my-16" : "my-5"} ${view === "list" ? "h-80 overflow-y-clip" : view === "grid" ? "h-80 overflow-y-clip" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
+            <button
+              onClick={() => updateFavorite(!note.favorite)}
+              className={`absolute top-1 right-1 text-lg ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+            >
+              {note.favorite ? <BsStarFill /> : <BsStar />}
+            </button>
             {search && folder === null ? (
               <button
                 onClick={(e) => {

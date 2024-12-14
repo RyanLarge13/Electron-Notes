@@ -188,6 +188,26 @@ export const moveNoteToTrash = (
   return res;
 };
 
+export const updateFavoriteOnNote = (
+  token: string,
+  noteId: string,
+  favorite: boolean
+): Promise<AxiosResponse> => {
+  const res = Axios.patch(
+    `${devUrl}/notes/favorite`,
+    {
+      notesId: noteId,
+      favorite: favorite
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+  return res;
+};
+
 export const deleteANote = (token: string, noteId: string): Promise<AxiosResponse> => {
   const res = Axios.delete(`${devUrl}/notes/delete/${noteId}`, {
     headers: {

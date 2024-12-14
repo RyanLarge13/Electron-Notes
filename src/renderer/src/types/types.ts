@@ -24,6 +24,7 @@ export type Note = {
   createdAt: Date;
   updated: Date;
   trashed: boolean;
+  favorite: boolean;
 };
 
 export type apiNote = {
