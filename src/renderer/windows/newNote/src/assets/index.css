@@ -2,10 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
 body {
   /* background-color: #223;
   color: #fff; */
   font-family: Georgia, "Times New Roman", Times, serif;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 body::-webkit-scrollbar {
@@ -35,12 +44,6 @@ body::-webkit-scrollbar-thumb {
   width: 0px;
 }
 
-/* .radial-gradient {
-  background: radial-gradient(transparent 90%, black 5%);
-  opacity: 0.2;
-  filter: blur(20px);
-} */
-
 .renderHtml ul {
   list-style-type: disc;
   margin-left: 2em;
@@ -51,59 +54,6 @@ body::-webkit-scrollbar-thumb {
   list-style-type: decimal;
   margin-left: 2em;
   margin-bottom: 0.5em;
-}
-
-.nesting-div::after {
-  position: absolute;
-  content: "";
-  inset: 0;
-  background-image: linear-gradient(to right, rgba(34, 34, 51, 0.8), transparent);
-}
-
-.my-masonry-grid {
-  display: flex;
-  justify-content: start;
-  align-items: start;
-  margin-left: -30px;
-  width: 100%;
-}
-
-.my-masonry-grid_column {
-  background-clip: padding-box;
-}
-
-.my-masonry-grid-attachments {
-  display: flex;
-  margin-left: -5px;
-  width: auto;
-}
-
-.my-masonry-grid_column-attachments {
-  padding-left: 10px; /* gutter size */
-  padding-top: 10px;
-  background-clip: padding-box;
-}
-
-.mode-vert {
-  writing-mode: vertical-lr;
-}
-
-.fade-inset-black::after,
-.fade-inset-black::before {
-  position: absolute;
-  content: "";
-  width: 100%;
-  height: 100%;
-}
-
-.fade-inset-black::after {
-  content: "";
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 50px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(255, 255, 255, 0));
-  z-index: 999;
 }
 
 .ql-container.ql-snow {

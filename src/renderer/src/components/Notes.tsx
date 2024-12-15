@@ -1,4 +1,4 @@
-import { useContext, useState, useRef, useEffect, PointerEventHandler } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import {
   createNewNote,
   deleteANote,
@@ -1489,8 +1489,8 @@ const Notes = (): JSX.Element => {
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
             <button
-              onClick={() => updateFavorite(!note.favorite)}
-              className={`absolute top-1 right-1 text-lg ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+              onClick={() => updateFavorite(!note.favorite, note.noteid)}
+              className={`absolute top-1 left-1 ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
             >
               {note.favorite ? <BsStarFill /> : <BsStar />}
             </button>
