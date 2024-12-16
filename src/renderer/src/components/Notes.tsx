@@ -78,6 +78,7 @@ const Notes = (): JSX.Element => {
   const [renameANote, setRenameANote] = useState(null);
   const [renameText, setRenameText] = useState("");
   const [unsavedChangesOptions, setUnsavedChangesOptions] = useState(null);
+  const [lockedOpenNewWinNote, setLockedOpenNewWinNote] = useState(false);
 
   const firstInput = useRef(null);
   const secondInput = useRef(null);
@@ -122,10 +123,17 @@ const Notes = (): JSX.Element => {
   }, [pinInput]);
 
   useEffect(() => {
+    if (lockedOpenNewWinNote) {
+      setPinInput(true);
+    }
+  }, [lockedOpenNewWinNote]);
+
+  useEffect(() => {
     if (pin.fourth !== "") {
       const validPin = checkPin();
       if (validPin) {
-        return unlockNote();
+        unlockNote();
+        return;
       }
       const newError = {
         show: true,
@@ -1066,6 +1074,13 @@ const Notes = (): JSX.Element => {
   };
 
   const openWindow = async (note: Note): Promise<void> => {
+    if (note.locked) {
+      setLockedOpenNewWinNote(true);
+      setAwaitingNote(note);
+      setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+      setNote(null);
+      return;
+    }
     await window.openNewWin.openNoteInNewWindow(note, userPreferences.darkMode);
     setNote(null);
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
@@ -1245,8 +1260,18 @@ const Notes = (): JSX.Element => {
     setNote(note);
   };
 
-  const unlockNote = (): void => {
+  const unlockNote = async (): Promise<void> => {
     try {
+      if (lockedOpenNewWinNote) {
+        const stringifiedPin = JSON.stringify(pin);
+        localStorage.setItem("pin", stringifiedPin);
+        setPinInput(false);
+        setPin({ first: "", second: "", third: "", fourth: "" });
+        await window.openNewWin.openNoteInNewWindow(awaitingNote, userPreferences.darkMode);
+        setAwaitingNote(null);
+        setLockedOpenNewWinNote(false);
+        return;
+      }
       const stringifiedPin = JSON.stringify(pin);
       localStorage.setItem("pin", stringifiedPin);
       setPinInput(false);
@@ -1454,8 +1479,82 @@ const Notes = (): JSX.Element => {
     }
   };
 
-  const updateFavorite = (newFavorite: boolean, noteId: string): void => {
-    updateFavoriteOnNote(token, noteId, newFavorite).then((res) => {});
+  const updateFavorite = (newFavorite: boolean, note: Note): void => {
+    const newNote = {
+      ...note,
+      favorite: newFavorite
+    };
+    const oldNotes = allData.notes;
+    setAllData((prev) => {
+      return {
+        ...prev,
+        notes: prev.notes.map((aNote) => {
+          if (aNote.noteid === note.noteid) {
+            return newNote;
+          } else {
+            return aNote;
+          }
+        })
+      };
+    });
+    updateFavoriteOnNote(token, note.noteid, newFavorite)
+      .then((res) => {
+        if (userPreferences.notify.notifySuccess || userPreferences.notify.notifyAll) {
+          setSystemNotif({
+            show: true,
+            title: `${note.title}`,
+            text: `${note.title} was favored successfully`,
+            color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`,
+            hasCancel: false,
+            actions: [
+              {
+                text: "close",
+                func: (): void =>
+                  setSystemNotif({
+                    show: false,
+                    title: "",
+                    text: "",
+                    color: "",
+                    hasCancel: false,
+                    actions: []
+                  })
+              }
+            ]
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        setAllData((prev) => {
+          return {
+            ...prev,
+            notes: oldNotes
+          };
+        });
+
+        const newError = {
+          show: true,
+          title: "Issues Favoring Note",
+          text: "Please contact the developer if this issue persists. We seemed to have a problem favoring your note. Please close the application, reload it and try the operation again.",
+          color: "bg-red-300",
+          hasCancel: true,
+          actions: [
+            {
+              text: "close",
+              func: () =>
+                setSystemNotif({
+                  show: false,
+                  title: "",
+                  text: "",
+                  color: "",
+                  hasCancel: false,
+                  actions: []
+                })
+            }
+          ]
+        };
+        setSystemNotif(newError);
+      });
   };
 
   return (
@@ -1489,8 +1588,11 @@ const Notes = (): JSX.Element => {
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
             <button
-              onClick={() => updateFavorite(!note.favorite, note.noteid)}
-              className={`absolute top-1 left-1 ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                updateFavorite(!note.favorite, note);
+              }}
+              className={`absolute top-[-3px] left-[-3px] text-sm ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
             >
               {note.favorite ? <BsStarFill /> : <BsStar />}
             </button>
@@ -1656,10 +1758,10 @@ const Notes = (): JSX.Element => {
               setPin({ first: "", second: "", third: "", fourth: "" });
               setPinInput(false);
             }}
-            className="fixed bg-transparent inset-0 shadow-md"
+            className="fixed bg-transparent inset-0 shadow-md z-999"
           ></div>
           <form
-            className={`p-5 fixed bottom-5 left-5 rounded-md shadow-md ${
+            className={`p-5  z-[999] fixed bottom-5 left-5 rounded-md shadow-md ${
               userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-200 text-black"
             } flex justify-center items-center gap-x-5`}
           >

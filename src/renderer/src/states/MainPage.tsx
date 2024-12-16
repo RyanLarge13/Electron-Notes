@@ -457,7 +457,10 @@ const MainPage = (): JSX.Element => {
             <div className="fixed bottom-5 left-5 bg-transparent flex flex-col gap-3 justify-end items-center">
               {userPreferences.quickActions.map((actionIndex, index) => (
                 <>
-                  <Tooltip id={quickActions[actionIndex].title} />
+                  <Tooltip
+                    id={quickActions[actionIndex].title}
+                    key={((actionIndex * index) / index) * Math.random()}
+                  />
                   <button
                     key={index}
                     onClick={() => quickActions[actionIndex].func()}

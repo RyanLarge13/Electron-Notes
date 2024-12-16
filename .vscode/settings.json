@@ -9,5 +9,15 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "git.ignoreLimitWarning": true,
-  "cSpell.words": ["folderid", "newnote", "noteid", "notesid", "Notif", "Prefs", "uuidv"]
+  "cSpell.words": [
+    "folderid",
+    "maximizable",
+    "minimizable",
+    "newnote",
+    "noteid",
+    "notesid",
+    "Notif",
+    "Prefs",
+    "uuidv"
+  ]
 }

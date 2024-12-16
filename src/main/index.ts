@@ -5,7 +5,7 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
-import appIcon from "../../resources/icon.png?asset";
+import appIcon from "../../resources/icon-2.png?asset";
 
 function createWindow(): void {
   // Create the browser window.
@@ -149,9 +149,12 @@ function createWindow(): void {
     const noteWindow = new BrowserWindow({
       width: 1000,
       height: 600,
-      parent: mainWindow, // Tie the new window to the main window
-      title: note.title,
+      title: note.title || "Note",
       autoHideMenuBar: true,
+      resizable: true, // Ensure this is true to enable resizing
+      minimizable: true, // Ensure this is true for minimizing
+      maximizable: true, // Ensure this is true for maximizing
+      frame: true,
       modal: false, // Change to true if you want it as a modal
       webPreferences: {
         preload: join(__dirname, "../preload/noteWinPreload.js"),
@@ -180,7 +183,7 @@ function createWindow(): void {
   });
 
   mainWindow.loadFile(join(__dirname, "../renderer/index.html"), { hash: "login" });
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
