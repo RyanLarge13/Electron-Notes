@@ -1,19 +1,31 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaCopy, FaEdit, FaShareAlt, FaTrashAlt } from "react-icons/fa";
+import { FaCopy, FaEdit } from "react-icons/fa";
 import UserContext from "@renderer/contexxt/UserContext";
 import { IoCloseCircle } from "react-icons/io5";
 import { MdDragHandle } from "react-icons/md";
-import { CiDesktop, CiMaximize1, CiMinimize1 } from "react-icons/ci";
+import { CiDesktop } from "react-icons/ci";
 import { Tooltip } from "react-tooltip";
 import { Note } from "@renderer/types/types";
 
 const NoteView = (): JSX.Element => {
-  const { note, userPreferences, setNote, setNoteToEdit, setSystemNotif } = useContext(UserContext);
+  const { note, userPreferences, setUserPreferences, setNote, setNoteToEdit, setSystemNotif } =
+    useContext(UserContext);
 
   const [htmlToRender, setHtmlToRender] = useState(note.htmlText);
-  const [minimize, setMinimize] = useState(false);
+  const [noteWidth, setNoteWidth] = useState(
+    userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.width || 45
+  );
+  const [noteHeight, setNoteHeight] = useState(
+    userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.height || 75
+  );
+  const [noteTop, setNoteTop] = useState(
+    userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.top || 50
+  );
+  const [noteLeft, setNoteLeft] = useState(
+    userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.left || 50
+  );
 
   const navigate = useNavigate();
 
@@ -23,10 +35,6 @@ const NoteView = (): JSX.Element => {
       setHtmlToRender(contains[0].htmlText);
     }
   }, []);
-
-  const minimizeWin = () => {
-    setMinimize(true);
-  };
 
   const editNote = (): void => {
     setNoteToEdit(note);
@@ -120,41 +128,59 @@ const NoteView = (): JSX.Element => {
     setNote(null);
   };
 
+  const handleDragEnd = (e: DragEvent): void => {
+    setNoteTop(e.clientY);
+    setNoteLeft(e.clientX);
+    let newDems;
+    if (userPreferences.noteDems.find((dem) => dem.id === note.noteid) !== undefined) {
+      newDems = [
+        ...userPreferences.noteDems,
+        { width: noteWidth, height: noteHeight, top: noteTop, left: noteLeft }
+      ];
+    } else {
+      newDems = userPreferences.noteDems.map((dem) => {
+        if (dem.id !== note.noteid) {
+          return dem;
+        } else {
+          return { ...dem, top: e.clientY, left: e.clientX };
+        }
+      });
+    }
+
+    const newPreferences = { ...userPreferences, noteDems: newDems };
+    setUserPreferences(newPreferences);
+
+    localStorage.setItem("preferences", JSON.stringify(newPreferences));
+  };
+
   return (
     <>
       {/* {!minimize ? ( */}
       <div
-        className={`${minimize ? "bg-transparent pointer-events-none" : "bg-black backdrop-blur-sm bg-opacity-20"} fixed z-40 inset-0`}
-        onClick={() => (minimize ? setMinimize(false) : setNote(null))}
+        className="bg-black backdrop-blur-sm bg-opacity-20 fixed z-40 inset-0"
+        onClick={() => setNote(null)}
       ></div>
       {/* ) : null} */}
       <motion.div
         drag={true}
         dragConstraints={{ top: 0, bottom: 250, right: 1000, left: 0 }}
-        dragSnapToOrigin={minimize}
+        dragSnapToOrigin={false}
         initial={{ opacity: 0 }}
         animate={{
           opacity: 1,
-          width: minimize ? "30px" : null,
-          height: minimize ? "300px" : null,
-          left: minimize ? 0 : null,
-          top: minimize ? 150 : null
+          width: `${noteWidth}%`,
+          height: `${noteHeight}%`,
+          top: `${noteTop}px`,
+          left: `${noteLeft}px`
         }}
+        onDragEnd={handleDragEnd}
         whileDrag={{ outline: "2px solid rgba(255,255,255,0.5" }}
-        className={`${minimize ? "shadow-lg shadow-black" : "shadow-md"} fixed z-40 ${
+        className={`shadow-md fixed z-40 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
         } inset-10 right-[55%] overflow-y-auto origin-bottom no-scroll-bar rounded-md shadow-md pb-5`}
       >
-        {minimize ? (
-          <div className="p-2">
-            <button onClick={() => setMinimize(false)}>
-              <CiMaximize1 />
-            </button>
-            <p className="mode-vert mt-10 ml-[-5px]">{note.title}</p>
-          </div>
-        ) : null}
         <div
-          className={`p-2 sticky z-[40] top-0 ${userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"} rounded-t-md flex justify-between items-center ${minimize ? "hidden" : ""}`}
+          className={`p-2 sticky z-[40] top-0 ${userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"} rounded-t-md flex justify-between items-center`}
         >
           <p>
             Created On{" "}
@@ -166,7 +192,6 @@ const NoteView = (): JSX.Element => {
           </p>
           <div className="flex justify-between items-center gap-x-3">
             <Tooltip id="move-note" />
-            <Tooltip id="pin-note" />
             <Tooltip id="new-win-note" />
             <Tooltip id="close-note" />
             <button
@@ -175,13 +200,6 @@ const NoteView = (): JSX.Element => {
               data-tooltip-content="Move Around Your Note"
             >
               <MdDragHandle />
-            </button>
-            <button
-              onClick={() => minimizeWin()}
-              data-tooltip-id="pin-note"
-              data-tooltip-content="Minimize Your Note"
-            >
-              <CiMinimize1 />
             </button>
             <button
               onClick={() => openWindow(note)}
@@ -200,7 +218,7 @@ const NoteView = (): JSX.Element => {
           </div>
         </div>
         <div
-          className={`${minimize ? "hidden" : ""} flex justify-between items-center sticky top-10 right-0 left-0 ${
+          className={`flex justify-between items-center sticky top-10 right-0 left-0 ${
             userPreferences.darkMode ? "bg-[#444]" : "bg-white"
           } p-3 rounded-b-md`}
         >
@@ -231,7 +249,7 @@ const NoteView = (): JSX.Element => {
           </div>
         </div>
         <div
-          className={`renderHtml mt-5 px-5 ${minimize ? "hidden" : ""}`}
+          className="renderHtml mt-5 px-5"
           dangerouslySetInnerHTML={{ __html: htmlToRender }}
         ></div>
       </motion.div>

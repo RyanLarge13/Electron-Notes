@@ -415,7 +415,12 @@ const MainPage = (): JSX.Element => {
         userPreferences?.darkMode ? "bg-[#222] text-white" : "bg-slate-100 text=black"
       } min-h-screen scrollbar-hide`}
     >
-      <div className="text-rose-300 text-red-300 text-amber-300 text-yellow-300 text-lime-300 text-green-300 text-emerald-300 text-cyan-300 text-sky-300 text-blue-300 text-indigo-300 text-violet-300 text-fuchsia-300 text-pink-300"></div>
+      <div
+        className="
+      text-rose-300 text-red-300 text-amber-300 text-yellow-300 text-lime-300 text-green-300 text-emerald-300 text-cyan-300 text-sky-300 text-blue-300 text-indigo-300 text-violet-300 text-fuchsia-300 text-pink-300 
+      text-rose-600 text-red-600 text-amber-600 text-yellow-600 text-lime-600 text-green-600 text-emerald-600 text-cyan-600 text-sky-600 text-blue-600 text-indigo-600 text-violet-600 text-fuchsia-600 text-pink-600
+      "
+      ></div>
       <ContextMenu />
       <SystemNotif />
       {!loading ? (
@@ -433,7 +438,7 @@ const MainPage = (): JSX.Element => {
                   }}
                 ></div>
                 <div
-                  className={`fixed top-10 left-10 z-40 ${userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-200 text-black"} p-3 rounded-md shadow-md`}
+                  className={`fixed top-20 left-10 z-40 ${userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-200 text-black"} p-3 rounded-md shadow-md`}
                 >
                   <form
                     onSubmit={(e) => {
@@ -454,32 +459,28 @@ const MainPage = (): JSX.Element => {
             ) : null}
             <Account />
             <Tooltip id="quick-actions" />
-            <div className="fixed bottom-5 left-5 bg-transparent flex flex-col gap-3 justify-end items-center">
+            <div className="fixed bottom-5 left-5 bg-transparent">
               {userPreferences.quickActions.map((actionIndex, index) => (
-                <>
-                  <Tooltip
-                    id={quickActions[actionIndex].title}
-                    key={((actionIndex * index) / index) * Math.random()}
-                  />
+                <div key={index} className="flex flex-col gap-3 justify-end items-center">
+                  <Tooltip id={quickActions[actionIndex].title} />
                   <button
-                    key={index}
                     onClick={() => quickActions[actionIndex].func()}
                     onContextMenu={(e) => {
                       e.stopPropagation();
                     }}
                     data-tooltip-content={quickActions[actionIndex].title}
                     data-tooltip-id={quickActions[actionIndex].title}
-                    className="rounded-full p-3 shadow-md bg-[#333] text-lg text-white"
+                    className={`rounded-full p-3 shadow-md my-1 ${userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-300 text-black"} text-lg`}
                   >
                     {quickActions[actionIndex].icon}
                   </button>
-                </>
+                </div>
               ))}
               <button
                 onClick={() => setQuickActionsNew((prev) => !prev)}
                 data-tooltip-content="quick actions"
                 data-tooltip-id="quick-actions"
-                className="rounded-full p-3 shadow-md bg-[#333] text-lg text-white"
+                className={`${userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-300 text-black"} mt-1 rounded-full p-3 shadow-md text-lg`}
               >
                 <PiPlusMinus />
               </button>
@@ -492,17 +493,19 @@ const MainPage = (): JSX.Element => {
                     setQuickActionsNew(false);
                   }}
                 ></div>
-                <div className="fixed inset-y-40 inset-x-60 z-[999] bg-[#222] p-5 shadow-md">
+                <div
+                  className={`rounded-md fixed inset-y-40 inset-x-60 z-[999] p-5 shadow-md ${userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-200 text-black"}`}
+                >
                   <p className="text-lg">Quick Action Select</p>
-                  <div className="grid grid-cols-4 p-10 justify-center items-center gap-3 h-full">
+                  <div className="grid grid-cols-4 p-10 justify-center items-center gap-1 h-full">
                     {quickActions.map((action, index) => (
                       <button
                         onClick={() => addActionToList(index)}
                         key={action.title}
-                        className="flex flex-col gap-y-1 justify-center items-center"
+                        className={`flex flex-col gap-y-1 w-full h-full duration-200 rounded-lg shadow-md justify-center items-center ${userPreferences.darkMode ? (userPreferences.quickActions.includes(index) ? "bg-[#555] text-white" : "bg-[#444] text-white") : userPreferences.quickActions.includes(index) ? "bg-slate-300 text-black" : "bg-slate-200 text-black"}`}
                       >
                         <div
-                          className={`p-3 rounded-full w-min ${userPreferences.darkMode ? (userPreferences.quickActions.includes(index) ? "bg-slate-400 text-black" : "bg-slate-300 text-black") : userPreferences.quickActions.includes(index) ? "bg-[#333] text-white" : "bg-[#444] text-white"} shadow-md`}
+                          className={`p-3 duration-200 rounded-full w-min ${userPreferences.darkMode ? (userPreferences.quickActions.includes(index) ? "bg-[#444] text-white" : "bg-[#555] text-white") : userPreferences.quickActions.includes(index) ? "bg-slate-400 text-black" : "bg-slate-300 text-black"} shadow-md`}
                         >
                           <p>{action.icon}</p>
                         </div>

@@ -3,8 +3,6 @@ import { ContextProps, Folder, Note } from "@renderer/types/types";
 import { getuserData } from "@renderer/utils/api";
 import "@renderer/threads/handleConnections";
 import LocalCache from "../utils/cache";
-import { FaFolderPlus, FaPlusSquare } from "react-icons/fa";
-import { Navigate, useNavigate } from "react-router-dom";
 
 const UserContext = createContext({} as ContextProps);
 
@@ -104,6 +102,17 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
           { text: "reorder notes", command: "ctrl + o", active: true },
           { text: "edit", command: "ctrl + e", active: true },
           { text: "search", command: "ctrl + s", active: true }
+        ],
+        menuWidth: 45,
+        settingsWidth: 45,
+        noteDems: [
+          // {
+          //   id: 0,
+          //   width: 45,
+          //   height: 75,
+          //   top: 10,
+          //   left: 10
+          // }
         ]
       };
       localStorage.setItem("preferences", JSON.stringify(defaultPreferences));
@@ -124,19 +133,16 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         if ("layout" in parsedPreferences) {
           null;
         } else {
-          console.log("No layout in parsed prefs");
           parsedPreferences.layout = "masonry";
         }
         if ("order" in parsedPreferences) {
           null;
         } else {
-          console.log("No order in preferences");
           parsedPreferences.order = true;
         }
         if ("filter" in parsedPreferences) {
           null;
         } else {
-          console.log("no filter in preferences");
           parsedPreferences.filter = "Title";
         }
         if ("unsavedNotes" in parsedPreferences) {
@@ -154,6 +160,22 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         } else {
           parsedPreferences.quickActions = [0, 1];
         }
+        if ("menuWidth" in parsedPreferences) {
+          null;
+        } else {
+          parsedPreferences.menuWidth = 45;
+        }
+        if ("settingsWidth" in parsedPreferences) {
+          null;
+        } else {
+          parsedPreferences.settingsWidth = 45;
+        }
+        if ("noteDems" in parsedPreferences) {
+          null;
+        } else {
+          parsedPreferences.noteDems = [];
+        }
+
         parsedPreferences.order ? setOrder(parsedPreferences.order) : setOrder(true);
         parsedPreferences.filter ? setFilter(parsedPreferences.filter) : setFilter("Title");
         parsedPreferences.layout === "grid"

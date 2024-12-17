@@ -114,6 +114,9 @@ type UserPreferences = {
   quickActions: number[];
   unsavedNotes: unsavedNotesArray[];
   autosave: boolean;
+  menuWidth: number;
+  settingsWidth: number;
+  noteDems: { id: string; width: number; height: number; top: number; left: number }[];
 };
 
 type Move = {

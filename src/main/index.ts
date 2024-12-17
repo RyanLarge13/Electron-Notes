@@ -5,7 +5,7 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
-import appIcon from "../../resources/icon-2.png?asset";
+import appIcon from "../../resources/icon.png?asset";
 
 function createWindow(): void {
   // Create the browser window.
@@ -183,7 +183,7 @@ function createWindow(): void {
   });
 
   mainWindow.loadFile(join(__dirname, "../renderer/index.html"), { hash: "login" });
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
