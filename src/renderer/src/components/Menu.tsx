@@ -1,11 +1,12 @@
 import { useContext } from "react";
 import { motion } from "framer-motion";
-import { FaShareAlt, FaTrashAlt, FaLock, FaFirstdraft } from "react-icons/fa";
+import { FaTrashAlt, FaLock, FaFirstdraft } from "react-icons/fa";
 import { LuFileStack } from "react-icons/lu";
 import { deleteUser } from "@renderer/utils/api";
 import { useNavigate } from "react-router-dom";
 import UserContext from "@renderer/contexxt/UserContext";
 import Tree from "./Tree";
+import { BsStarFill } from "react-icons/bs";
 
 const Menu = (): JSX.Element => {
   const {
@@ -17,6 +18,7 @@ const Menu = (): JSX.Element => {
     setMainTitle,
     setSystemNotif,
     setSettings,
+    favorites,
     user,
     allData,
     token,
@@ -218,6 +220,13 @@ const Menu = (): JSX.Element => {
     setMenu(false);
   };
 
+  const showAllFavorites = (): void => {
+    setMainTitle("Favorites");
+    setFolders([]);
+    setNotes(favorites);
+    setMenu(false);
+  };
+
   return (
     <>
       <motion.div
@@ -247,7 +256,7 @@ const Menu = (): JSX.Element => {
             <div className="flex justify-center items-center gap-x-3">
               <p className="font-semibold">{allData?.notes?.length}</p>
               <LuFileStack
-                className={`${userPreferences.theme ? textThemeString : "bg-amber-300"} text-sm`}
+                className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
               />
             </div>
           </button>
@@ -265,7 +274,25 @@ const Menu = (): JSX.Element => {
                 {allData?.notes?.filter((note) => note.locked).length}
               </p>
               <FaLock
-                className={`${userPreferences.theme ? textThemeString : "bg-amber-300"} text-sm`}
+                className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
+              />
+            </div>
+          </button>
+          <button
+            onClick={() => showAllFavorites()}
+            className={`p-3 rounded-md shadow-md my-3 ${
+              userPreferences.darkMode
+                ? "bg-[#333] hover:bg-[#444]"
+                : "bg-slate-300 hover:bg-slate-400"
+            } w-full flex justify-between items-center duration-200`}
+          >
+            <p>Favorite Notes</p>
+            <div className="flex justify-center items-center gap-x-3">
+              <p className="font-semibold">
+                {allData?.notes?.filter((note) => note.favorite).length}
+              </p>
+              <BsStarFill
+                className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
               />
             </div>
           </button>
@@ -281,7 +308,7 @@ const Menu = (): JSX.Element => {
             <div className="flex justify-center items-center gap-x-3">
               <p className="font-semibold">{drafts.length}</p>
               <FaFirstdraft
-                className={`${userPreferences.theme ? textThemeString : "bg-amber-300"} text-sm`}
+                className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
               />
             </div>
           </button>
@@ -297,7 +324,7 @@ const Menu = (): JSX.Element => {
             <div className="flex justify-center items-center gap-x-3">
               <p className="font-semibold">{trashedNotes.length}</p>
               <FaTrashAlt
-                className={`${userPreferences.theme ? textThemeString : "bg-amber-300"} text-sm`}
+                className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
               />
             </div>
           </button>

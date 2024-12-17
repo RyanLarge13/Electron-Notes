@@ -1594,7 +1594,7 @@ const Notes = (): JSX.Element => {
               }}
               className={`absolute top-[-3px] left-[-3px] text-sm ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
             >
-              {note.favorite ? <BsStarFill /> : <BsStar />}
+              {note.favorite === true ? <BsStarFill /> : <BsStar />}
             </button>
             {search && folder === null ? (
               <button

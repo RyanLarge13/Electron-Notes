@@ -13,6 +13,13 @@ const NoteView = (): JSX.Element => {
   const { note, userPreferences, setUserPreferences, setNote, setNoteToEdit, setSystemNotif } =
     useContext(UserContext);
 
+  const [resizing, setResizing] = useState(true);
+  const [resizeXPxW, setResizeXPxW] = useState(0);
+  const [initialX, setInitialX] = useState(0);
+  const [isResizingX, setIsResizingX] = useState(false);
+  const [offsetX, setOffsetX] = useState(0);
+  const [initialY, setInitialY] = useState(0);
+
   const [htmlToRender, setHtmlToRender] = useState(note.htmlText);
   const [noteWidth, setNoteWidth] = useState(
     userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.width || 45
@@ -129,28 +136,72 @@ const NoteView = (): JSX.Element => {
   };
 
   const handleDragEnd = (e: DragEvent): void => {
-    setNoteTop(e.clientY);
-    setNoteLeft(e.clientX);
-    let newDems;
-    if (userPreferences.noteDems.find((dem) => dem.id === note.noteid) !== undefined) {
+    let newDems: { id: string; top: number; left: number; width: number; height: number }[] = [];
+    if (!userPreferences?.noteDems || userPreferences.noteDems.length < 1) {
       newDems = [
-        ...userPreferences.noteDems,
-        { width: noteWidth, height: noteHeight, top: noteTop, left: noteLeft }
+        {
+          id: note.noteid,
+          // top: e.clientY - noteHeight / 2,
+          // left: e.clientX - noteWidth / 2,
+          top: 0,
+          left: 0,
+          height: noteHeight,
+          width: noteWidth
+        }
       ];
     } else {
-      newDems = userPreferences.noteDems.map((dem) => {
-        if (dem.id !== note.noteid) {
-          return dem;
-        } else {
-          return { ...dem, top: e.clientY, left: e.clientX };
-        }
-      });
+      if (userPreferences.noteDems.find((dem) => dem.id === note.noteid)) {
+        newDems = userPreferences.noteDems.map((dem) => {
+          if (dem.id === note.noteid) {
+            // return { ...dem, top: e.clientY - noteHeight / 2, left: e.clientX - noteWidth / 2 };
+            return { ...dem, top: 0, left: 0 };
+          } else {
+            return dem;
+          }
+        });
+      } else {
+        newDems = [
+          ...userPreferences.noteDems,
+          {
+            id: note.noteid,
+            top: noteTop,
+            left: noteLeft,
+            width: noteWidth,
+            height: noteHeight
+          }
+        ];
+      }
     }
 
     const newPreferences = { ...userPreferences, noteDems: newDems };
     setUserPreferences(newPreferences);
 
     localStorage.setItem("preferences", JSON.stringify(newPreferences));
+  };
+
+  const handleResizeWidth = (e) => {
+    const width = e.target.getBoundingClientRect().width;
+    setResizeXPxW(width);
+    setInitialX(e.clientX);
+    setIsResizingX(true);
+    setResizing(false);
+  };
+
+  const handleResizeWidthMove = (e) => {
+    if (isResizingX) {
+      const offset = e.clientX - initialX;
+      setOffsetX(offset);
+      const newPercentage = noteWidth + (offset / resizeXPxW) * 100;
+      setNoteWidth(Math.max(0, Math.min(100, newPercentage)));
+    }
+  };
+
+  const handleResizeWidthUp = (e) => {
+    setIsResizingX(false);
+  };
+
+  const handleResizeHeight = (e) => {
+    setResizing(false);
   };
 
   return (
@@ -162,8 +213,8 @@ const NoteView = (): JSX.Element => {
       ></div>
       {/* ) : null} */}
       <motion.div
-        drag={true}
-        dragConstraints={{ top: 0, bottom: 250, right: 1000, left: 0 }}
+        drag={resizing}
+        // dragConstraints={{ top: 0, bottom: 250, right: 1000, left: 0 }}
         dragSnapToOrigin={false}
         initial={{ opacity: 0 }}
         animate={{
@@ -179,6 +230,16 @@ const NoteView = (): JSX.Element => {
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
         } inset-10 right-[55%] overflow-y-auto origin-bottom no-scroll-bar rounded-md shadow-md pb-5`}
       >
+        <div
+          className="absolute right-0 top-[50%] translate-y-[-50%] w-1 h-20 rounded-full bg-red-400 cursor-grab"
+          onPointerDown={handleResizeWidth}
+          onPointerMove={handleResizeWidthMove}
+          onPointerUp={handleResizeWidthUp}
+        ></div>
+        <div
+          className="absolute bottom-0 left-[50%] translate-x-[-50%] w-20 h-1 rounded-full bg-red-400 cursor-grab"
+          onPointerDown={handleResizeHeight}
+        ></div>
         <div
           className={`p-2 sticky z-[40] top-0 ${userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"} rounded-t-md flex justify-between items-center`}
         >

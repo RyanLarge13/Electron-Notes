@@ -49,6 +49,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
 
   const [editCurrentFolder, setEditCurrentFolder] = useState(false);
   const [drafts, setDrafts] = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const [search, setSearch] = useState(false);
   const [folderSearch, setFolderSearch] = useState(false);
   const [folderSearchText, setFolderSearchText] = useState("");
@@ -246,7 +247,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setFolder(folderToSet[0]);
         setNotes(notesToSet);
         setFolders(childFolders);
-        setMainTitle(folderToSet[0].title || "Folders");
+        setMainTitle(folderToSet[0]?.title || "Folders");
       } else {
         setIsInitialLoad(false);
         setFolder(null);
@@ -286,6 +287,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     let copyOfNotes: Note[];
     if (mainTitle === "Trashed") {
       copyOfNotes = notes.filter((aNote) => aNote.trashed);
+    } else if (mainTitle === "favorites") {
+      copyOfNotes = notes.filter((aNote) => aNote.favorite);
     } else {
       copyOfNotes = notes.filter((aNote) => !aNote.trashed);
     }
@@ -319,6 +322,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     };
     setAllData(cachedAllData);
     setTrashedNotes(cachedAllData.notes.filter((aNote: Note) => aNote.trashed));
+    setFavorites(cachedAllData.notes.filter((aNote) => aNote.favorite));
     setUser(cachedAllData.user);
     setLoading(false);
   };
@@ -373,6 +377,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         );
         setAllData(newAllData);
         setTrashedNotes(data.notes.filter((aNote: Note) => aNote.trashed));
+        setFavorites(data.notes.filter((aNote) => aNote.favorite));
         setUser(data.user);
         setLoading(false);
         setIsInitialLoad(false);
@@ -489,6 +494,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setContextMenu,
         menu,
         hoverConnections,
+        favorites,
         setHoverConnections,
         editCurrentFolder,
         setEditCurrentFolder,
