@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { FaTrashAlt, FaLock, FaFirstdraft } from "react-icons/fa";
 import { LuFileStack } from "react-icons/lu";
@@ -18,14 +18,20 @@ const Menu = (): JSX.Element => {
     setMainTitle,
     setSystemNotif,
     setSettings,
+    setUserPreferences,
+    userPreferences,
     favorites,
     user,
     allData,
     token,
-    userPreferences,
     drafts,
     trashedNotes
   } = useContext(UserContext);
+
+  const [resizing, setResizing] = useState(false);
+  const [menuWidth, setMenuWidth] = useState(userPreferences?.menuWidth || 33);
+
+  const menuRef = useRef(null);
 
   const navigate = useNavigate();
   const hoverBgString = userPreferences?.theme
@@ -227,6 +233,41 @@ const Menu = (): JSX.Element => {
     setMenu(false);
   };
 
+  const handleResizeWidth = (e): void => {
+    e.stopPropagation();
+    if (menuRef && menuRef.current) {
+      e.target.setPointerCapture(e.pointerId);
+      setResizing(true);
+      const rect = menuRef.current.getBoundingClientRect();
+      const offsetX = e.pageX - rect.left;
+      const percentagePointer = ((offsetX + menuWidth - 27) / window.innerWidth) * 100;
+      setMenuWidth(percentagePointer);
+    }
+  };
+
+  const handleResizeWidthMove = (e): void => {
+    e.stopPropagation();
+    if (menuRef && menuRef.current && resizing) {
+      const rect = menuRef.current.getBoundingClientRect();
+      const offsetX = e.pageX - rect.left;
+      const percentagePointer = ((offsetX + menuWidth - 27) / window.innerWidth) * 100;
+      setMenuWidth(percentagePointer);
+    }
+  };
+
+  const handleResizeWidthUp = (e): void => {
+    e.target.releasePointerCapture(e.pointerId);
+    setResizing(false);
+    setUserPreferences((prev) => {
+      return { ...prev, menuWidth: menuWidth };
+    });
+
+    localStorage.setItem(
+      "preferences",
+      JSON.stringify({ ...userPreferences, menuWidth: menuWidth })
+    );
+  };
+
   return (
     <>
       <motion.div
@@ -236,12 +277,24 @@ const Menu = (): JSX.Element => {
         onClick={() => setMenu(false)}
       ></motion.div>
       <motion.div
+        ref={menuRef}
         initial={{ x: -10, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        className={`fixed flex flex-col justify-between z-40 left-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 ${
+        animate={{
+          x: 0,
+          opacity: 1,
+          width: `${menuWidth}%`,
+          transition: { duration: resizing ? 0 : 0.25 }
+        }}
+        className={`fixed flex flex-col justify-between z-40 left-0 top-0 bottom-0 p-5 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"
         } rounded-r-md overflow-y-auto no-scroll-bar`}
       >
+        <div
+          className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute right-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full cursor-grab`}
+          onPointerDown={handleResizeWidth}
+          onPointerMove={handleResizeWidthMove}
+          onPointerUp={handleResizeWidthUp}
+        ></div>
         <div className="mb-10">
           <h1 className="text-3xl">{user.username}</h1>
           <button

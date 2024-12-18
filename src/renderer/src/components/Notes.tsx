@@ -798,6 +798,15 @@ const Notes = (): JSX.Element => {
               ]
             };
             setSystemNotif(newSuccess);
+
+            const newNoteDems = userPreferences.noteDems.filter((aDem) => aDem.id !== note.noteid);
+            setUserPreferences((prev) => {
+              return { ...prev, noteDems: newNoteDems };
+            });
+            localStorage.setItem(
+              "preferences",
+              JSON.stringify({ ...userPreferences, noteDems: newNoteDems })
+            );
           }
         })
         .catch((err) => {

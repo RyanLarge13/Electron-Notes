@@ -46,10 +46,14 @@ const Settings = (): JSX.Element => {
   const [notifyErrors, setNotifyErrors] = useState(userPreferences?.notify?.notifyErrors);
   const [newPassLoading, setNewPassLoading] = useState(false);
 
+  const [resizing, setResizing] = useState(false);
+  const [settingsWidth, setSettingsWidth] = useState(userPreferences?.settingsWidth || 33);
+
   const firstInput = useRef(null);
   const secondInput = useRef(null);
   const thirdInput = useRef(null);
   const fourthInput = useRef(null);
+  const settingsRef = useRef(null);
 
   useEffect(() => {
     if (!theme) {
@@ -709,6 +713,41 @@ const Settings = (): JSX.Element => {
     }
   };
 
+  const handleResizeWidth = (e): void => {
+    e.stopPropagation();
+    if (settingsRef && settingsRef.current) {
+      e.target.setPointerCapture(e.pointerId);
+      setResizing(true);
+      const rect = settingsRef.current.getBoundingClientRect();
+      const offsetX = e.pageX - rect.left;
+      const percentagePointer = ((offsetX + settingsWidth - 27) / window.innerWidth) * 100;
+      setSettingsWidth(percentagePointer);
+    }
+  };
+
+  const handleResizeWidthMove = (e): void => {
+    e.stopPropagation();
+    if (settingsRef && settingsRef.current && resizing) {
+      const rect = settingsRef.current.getBoundingClientRect();
+      const offsetX = e.pageX - rect.left;
+      const percentagePointer = ((offsetX + settingsWidth - 27) / window.innerWidth) * 100;
+      setSettingsWidth(percentagePointer);
+    }
+  };
+
+  const handleResizeWidthUp = (e): void => {
+    e.target.releasePointerCapture(e.pointerId);
+    setResizing(false);
+    setUserPreferences((prev) => {
+      return { ...prev, settingsWidth: settingsWidth };
+    });
+
+    localStorage.setItem(
+      "preferences",
+      JSON.stringify({ ...userPreferences, settingsWidth: settingsWidth })
+    );
+  };
+
   return (
     <>
       <motion.div
@@ -718,12 +757,24 @@ const Settings = (): JSX.Element => {
         onClick={() => setSettings(false)}
       ></motion.div>
       <motion.div
+        ref={settingsRef}
         initial={{ x: -10, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        className={`fixed no-scroll-bar flex flex-col justify-start z-40 right-0 top-0 bottom-0 w-[80%] lg:w-[30%] p-5 ${
+        animate={{
+          x: 0,
+          opacity: 1,
+          transition: { duration: resizing ? 0 : 2.5 },
+          left: `${settingsWidth}px`
+        }}
+        className={`fixed no-scroll-bar flex flex-col justify-start z-40 right-0 top-0 bottom-0 p-5 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"
         } rounded-r-md overflow-y-auto no-scroll-bar`}
       >
+        <div
+          className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute left-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full cursor-grab`}
+          onPointerDown={handleResizeWidth}
+          onPointerMove={handleResizeWidthMove}
+          onPointerUp={handleResizeWidthUp}
+        ></div>
         <button
           onClick={() => setDarkModeTheme()}
           className="flex justify-between items-center my-3"
