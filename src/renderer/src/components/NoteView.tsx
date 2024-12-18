@@ -135,36 +135,40 @@ const NoteView = (): JSX.Element => {
 
   const handleDragEnd = (e: DragEvent): void => {
     let newDems: { id: string; top: number; left: number; width: number; height: number }[] = [];
+    // const newTop = e.clientY - noteHeight / 2;
+    // const newLeft = e.clientX - noteWidth / 2;
+
+    const rect = noteRef.current.getBoundingClientRect();
+    const totalHeight = window.innerHeight;
+    const totalWidth = window.innerWidth;
+
+    const newTop = rect.top;
+    const newLeft = rect.left;
+
+    const newWidth = 100 - (rect.right / totalWidth) * 100;
+    const newHeight = 100 - (rect.bottom / totalHeight) * 100;
+
+    const preDefDems = {
+      id: note.noteid,
+      top: newTop,
+      left: newLeft,
+      height: newHeight,
+      width: newWidth
+    };
+
     if (!userPreferences?.noteDems || userPreferences.noteDems.length < 1) {
-      newDems = [
-        {
-          id: note.noteid,
-          top: e.clientY - noteHeight / 2,
-          left: e.clientX - noteWidth / 2,
-          height: noteHeight,
-          width: noteWidth
-        }
-      ];
+      newDems = [preDefDems];
     } else {
       if (userPreferences.noteDems.find((dem) => dem.id === note.noteid)) {
         newDems = userPreferences.noteDems.map((dem) => {
           if (dem.id === note.noteid) {
-            return { ...dem, top: e.clientY - noteHeight / 2, left: e.clientX - noteWidth / 2 };
+            return preDefDems;
           } else {
             return dem;
           }
         });
       } else {
-        newDems = [
-          ...userPreferences.noteDems,
-          {
-            id: note.noteid,
-            top: e.clientY - noteHeight / 2,
-            left: e.clientX - noteWidth / 2,
-            width: noteWidth,
-            height: noteHeight
-          }
-        ];
+        newDems = [...userPreferences.noteDems, preDefDems];
       }
     }
 
@@ -187,6 +191,7 @@ const NoteView = (): JSX.Element => {
   };
 
   const handleResizeWidthMove = (e): void => {
+    e.stopPropagation();
     if (noteRef && noteRef.current && resizing) {
       const rect = noteRef.current.getBoundingClientRect();
       const offsetX = e.pageX - rect.left;
@@ -201,7 +206,7 @@ const NoteView = (): JSX.Element => {
     e.target.releasePointerCapture(e.pointerId);
     setResizing(false);
 
-    saveNewDems();
+    handleDragEnd(e);
   };
 
   const handleResizeHeight = (e): void => {
@@ -231,7 +236,7 @@ const NoteView = (): JSX.Element => {
     e.target.releasePointerCapture(e.pointerId);
     setResizing(false);
 
-    saveNewDems();
+    handleDragEnd(e);
   };
 
   const handleCancelH = (): void => {
@@ -242,47 +247,6 @@ const NoteView = (): JSX.Element => {
   const handleCancelW = (): void => {
     setResizing(false);
     console.log("cancel");
-  };
-
-  const saveNewDems = (): void => {
-    let newDems: { id: string; top: number; left: number; width: number; height: number }[] = [];
-    if (!userPreferences?.noteDems || userPreferences.noteDems.length < 1) {
-      newDems = [
-        {
-          id: note.noteid,
-          top: noteTop,
-          left: noteLeft,
-          width: noteWidth,
-          height: noteHeight
-        }
-      ];
-    } else {
-      if (userPreferences.noteDems.find((dem) => dem.id === note.noteid)) {
-        newDems = userPreferences.noteDems.map((dem) => {
-          if (dem.id === note.noteid) {
-            return { ...dem, width: noteTop, height: noteWidth };
-          } else {
-            return dem;
-          }
-        });
-      } else {
-        newDems = [
-          ...userPreferences.noteDems,
-          {
-            id: note.noteid,
-            top: noteTop,
-            left: noteLeft,
-            width: noteWidth,
-            height: noteHeight
-          }
-        ];
-      }
-    }
-
-    const newPreferences = { ...userPreferences, noteDems: newDems };
-    setUserPreferences(newPreferences);
-
-    localStorage.setItem("preferences", JSON.stringify(newPreferences));
   };
 
   return (
