@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaCopy, FaEdit } from "react-icons/fa";
@@ -13,19 +13,15 @@ const NoteView = (): JSX.Element => {
   const { note, userPreferences, setUserPreferences, setNote, setNoteToEdit, setSystemNotif } =
     useContext(UserContext);
 
-  const [resizing, setResizing] = useState(true);
-  const [resizeXPxW, setResizeXPxW] = useState(0);
-  const [initialX, setInitialX] = useState(0);
-  const [isResizingX, setIsResizingX] = useState(false);
-  const [offsetX, setOffsetX] = useState(0);
-  const [initialY, setInitialY] = useState(0);
+  const [resizing, setResizing] = useState(false);
 
   const [htmlToRender, setHtmlToRender] = useState(note.htmlText);
+
   const [noteWidth, setNoteWidth] = useState(
     userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.width || 45
   );
   const [noteHeight, setNoteHeight] = useState(
-    userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.height || 75
+    userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.height || 10
   );
   const [noteTop, setNoteTop] = useState(
     userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.top || 50
@@ -33,6 +29,8 @@ const NoteView = (): JSX.Element => {
   const [noteLeft, setNoteLeft] = useState(
     userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.left || 50
   );
+
+  const noteRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -141,10 +139,8 @@ const NoteView = (): JSX.Element => {
       newDems = [
         {
           id: note.noteid,
-          // top: e.clientY - noteHeight / 2,
-          // left: e.clientX - noteWidth / 2,
-          top: 0,
-          left: 0,
+          top: e.clientY - noteHeight / 2,
+          left: e.clientX - noteWidth / 2,
           height: noteHeight,
           width: noteWidth
         }
@@ -153,8 +149,118 @@ const NoteView = (): JSX.Element => {
       if (userPreferences.noteDems.find((dem) => dem.id === note.noteid)) {
         newDems = userPreferences.noteDems.map((dem) => {
           if (dem.id === note.noteid) {
-            // return { ...dem, top: e.clientY - noteHeight / 2, left: e.clientX - noteWidth / 2 };
-            return { ...dem, top: 0, left: 0 };
+            return { ...dem, top: e.clientY - noteHeight / 2, left: e.clientX - noteWidth / 2 };
+          } else {
+            return dem;
+          }
+        });
+      } else {
+        newDems = [
+          ...userPreferences.noteDems,
+          {
+            id: note.noteid,
+            top: e.clientY - noteHeight / 2,
+            left: e.clientX - noteWidth / 2,
+            width: noteWidth,
+            height: noteHeight
+          }
+        ];
+      }
+    }
+
+    const newPreferences = { ...userPreferences, noteDems: newDems };
+    setUserPreferences(newPreferences);
+
+    localStorage.setItem("preferences", JSON.stringify(newPreferences));
+  };
+
+  const handleResizeWidth = (e): void => {
+    e.stopPropagation();
+    if (noteRef && noteRef.current) {
+      e.target.setPointerCapture(e.pointerId);
+      setResizing(true);
+      const rect = noteRef.current.getBoundingClientRect();
+      const offsetX = e.pageX - rect.left;
+      const percentagePointer = ((offsetX + noteLeft) / window.innerWidth) * 100;
+      setNoteWidth(100 - percentagePointer);
+    }
+  };
+
+  const handleResizeWidthMove = (e): void => {
+    if (noteRef && noteRef.current && resizing) {
+      const rect = noteRef.current.getBoundingClientRect();
+      const offsetX = e.pageX - rect.left;
+      const percentagePointer = ((offsetX + noteLeft) / window.innerWidth) * 100;
+      if (percentagePointer > 50 && percentagePointer < 100) {
+        setNoteWidth(100 - percentagePointer);
+      }
+    }
+  };
+
+  const handleResizeWidthUp = (e): void => {
+    e.target.releasePointerCapture(e.pointerId);
+    setResizing(false);
+
+    saveNewDems();
+  };
+
+  const handleResizeHeight = (e): void => {
+    e.stopPropagation();
+    if (noteRef && noteRef.current) {
+      e.target.setPointerCapture(e.pointerId);
+      setResizing(true);
+      const rect = noteRef.current.getBoundingClientRect();
+      const offsetY = e.pageY - rect.top;
+      const percentagePointer = ((offsetY + noteTop) / window.innerHeight) * 100;
+      setNoteHeight(100 - percentagePointer);
+    }
+  };
+
+  const handleResizeHeightMove = (e): void => {
+    if (noteRef && noteRef.current && resizing) {
+      const rect = noteRef.current.getBoundingClientRect();
+      const offsetY = e.pageY - rect.top;
+      const percentagePointer = ((offsetY + noteTop) / window.innerHeight) * 100;
+      if (percentagePointer > 50 && percentagePointer < 100) {
+        setNoteHeight(100 - percentagePointer);
+      }
+    }
+  };
+
+  const handleResizeHeightUp = (e): void => {
+    e.target.releasePointerCapture(e.pointerId);
+    setResizing(false);
+
+    saveNewDems();
+  };
+
+  const handleCancelH = (): void => {
+    setResizing(false);
+    console.log("cancel");
+  };
+
+  const handleCancelW = (): void => {
+    setResizing(false);
+    console.log("cancel");
+  };
+
+  const saveNewDems = (): void => {
+    let newDems: { id: string; top: number; left: number; width: number; height: number }[] = [];
+    if (!userPreferences?.noteDems || userPreferences.noteDems.length < 1) {
+      newDems = [
+        {
+          id: note.noteid,
+          top: noteTop,
+          left: noteLeft,
+          width: noteWidth,
+          height: noteHeight
+        }
+      ];
+    } else {
+      if (userPreferences.noteDems.find((dem) => dem.id === note.noteid)) {
+        newDems = userPreferences.noteDems.map((dem) => {
+          if (dem.id === note.noteid) {
+            return { ...dem, width: noteTop, height: noteWidth };
           } else {
             return dem;
           }
@@ -179,31 +285,6 @@ const NoteView = (): JSX.Element => {
     localStorage.setItem("preferences", JSON.stringify(newPreferences));
   };
 
-  const handleResizeWidth = (e) => {
-    const width = e.target.getBoundingClientRect().width;
-    setResizeXPxW(width);
-    setInitialX(e.clientX);
-    setIsResizingX(true);
-    setResizing(false);
-  };
-
-  const handleResizeWidthMove = (e) => {
-    if (isResizingX) {
-      const offset = e.clientX - initialX;
-      setOffsetX(offset);
-      const newPercentage = noteWidth + (offset / resizeXPxW) * 100;
-      setNoteWidth(Math.max(0, Math.min(100, newPercentage)));
-    }
-  };
-
-  const handleResizeWidthUp = (e) => {
-    setIsResizingX(false);
-  };
-
-  const handleResizeHeight = (e) => {
-    setResizing(false);
-  };
-
   return (
     <>
       {/* {!minimize ? ( */}
@@ -213,32 +294,39 @@ const NoteView = (): JSX.Element => {
       ></div>
       {/* ) : null} */}
       <motion.div
-        drag={resizing}
+        ref={noteRef}
+        drag={!resizing}
         // dragConstraints={{ top: 0, bottom: 250, right: 1000, left: 0 }}
         dragSnapToOrigin={false}
         initial={{ opacity: 0 }}
         animate={{
           opacity: 1,
-          width: `${noteWidth}%`,
-          height: `${noteHeight}%`,
+          right: `${noteWidth}%`,
+          bottom: `${noteHeight}%`,
           top: `${noteTop}px`,
-          left: `${noteLeft}px`
+          left: `${noteLeft}px`,
+          transition: { duration: !resizing ? 0 : 0.25 }
         }}
         onDragEnd={handleDragEnd}
+        style={{ touchAction: "none" }}
         whileDrag={{ outline: "2px solid rgba(255,255,255,0.5" }}
         className={`shadow-md fixed z-40 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
-        } inset-10 right-[55%] overflow-y-auto origin-bottom no-scroll-bar rounded-md shadow-md pb-5`}
+        } overflow-y-auto origin-bottom no-scroll-bar select-none rounded-md shadow-md pb-5`}
       >
         <div
-          className="absolute right-0 top-[50%] translate-y-[-50%] w-1 h-20 rounded-full bg-red-400 cursor-grab"
+          className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute right-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full cursor-grab`}
           onPointerDown={handleResizeWidth}
           onPointerMove={handleResizeWidthMove}
           onPointerUp={handleResizeWidthUp}
+          onPointerCancel={handleCancelW}
         ></div>
         <div
-          className="absolute bottom-0 left-[50%] translate-x-[-50%] w-20 h-1 rounded-full bg-red-400 cursor-grab"
+          className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute bottom-0 left-[50%] translate-x-[-50%] w-20 h-1 rounded-full cursor-grab touch-none`}
           onPointerDown={handleResizeHeight}
+          onPointerMove={handleResizeHeightMove}
+          onPointerUp={handleResizeHeightUp}
+          onPointerCancel={handleCancelH}
         ></div>
         <div
           className={`p-2 sticky z-[40] top-0 ${userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"} rounded-t-md flex justify-between items-center`}
