@@ -278,9 +278,8 @@ const Menu = (): JSX.Element => {
       ></motion.div>
       <motion.div
         ref={menuRef}
-        initial={{ x: -10, opacity: 0 }}
+        initial={{ opacity: 0, width: `${menuWidth}%` }}
         animate={{
-          x: 0,
           opacity: 1,
           width: `${menuWidth}%`,
           transition: { duration: resizing ? 0 : 0.25 }

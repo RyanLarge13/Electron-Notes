@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLock, FaSave, FaUnlock } from "react-icons/fa";
+import { motion } from "framer-motion";
 import { createNewNote, updateNote } from "@renderer/utils/api";
 import { ClipLoader } from "react-spinners";
 import { v4 as uuidv4 } from "uuid";
@@ -28,7 +29,23 @@ const Draft = (): JSX.Element => {
   const [value, setValue] = useState(noteToEdit ? noteToEdit.htmlText : "");
   const [changed, setChanged] = useState(false);
   const [locked, setLocked] = useState(noteToEdit ? noteToEdit.locked : false);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [favorite, setFavorite] = useState(noteToEdit?.favorite || false);
+
+  const [dems, setDems] = useState(
+    userPreferences?.noteDems?.find((dem) => dem.id === noteToEdit?.noteid ?? -999) || undefined
+  );
+  const [position, setPosition] = useState(
+    noteToEdit
+      ? {
+          top: dems?.top || 50,
+          left: dems?.left || 50,
+          right: dems?.width || 45,
+          bottom: dems?.height || 10
+        }
+      : { top: 50, left: 50, bottom: 10, right: 45 }
+  );
+  const [resizing, setResizing] = useState(false);
 
   let autoSaveInterval;
 
@@ -129,6 +146,7 @@ const Draft = (): JSX.Element => {
 
   const autoSaveNote = (): void => {
     setChanged(false);
+    setSaving(true);
     const updatedNote = {
       notesId: noteToEdit.noteid,
       title: title,
@@ -170,6 +188,7 @@ const Draft = (): JSX.Element => {
           };
           setSystemNotif(newSuccess);
         }
+        setSaving(false);
       })
       .catch((err) => {
         if (err.response) {
@@ -226,6 +245,7 @@ const Draft = (): JSX.Element => {
             setSystemNotif(newError);
           }
         }
+        setSaving(false);
       });
   };
 
@@ -251,12 +271,12 @@ const Draft = (): JSX.Element => {
   };
 
   const saveNote = (): void => {
-    setLoading(true);
+    setSaving(true);
     if (noteToEdit && !editDraft) {
       removeUnsavedChanges();
     }
     if (!token) {
-      setLoading(false);
+      setSaving(false);
       return;
     }
     const tempId = uuidv4();
@@ -274,7 +294,8 @@ const Draft = (): JSX.Element => {
       folderId: folder ? folder.folderid : null,
       locked: locked,
       trashed: false,
-      updated: new Date()
+      updated: new Date(),
+      favorite: favorite
     };
     if (noteToEdit && !editDraft) {
       return updateEditNote();
@@ -286,11 +307,10 @@ const Draft = (): JSX.Element => {
       };
       return newData;
     });
-    setLoading(false);
-    setNoteToEdit(null);
-    setNote({ ...noteToEdit, htmlText: value });
+    // setNoteToEdit(null);
+    // setNote({ ...noteToEdit, htmlText: value });
     setDrafts((prevDrafts) => prevDrafts.filter((aNote) => aNote.noteid !== noteToEdit.noteid));
-    navigate("/");
+    // navigate("/");
     createNewNote(token, newNote)
       .then((res) => {
         const returnedNote = res.data.data[0];
@@ -333,9 +353,9 @@ const Draft = (): JSX.Element => {
           };
           setSystemNotif(newSuccess);
         }
+        setSaving(false);
       })
       .catch((err) => {
-        setLoading(false);
         console.log(err);
         setAllData((prevData) => {
           const newNotes = prevData.notes.filter((aNote) => aNote.noteid !== tempId);
@@ -423,6 +443,7 @@ const Draft = (): JSX.Element => {
             setSystemNotif(newError);
           }
         }
+        setSaving(false);
       });
   };
 
@@ -445,9 +466,9 @@ const Draft = (): JSX.Element => {
       });
       return { ...prevData, notes: newNotes };
     });
-    setNoteToEdit(null);
-    setNote({ ...noteToEdit, htmlText: value });
-    navigate("/");
+    // setNoteToEdit(null);
+    // setNote({ ...noteToEdit, htmlText: value });
+    // navigate("/");
     updateNote(token, updatedNote)
       .then(() => {
         if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
@@ -475,7 +496,7 @@ const Draft = (): JSX.Element => {
           };
           setSystemNotif(newSuccess);
         }
-        setLoading(false);
+        setSaving(false);
       })
       .catch((err) => {
         setAllData((prevData) => {
@@ -487,7 +508,6 @@ const Draft = (): JSX.Element => {
           });
           return { ...prevData, notes: newNotes };
         });
-        setLoading(false);
         if (err.response) {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
             const newError = {
@@ -570,6 +590,7 @@ const Draft = (): JSX.Element => {
             setSystemNotif(newError);
           }
         }
+        setSaving(false);
       });
   };
 
@@ -583,7 +604,8 @@ const Draft = (): JSX.Element => {
       folderId: folder ? folder.folderid : null,
       createdAt: new Date(),
       trashed: false,
-      updated: new Date()
+      updated: new Date(),
+      favorite: favorite
     };
     setDrafts((prev) => [...prev, newDraft]);
     const newDraftNotif = {
@@ -651,8 +673,22 @@ const Draft = (): JSX.Element => {
           navigate("/");
         }}
       ></div>
-      <div
-        className={`fixed inset-10 right-[55%] rounded-md shadow-md ${
+      <motion.div
+        drag={!resizing}
+        dragSnapToOrigin={false}
+        initial={{
+          top: `${position.top}px`,
+          left: `${position.left}px`,
+          bottom: `${position.bottom}%`,
+          right: `${position.right}%`
+        }}
+        animate={{
+          top: `${position.top}px`,
+          left: `${position.left}px`,
+          bottom: `${position.bottom}%`,
+          right: `${position.right}%`
+        }}
+        className={`fixed min-w-80 min-h-80 rounded-md shadow-md ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
         } z-40`}
       >
@@ -681,7 +717,7 @@ const Draft = (): JSX.Element => {
               onClick={() => saveNote()}
               className={`${userPreferences.darkMode ? "text-slate-200" : "text-black"}`}
             >
-              {loading ? (
+              {saving ? (
                 <ClipLoader size={16} color={`${userPreferences.darkMode ? "#fff" : "#000"}`} />
               ) : (
                 <FaSave />
@@ -706,7 +742,7 @@ const Draft = (): JSX.Element => {
             }}
           />
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };

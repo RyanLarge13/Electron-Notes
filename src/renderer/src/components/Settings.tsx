@@ -47,7 +47,8 @@ const Settings = (): JSX.Element => {
   const [newPassLoading, setNewPassLoading] = useState(false);
 
   const [resizing, setResizing] = useState(false);
-  const [settingsWidth, setSettingsWidth] = useState(userPreferences?.settingsWidth || 33);
+  const [settingsWidth, setSettingsWidth] = useState(userPreferences?.settingsWidth || 66);
+  // const [settingsWidth, setSettingsWidth] = useState(33);
 
   const firstInput = useRef(null);
   const secondInput = useRef(null);
@@ -718,9 +719,7 @@ const Settings = (): JSX.Element => {
     if (settingsRef && settingsRef.current) {
       e.target.setPointerCapture(e.pointerId);
       setResizing(true);
-      const rect = settingsRef.current.getBoundingClientRect();
-      const offsetX = e.pageX - rect.left;
-      const percentagePointer = ((offsetX + settingsWidth - 27) / window.innerWidth) * 100;
+      const percentagePointer = (e.pageX / window.innerWidth) * 100;
       setSettingsWidth(percentagePointer);
     }
   };
@@ -728,9 +727,7 @@ const Settings = (): JSX.Element => {
   const handleResizeWidthMove = (e): void => {
     e.stopPropagation();
     if (settingsRef && settingsRef.current && resizing) {
-      const rect = settingsRef.current.getBoundingClientRect();
-      const offsetX = e.pageX - rect.left;
-      const percentagePointer = ((offsetX + settingsWidth - 27) / window.innerWidth) * 100;
+      const percentagePointer = (e.pageX / window.innerWidth) * 100;
       setSettingsWidth(percentagePointer);
     }
   };
@@ -758,12 +755,11 @@ const Settings = (): JSX.Element => {
       ></motion.div>
       <motion.div
         ref={settingsRef}
-        initial={{ x: -10, opacity: 0 }}
+        initial={{ opacity: 0, left: `${settingsWidth}%` }}
         animate={{
-          x: 0,
           opacity: 1,
-          transition: { duration: resizing ? 0 : 2.5 },
-          left: `${settingsWidth}px`
+          transition: { duration: resizing ? 0 : 0.25 },
+          left: `${settingsWidth}%`
         }}
         className={`fixed no-scroll-bar flex flex-col justify-start z-40 right-0 top-0 bottom-0 p-5 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"

@@ -26,7 +26,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [notesToRender, setNotesToRender] = useState([]);
   const [order, setOrder] = useState(true);
   const [filter, setFilter] = useState("Title");
-  const [note, setNote] = useState(null);
+  const [note, setNote] = useState<Note[] | []>([]);
   const [mainTitle, setMainTitle] = useState("Folders");
   const [token, setToken] = useState(localStorage.getItem("authToken"));
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -106,15 +106,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         ],
         menuWidth: 45,
         settingsWidth: 45,
-        noteDems: [
-          // {
-          //   id: 0,
-          //   width: 45,
-          //   height: 75,
-          //   top: 10,
-          //   left: 10
-          // }
-        ]
+        noteDems: []
       };
       localStorage.setItem("preferences", JSON.stringify(defaultPreferences));
       setUserPreferences(defaultPreferences);

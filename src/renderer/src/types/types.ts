@@ -152,7 +152,7 @@ export interface ContextProps {
   setUser: Dispatch<SetStateAction<User>>;
   setFolder: Dispatch<SetStateAction<Folder>>;
   setSelectedFolder: Dispatch<SetStateAction<Folder>>;
-  setNote: Dispatch<SetStateAction<Note>>;
+  setNote: Dispatch<SetStateAction<Note[] | []>>;
   setPosition: Dispatch<SetStateAction<Position>>;
   setContextMenu?: Dispatch<SetStateAction<ContextMenu>>;
   setSystemNotif?: Dispatch<SetStateAction<SystemNotif>>;
@@ -176,7 +176,7 @@ export interface ContextProps {
   token: string;
   folder: Folder;
   loading: boolean;
-  note: Note;
+  note: Note[];
   selectedFolder: Folder;
   position: Position;
   contextMenu?: ContextMenu;

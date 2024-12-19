@@ -157,8 +157,8 @@ const MainPage = (): JSX.Element => {
     if (search && Escape) {
       setSearch(false);
     }
-    if (note && Escape) {
-      setNote(null);
+    if (note.length > 0 && Escape) {
+      setNote([]);
     }
     if (contextMenu && Escape) {
       setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
@@ -351,7 +351,7 @@ const MainPage = (): JSX.Element => {
   ];
 
   const openOptions = (e): void => {
-    if (!user || loading || note || noteToEdit) return;
+    if (!user || loading || note.length > 0 || noteToEdit) return;
     e.preventDefault();
     const { clientX, clientY } = e;
     let dynamicTop = clientY;

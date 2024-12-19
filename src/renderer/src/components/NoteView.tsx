@@ -252,10 +252,10 @@ const NoteView = (): JSX.Element => {
   return (
     <>
       {/* {!minimize ? ( */}
-      <div
+      {/* <div
         className="bg-black backdrop-blur-sm bg-opacity-20 fixed z-40 inset-0"
         onClick={() => setNote(null)}
-      ></div>
+      ></div> */}
       {/* ) : null} */}
       <motion.div
         ref={noteRef}
@@ -276,7 +276,7 @@ const NoteView = (): JSX.Element => {
         whileDrag={{ outline: "2px solid rgba(255,255,255,0.5" }}
         className={`shadow-md fixed z-40 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
-        } overflow-y-auto origin-bottom no-scroll-bar select-none rounded-md shadow-md pb-5`}
+        } overflow-y-auto origin-bottom no-scroll-bar select-none rounded-md shadow-md pb-5 min-w-80 min-h-80 `}
       >
         <div
           className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute right-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full cursor-grab`}
