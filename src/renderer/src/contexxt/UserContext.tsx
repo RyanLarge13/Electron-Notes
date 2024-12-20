@@ -38,7 +38,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [editDraft, setEditDraft] = useState(false);
   const [selectedForEdit, setSelectedForEdit] = useState([]);
   const [draggedOverFolder, setDraggedOverFolder] = useState(null);
-  const [noteToEdit, setNoteToEdit] = useState(null);
+  const [noteToEdit, setNoteToEdit] = useState<Note[] | []>([]);
   const [settings, setSettings] = useState(false);
   const [move, setMove] = useState(null);
 

@@ -9,13 +9,13 @@ import ReactQuill from "react-quill";
 import UserContext from "@renderer/contexxt/UserContext";
 import "react-quill/dist/quill.snow.css";
 import "../assets/quill.css";
+import { Note } from "@renderer/types/types";
 
-const Draft = (): JSX.Element => {
+const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
   const {
     token,
     folder,
     userPreferences,
-    noteToEdit,
     editDraft,
     setUserPreferences,
     setNote,
@@ -33,7 +33,7 @@ const Draft = (): JSX.Element => {
   const [favorite, setFavorite] = useState(noteToEdit?.favorite || false);
 
   const [dems, setDems] = useState(
-    userPreferences?.noteDems?.find((dem) => dem.id === noteToEdit?.noteid ?? -999) || undefined
+    userPreferences?.noteDems?.find((dem) => dem.id === noteToEdit?.noteid) || undefined
   );
   const [position, setPosition] = useState(
     noteToEdit
@@ -87,7 +87,7 @@ const Draft = (): JSX.Element => {
   ];
 
   useEffect(() => {
-    if (noteToEdit) {
+    if (!noteToEdit.isNew) {
       const contains = userPreferences.unsavedNotes.filter(
         (unsaved) => unsaved.id === noteToEdit.noteid
       );
@@ -98,7 +98,7 @@ const Draft = (): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    if (userPreferences.autosave === true && noteToEdit !== null && !editDraft) {
+    if (userPreferences.autosave === true && !noteToEdit.isNew && !editDraft) {
       autoSaveInterval = setInterval(() => autoSaveNote(), 10000);
     }
     return () => {
@@ -272,7 +272,7 @@ const Draft = (): JSX.Element => {
 
   const saveNote = (): void => {
     setSaving(true);
-    if (noteToEdit && !editDraft) {
+    if (!noteToEdit.isNew && !editDraft) {
       removeUnsavedChanges();
     }
     if (!token) {
@@ -297,7 +297,7 @@ const Draft = (): JSX.Element => {
       updated: new Date(),
       favorite: favorite
     };
-    if (noteToEdit && !editDraft) {
+    if (!noteToEdit.isNew && !editDraft) {
       return updateEditNote();
     }
     setAllData((prevData) => {
@@ -311,6 +311,7 @@ const Draft = (): JSX.Element => {
     // setNote({ ...noteToEdit, htmlText: value });
     setDrafts((prevDrafts) => prevDrafts.filter((aNote) => aNote.noteid !== noteToEdit.noteid));
     // navigate("/");
+    noteToEdit.isNew = false;
     createNewNote(token, newNote)
       .then((res) => {
         const returnedNote = res.data.data[0];
@@ -649,28 +650,25 @@ const Draft = (): JSX.Element => {
   return (
     <>
       <div
-        className={`fixed z-20 inset-0 bg-black bg-opacity-20 backdrop-blur-sm`}
+        className={`fixed z-20 inset-0 bg-transparent`}
         onClick={() => {
-          if (noteToEdit) {
-            setNoteToEdit(null);
-            if (changed) {
-              noteToEdit.htmlText = value;
-              const newPreferences = {
-                ...userPreferences,
-                unsavedNotes: [
-                  ...userPreferences.unsavedNotes,
-                  { id: noteToEdit.noteid, htmlText: value }
-                ]
-              };
-              setUserPreferences(newPreferences);
-              localStorage.setItem("preferences", JSON.stringify(newPreferences));
-            }
-            setNote(noteToEdit);
+          setNoteToEdit((prev) => prev.filter((prev) => prev.noteid !== noteToEdit.noteid));
+          if (changed) {
+            noteToEdit.htmlText = value;
+            const newPreferences = {
+              ...userPreferences,
+              unsavedNotes: [
+                ...userPreferences.unsavedNotes,
+                { id: noteToEdit.noteid, htmlText: value }
+              ]
+            };
+            setUserPreferences(newPreferences);
+            localStorage.setItem("preferences", JSON.stringify(newPreferences));
           }
-          if (!noteToEdit && title) {
+          setNote((prev) => [...prev, noteToEdit]);
+          if (noteToEdit.isNew && title) {
             saveNoteAsDraft();
           }
-          navigate("/");
         }}
       ></div>
       <motion.div

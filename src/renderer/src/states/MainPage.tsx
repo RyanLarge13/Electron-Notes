@@ -14,6 +14,7 @@ import { LuFileSearch } from "react-icons/lu";
 import { Tooltip } from "react-tooltip";
 import { ContextMenuOption } from "@renderer/types/types";
 import { IoSettings } from "react-icons/io5";
+import { v4 as uuidv4 } from "uuid";
 
 const MainPage = (): JSX.Element => {
   const {
@@ -32,6 +33,7 @@ const MainPage = (): JSX.Element => {
     setNotes,
     setNote,
     setFolder,
+    setNoteToEdit,
     folders,
     setFolderSearchText,
     setFolderSearch,
@@ -67,7 +69,6 @@ const MainPage = (): JSX.Element => {
     Escape: false
   });
   const [quickActionsNew, setQuickActionsNew] = useState(false);
-  const [quickActionsSelected, setQuickActionsSelected] = useState([]);
 
   const navigate = useNavigate();
 
@@ -158,7 +159,13 @@ const MainPage = (): JSX.Element => {
       setSearch(false);
     }
     if (note.length > 0 && Escape) {
-      setNote([]);
+      setNote((prev) => {
+        if (prev.length === 1) {
+          return [];
+        } else {
+          return prev.splice(prev.length - 1, 1);
+        }
+      });
     }
     if (contextMenu && Escape) {
       setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
@@ -274,6 +281,21 @@ const MainPage = (): JSX.Element => {
       icon: <FaPlusSquare />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+        setNoteToEdit((prev) => [
+          ...prev,
+          {
+            title: "New Note",
+            noteid: uuidv4(),
+            locked: false,
+            htmlText: "",
+            folderId: folder?.folderid || null,
+            createdAt: new Date(),
+            updated: new Date(),
+            trashed: false,
+            favorite: false,
+            isNew: true
+          }
+        ]);
         navigate("/newnote");
       }
     },
@@ -351,7 +373,7 @@ const MainPage = (): JSX.Element => {
   ];
 
   const openOptions = (e): void => {
-    if (!user || loading || note.length > 0 || noteToEdit) return;
+    if (!user || loading || note.length > 0 || noteToEdit.length > 0) return;
     e.preventDefault();
     const { clientX, clientY } = e;
     let dynamicTop = clientY;

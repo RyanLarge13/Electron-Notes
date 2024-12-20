@@ -2,7 +2,7 @@ import { UserProvider } from "./contexxt/UserContext";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import MainPage from "./states/MainPage";
 import NewFolder from "./states/NewFolder";
-import Draft from "./states/Draft";
+import DraftMain from "./states/DraftMain";
 
 function App(): JSX.Element {
   return (
@@ -11,7 +11,7 @@ function App(): JSX.Element {
         <Routes>
           <Route path="/" element={<MainPage />}>
             <Route path="newfolder" element={<NewFolder />} />
-            <Route path="newnote" element={<Draft />} />
+            <Route path="newnote" element={<DraftMain />} />
           </Route>
         </Routes>
       </Router>

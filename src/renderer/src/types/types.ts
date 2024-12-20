@@ -25,6 +25,7 @@ export type Note = {
   updated: Date;
   trashed: boolean;
   favorite: boolean;
+  isNew?: boolean;
 };
 
 export type apiNote = {
@@ -159,7 +160,7 @@ export interface ContextProps {
   setAllData: Dispatch<SetStateAction<AllData>>;
   setNotesToRender: Dispatch<SetStateAction<Note[]>>;
   setDraggedOverFolder: Dispatch<SetStateAction<Folder | null>>;
-  setNoteToEdit: Dispatch<SetStateAction<Note | null>>;
+  setNoteToEdit: Dispatch<SetStateAction<Note[] | []>>;
   setSettings: Dispatch<SetStateAction<boolean>>;
   fetchUser: (token: string, cacheInstalled: boolean) => void;
   setUserPreferences: Dispatch<SetStateAction<UserPreferences>>;
@@ -192,7 +193,7 @@ export interface ContextProps {
   notesToRender: Note[];
   selectedForEdit: string[];
   draggedOverFolder: Folder | null;
-  noteToEdit: Note | null;
+  noteToEdit: Note[] | [];
   settings: boolean;
   userPreferences: UserPreferences;
   move: Move | null;

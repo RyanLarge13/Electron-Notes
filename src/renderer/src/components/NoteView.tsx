@@ -9,8 +9,8 @@ import { CiDesktop } from "react-icons/ci";
 import { Tooltip } from "react-tooltip";
 import { Note } from "@renderer/types/types";
 
-const NoteView = (): JSX.Element => {
-  const { note, userPreferences, setUserPreferences, setNote, setNoteToEdit, setSystemNotif } =
+const NoteView = ({ note }: { note: Note }): JSX.Element => {
+  const { userPreferences, setUserPreferences, setNote, setNoteToEdit, setSystemNotif } =
     useContext(UserContext);
 
   const [resizing, setResizing] = useState(false);
@@ -42,8 +42,8 @@ const NoteView = (): JSX.Element => {
   }, []);
 
   const editNote = (): void => {
-    setNoteToEdit(note);
-    setNote(null);
+    setNoteToEdit((prev) => [...prev, note]);
+    setNote((prev) => prev.filter((aNote) => aNote.noteid !== note.noteid));
     navigate("/newnote");
   };
 
@@ -130,10 +130,10 @@ const NoteView = (): JSX.Element => {
 
   const openWindow = async (note: Note): Promise<void> => {
     await window.openNewWin.openNoteInNewWindow(note, userPreferences.darkMode);
-    setNote(null);
+    setNote([]);
   };
 
-  const handleDragEnd = (e: DragEvent): void => {
+  const handleDragEnd = (): void => {
     let newDems: { id: string; top: number; left: number; width: number; height: number }[] = [];
     // const newTop = e.clientY - noteHeight / 2;
     // const newLeft = e.clientX - noteWidth / 2;
@@ -206,7 +206,7 @@ const NoteView = (): JSX.Element => {
     e.target.releasePointerCapture(e.pointerId);
     setResizing(false);
 
-    handleDragEnd(e);
+    handleDragEnd();
   };
 
   const handleResizeHeight = (e): void => {
@@ -236,7 +236,7 @@ const NoteView = (): JSX.Element => {
     e.target.releasePointerCapture(e.pointerId);
     setResizing(false);
 
-    handleDragEnd(e);
+    handleDragEnd();
   };
 
   const handleCancelH = (): void => {
@@ -324,7 +324,9 @@ const NoteView = (): JSX.Element => {
             <button
               data-tooltip-id="close-note"
               data-tooltip-content="Close Note"
-              onClick={() => setNote(null)}
+              onClick={() =>
+                setNote((prev) => prev.filter((aNote) => aNote.noteid !== note.noteid))
+              }
             >
               <IoCloseCircle />
             </button>

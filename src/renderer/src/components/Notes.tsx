@@ -175,7 +175,7 @@ const Notes = (): JSX.Element => {
       setAwaitingNote(note);
       return setPinInput(true);
     }
-    setNoteToEdit(note);
+    setNoteToEdit((prev) => [...prev, note]);
     navigate("/newnote");
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
@@ -1087,11 +1087,11 @@ const Notes = (): JSX.Element => {
       setLockedOpenNewWinNote(true);
       setAwaitingNote(note);
       setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-      setNote(null);
+      setNote((prev) => prev.filter((aNote) => aNote.noteid !== note.noteid));
       return;
     }
     await window.openNewWin.openNoteInNewWindow(note, userPreferences.darkMode);
-    setNote(null);
+    setNote((prev) => prev.filter((aNote) => aNote.noteid !== note.noteid));
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
 
@@ -1266,7 +1266,7 @@ const Notes = (): JSX.Element => {
       setAwaitingNote(note);
       return setPinInput(true);
     }
-    setNote(note);
+    setNote((prev) => [...prev, note]);
   };
 
   const unlockNote = async (): Promise<void> => {
@@ -1285,7 +1285,7 @@ const Notes = (): JSX.Element => {
       localStorage.setItem("pin", stringifiedPin);
       setPinInput(false);
       setPin({ first: "", second: "", third: "", fourth: "" });
-      setNote(awaitingNote);
+      setNote((prev) => [...prev, awaitingNote]);
       setAwaitingNote(null);
     } catch (err) {
       console.log(err);
