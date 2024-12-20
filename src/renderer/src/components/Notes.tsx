@@ -580,6 +580,9 @@ const Notes = (): JSX.Element => {
       !trashed
         ? setTrashedNotes((prevTrash) => [...prevTrash, newNote])
         : setTrashedNotes((prevTrash) => prevTrash.filter((aNote) => aNote.noteid !== note.noteid));
+      if (drafts.find((aDraft) => aDraft.noteid === note.noteid)) {
+        return;
+      }
       moveNoteToTrash(token, note.noteid, !trashed)
         .then(() => {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
