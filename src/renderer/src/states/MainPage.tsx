@@ -400,14 +400,18 @@ const MainPage = (): JSX.Element => {
     if (folderSearchText === "") {
       return;
     }
-    const foldersAvailable = folders.filter((aFold) =>
-      aFold.title.toLowerCase().includes(folderSearchText.toLowerCase())
+    const foldersAvailable = folders.filter(
+      (aFold) => aFold.title && aFold.title.toLowerCase().includes(folderSearchText.toLowerCase())
     );
-    if (foldersAvailable.length > 1) {
+    if (foldersAvailable && foldersAvailable.length > 1) {
       return;
     } else {
-      setFolder(foldersAvailable[0]);
-      setFolderSearchText("");
+      if (foldersAvailable[0]) {
+        setFolder(foldersAvailable[0]);
+        setFolderSearchText("");
+      } else {
+        return;
+      }
     }
   };
 

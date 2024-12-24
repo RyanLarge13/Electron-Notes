@@ -329,26 +329,26 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   };
 
   const handleConnections = (cons, conReqs, shareReqs, shareNotes, userEmail): void => {
-    // const connectionWorker = new Worker("/src/threads/handleConnections.js");
-    // connectionWorker.onmessage = (event): void => {
-    //   const {
-    //     filteredConnections,
-    //     filteredConnectionRequests,
-    //     filteredShareRequests,
-    //     filteredSharedNotes
-    //   } = event.data;
-    //   setConnections(filteredConnections);
-    //   setConnectionRequests(filteredConnectionRequests);
-    //   setShareRequests(filteredShareRequests);
-    //   setSharedNotes(filteredSharedNotes);
-    // };
-    // connectionWorker.postMessage({
-    //   connections: cons,
-    //   connectionRequests: conReqs,
-    //   shareRequests: shareReqs,
-    //   sharedNotes: shareNotes,
-    //   userEmail: userEmail
-    // });
+    const connectionWorker = new Worker("/src/threads/handleConnections.js");
+    connectionWorker.onmessage = (event): void => {
+      const {
+        filteredConnections,
+        filteredConnectionRequests,
+        filteredShareRequests,
+        filteredSharedNotes
+      } = event.data;
+      setConnections(filteredConnections);
+      setConnectionRequests(filteredConnectionRequests);
+      setShareRequests(filteredShareRequests);
+      setSharedNotes(filteredSharedNotes);
+    };
+    connectionWorker.postMessage({
+      connections: cons,
+      connectionRequests: conReqs,
+      shareRequests: shareReqs,
+      sharedNotes: shareNotes,
+      userEmail: userEmail
+    });
   };
 
   const fetchUser = (token: string, cacheInstalled: boolean): void => {

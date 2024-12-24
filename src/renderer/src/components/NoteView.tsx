@@ -142,11 +142,32 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
     const totalHeight = window.innerHeight;
     const totalWidth = window.innerWidth;
 
-    const newTop = rect.top;
-    const newLeft = rect.left;
+    let newTop = rect.top;
+    let newLeft = rect.left;
 
-    const newWidth = 100 - (rect.right / totalWidth) * 100;
-    const newHeight = 100 - (rect.bottom / totalHeight) * 100;
+    let newRectRight = rect.right;
+    let newRectBottom = rect.bottom;
+
+    if (newTop < 10) {
+      newTop = 10;
+    }
+
+    if (newLeft < 10) {
+      newLeft = 10;
+    }
+
+    if (rect.bottom > window.innerHeight) {
+      newTop = window.innerHeight - rect.height - 10;
+      newRectBottom = 10;
+    }
+
+    if (rect.right > window.innerWidth) {
+      newLeft = window.innerWidth - rect.width - 10;
+      newRectRight = 10;
+    }
+
+    const newWidth = 100 - (newRectRight / totalWidth) * 100;
+    const newHeight = 100 - (newRectBottom / totalHeight) * 100;
 
     const preDefDems = {
       id: note.noteid,
@@ -196,7 +217,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
       const rect = noteRef.current.getBoundingClientRect();
       const offsetX = e.pageX - rect.left;
       const percentagePointer = ((offsetX + noteLeft) / window.innerWidth) * 100;
-      if (percentagePointer > 50 && percentagePointer < 100) {
+      if (rect.width > 200 && rect.width < window.innerWidth - 40) {
         setNoteWidth(100 - percentagePointer);
       }
     }
@@ -226,7 +247,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
       const rect = noteRef.current.getBoundingClientRect();
       const offsetY = e.pageY - rect.top;
       const percentagePointer = ((offsetY + noteTop) / window.innerHeight) * 100;
-      if (percentagePointer > 50 && percentagePointer < 100) {
+      if (rect.height > 200 && rect.height < window.innerHeight - 40) {
         setNoteHeight(100 - percentagePointer);
       }
     }
@@ -251,16 +272,11 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
 
   return (
     <>
-      {/* {!minimize ? ( */}
-      {/* <div
-        className="bg-black backdrop-blur-sm bg-opacity-20 fixed z-40 inset-0"
-        onClick={() => setNote(null)}
-      ></div> */}
-      {/* ) : null} */}
       <motion.div
         ref={noteRef}
         drag={!resizing}
-        // dragConstraints={{ top: 0, bottom: 250, right: 1000, left: 0 }}
+        // dragConstraints={{ top: 0, left: 0 }}
+        dragMomentum={false}
         dragSnapToOrigin={false}
         initial={{ opacity: 0 }}
         animate={{
@@ -276,7 +292,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
         whileDrag={{ outline: "2px solid rgba(255,255,255,0.5" }}
         className={`shadow-md fixed z-40 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
-        } overflow-y-auto origin-bottom no-scroll-bar select-none rounded-md shadow-md pb-5 min-w-80 min-h-80 `}
+        } overflow-y-auto origin-bottom no-scroll-bar select-none rounded-md shadow-md pb-5 min-w-80 min-h-80 max-w-[95%] max-h-[90%]`}
       >
         <div
           className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute right-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full cursor-grab`}

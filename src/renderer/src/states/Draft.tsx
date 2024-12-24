@@ -674,6 +674,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
       <motion.div
         drag={!resizing}
         dragSnapToOrigin={false}
+        // dragConstraints={{ top: 0, left: 0 }}
         initial={{
           top: `${position.top}px`,
           left: `${position.left}px`,
@@ -686,7 +687,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
           bottom: `${position.bottom}%`,
           right: `${position.right}%`
         }}
-        className={`fixed min-w-80 min-h-80 rounded-md shadow-md ${
+        className={`fixed min-w-80 min-h-80 max-w-[95%] max-h-[90%] rounded-md shadow-md ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
         } z-40`}
       >
