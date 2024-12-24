@@ -77,8 +77,8 @@ const Folders = (): JSX.Element => {
   useEffect(() => {
     if (folderSearchText !== "" && folderRefs.current && folderRefs.current.length > 0) {
       const search = folderSearchText.toLowerCase();
-      const possibleElements = folderRefs.current.filter((refData) =>
-        refData.title.includes(search)
+      const possibleElements = folderRefs.current.filter(
+        (refData) => refData && refData.title && refData?.title?.includes(search)
       );
       if (possibleElements.length === 1) {
         if (possibleElements[0].el) {
