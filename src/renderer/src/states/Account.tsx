@@ -2,8 +2,7 @@ import { useContext, useState } from "react";
 import { updateNote, updateFolder } from "@renderer/utils/api";
 import { useNavigate, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { v4 as uuidv4 } from "uuid";
-// import { AiOutlineUsergroupAdd } from "react-icons/ai";
+import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { TbFilters } from "react-icons/tb";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
 import { IoMdShare } from "react-icons/io";
@@ -19,14 +18,7 @@ import {
   MdDateRange
 } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
-import {
-  FaArrowAltCircleDown,
-  FaArrowCircleRight,
-  FaFolder,
-  FaFolderPlus,
-  FaHome,
-  FaPlus
-} from "react-icons/fa";
+import { FaArrowCircleRight, FaFolder, FaFolderPlus, FaHome, FaPlus } from "react-icons/fa";
 import { deleteMultipleFolders, moveManyFolders } from "@renderer/utils/api";
 import { AllData, Folder, Note } from "@renderer/types/types";
 import Folders from "@renderer/components/Folders";
@@ -40,8 +32,8 @@ import Tree from "@renderer/components/Tree";
 import Colors from "@renderer/components/Colors";
 import { BsAlphabet, BsArrowReturnRight, BsArrowRight } from "react-icons/bs";
 import { TiTime } from "react-icons/ti";
-// import Connections from "@renderer/components/Connections";
-// import ConBubbles from "@renderer/components/ConBubbles";
+import ConBubbles from "@renderer/components/ConBubbles";
+import Connections from "@renderer/components/Connections";
 
 const Account = (): JSX.Element => {
   const {
@@ -60,7 +52,7 @@ const Account = (): JSX.Element => {
     setUserPreferences,
     setHoverConnections,
     hoverConnections,
-    // createCon,
+    createCon,
     token,
     edit,
     editCurrentFolder,
@@ -129,7 +121,6 @@ const Account = (): JSX.Element => {
       htmlNotes: newNote.htmlText,
       ...newNote
     };
-    // { notesId: string; htmlNotes: string; locked: boolean; title: string; folderId: string }
     updateNote(token, staticNote);
     setSystemNotif({
       show: true,
@@ -382,7 +373,7 @@ const Account = (): JSX.Element => {
 
   const moveItem = (): void => {
     if (move.type === "note") {
-      const noteMoving = move.item[0];
+      const noteMoving = move.item[0] as Note;
       const prevIdFolderId = noteMoving.folderId;
       const newNote = {
         notesId: noteMoving.noteid,
@@ -412,7 +403,7 @@ const Account = (): JSX.Element => {
             const newSuccess = {
               show: true,
               title: "Successfully Moved",
-              text: `${move.item.title} was successfully moved to ${
+              text: `${move.item[0].title} was successfully moved to ${
                 selectedFolder ? selectedFolder.title : "home"
               }`,
               color: "bg-green-300",
@@ -510,7 +501,7 @@ const Account = (): JSX.Element => {
         });
     }
     if (move.type === "folder") {
-      const folderMoving = move.item[0];
+      const folderMoving = move.item[0] as Folder;
       const prevIdFolderId = folderMoving.folderid;
       const newFolder = {
         folderId: folderMoving.folderid,
@@ -542,7 +533,7 @@ const Account = (): JSX.Element => {
             const newSuccess = {
               show: true,
               title: "Successfully Moved",
-              text: `${move.item.title} was successfully moved to ${
+              text: `${move.item[0].title} was successfully moved to ${
                 selectedFolder ? selectedFolder.title : "home"
               }`,
               color: "bg-green-300",
@@ -1049,7 +1040,7 @@ const Account = (): JSX.Element => {
           }
         }}
       >
-        {/* <button
+        <button
           onMouseEnter={() => {
             setTimeout(() => {
               setHoverConnections(true);
@@ -1065,8 +1056,8 @@ const Account = (): JSX.Element => {
           onClick={() => setConOptions((prev) => !prev)}
         >
           <AiOutlineUsergroupAdd />
-        </button> */}
-        {/* <ConBubbles /> */}
+        </button>
+        <ConBubbles />
       </div>
       {conOptions && (
         <>
@@ -1155,7 +1146,7 @@ const Account = (): JSX.Element => {
       {note.length > 0 && note.map((aNote) => <NoteView key={aNote.noteid} note={aNote} />)}
       {menu && <Menu />}
       {settings && <Settings />}
-      {/* {createCon && <Connections />} */}
+      {createCon && <Connections />}
       {move && move.isMoving && (
         <>
           <motion.div
@@ -1172,7 +1163,6 @@ const Account = (): JSX.Element => {
             <Tree
               moving={true}
               folders={allData.folders}
-              // folders={allData.folders.filter((fold) => move.from.some((f) => f !== fold.folderid))}
               parentId={null}
               level={0}
               open={{ item: { title: null } }}

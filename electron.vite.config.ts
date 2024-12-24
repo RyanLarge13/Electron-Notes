@@ -11,7 +11,7 @@ export default defineConfig({
       rollupOptions: {
         input: {
           index: resolve(__dirname, "src/preload/index.ts"),
-          noteWinPreload: resolve(__dirname, "src/preload/noteWinPreload.ts") // Include the new preload script
+          noteWinPreload: resolve(__dirname, "src/preload/noteWinPreload.ts")
         }
       }
     },
@@ -22,7 +22,8 @@ export default defineConfig({
       rollupOptions: {
         input: {
           main_window: resolve(__dirname, "src/renderer/index.html"),
-          modal_window: resolve(__dirname, "src/renderer/windows/newNote/index.html")
+          modal_window: resolve(__dirname, "src/renderer/windows/newNote/index.html"),
+          preloader_window: resolve(__dirname, "src/renderer/windows/preloader/index.html")
         },
         output: {
           entryFileNames: "assets/[name].js", // Ensures unique filenames

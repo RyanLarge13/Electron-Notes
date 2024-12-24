@@ -15,11 +15,14 @@
     "folderid",
     "maximizable",
     "minimizable",
+    "newfolder",
     "newnote",
     "noteid",
     "notesid",
     "Notif",
+    "parentfolderid",
     "Prefs",
+    "Usergroup",
     "uuidv"
   ]
 }

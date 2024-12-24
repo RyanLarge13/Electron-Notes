@@ -7,6 +7,8 @@ import fs from "fs";
 import path from "path";
 import appIcon from "../../resources/icon.png?asset";
 
+let preloaderWindow;
+
 function createWindow(): void {
   // Create the browser window.
   const userDataPath = app.getPath("userData");
@@ -34,6 +36,7 @@ function createWindow(): void {
   });
 
   mainWindow.on("ready-to-show", () => {
+    preloaderWindow.close();
     mainWindow.show();
   });
 
@@ -208,7 +211,24 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  createWindow();
+  // Step 1: Create the preloader window immediately
+  preloaderWindow = new BrowserWindow({
+    width: 600,
+    height: 350,
+    frame: false, // Removes the default window frame
+    alwaysOnTop: true, // Ensures it's displayed above other windows
+    show: true, // Ensure the window is shown as soon as possible
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true
+    }
+  });
+  // Load a very minimal preloader HTML file
+  preloaderWindow.loadFile(join(__dirname, "../renderer/windows/preloader/index.html"));
+
+  setTimeout(() => {
+    createWindow();
+  }, 5000);
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
