@@ -237,7 +237,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
       setResizing(true);
       const rect = noteRef.current.getBoundingClientRect();
       const offsetY = e.pageY - rect.top;
-      const percentagePointer = ((offsetY + noteTop) / window.innerHeight) * 100;
+      const percentagePointer = ((offsetY + noteTop - 45) / window.innerHeight) * 100;
       setNoteHeight(100 - percentagePointer);
     }
   };
@@ -246,7 +246,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
     if (noteRef && noteRef.current && resizing) {
       const rect = noteRef.current.getBoundingClientRect();
       const offsetY = e.pageY - rect.top;
-      const percentagePointer = ((offsetY + noteTop) / window.innerHeight) * 100;
+      const percentagePointer = ((offsetY + noteTop - 45) / window.innerHeight) * 100;
       if (rect.height > 200 && rect.height < window.innerHeight - 40) {
         setNoteHeight(100 - percentagePointer);
       }
@@ -289,20 +289,20 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
         }}
         onDragEnd={handleDragEnd}
         style={{ touchAction: "none" }}
-        whileDrag={{ outline: "2px solid rgba(255,255,255,0.5" }}
+        whileDrag={{ boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`, cursor: "grabbing" }}
         className={`shadow-md fixed z-40 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
-        } overflow-y-auto origin-bottom no-scroll-bar select-none rounded-md shadow-md pb-5 min-w-80 min-h-80 max-w-[95%] max-h-[90%]`}
+        } overflow-hidden origin-bottom select-none rounded-md cursor shadow-md pb-5 min-w-80 min-h-80 max-w-[95%] max-h-[90%]`}
       >
         <div
-          className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute right-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full cursor-grab`}
+          className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute isolate right-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full ${resizing ? "cursor-grabbing" : "cursor-grab"}`}
           onPointerDown={handleResizeWidth}
           onPointerMove={handleResizeWidthMove}
           onPointerUp={handleResizeWidthUp}
           onPointerCancel={handleCancelW}
         ></div>
         <div
-          className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute bottom-0 left-[50%] translate-x-[-50%] w-20 h-1 rounded-full cursor-grab touch-none`}
+          className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute isolate bottom-0 left-[50%] translate-x-[-50%] w-20 h-1 rounded-full touch-none ${resizing ? "cursor-grabbing" : "cursor-grab"}`}
           onPointerDown={handleResizeHeight}
           onPointerMove={handleResizeHeightMove}
           onPointerUp={handleResizeHeightUp}
@@ -379,10 +379,12 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
             </button> */}
           </div>
         </div>
-        <div
-          className="renderHtml mt-5 px-5"
-          dangerouslySetInnerHTML={{ __html: htmlToRender }}
-        ></div>
+        <div className="overflow-y-auto h-full no-scroll-bar">
+          <div
+            className="renderHtml mt-5 px-5"
+            dangerouslySetInnerHTML={{ __html: htmlToRender }}
+          ></div>
+        </div>
       </motion.div>
       {/* <div
         className={`fixed z-40 ${

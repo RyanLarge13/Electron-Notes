@@ -1143,7 +1143,7 @@ const Account = (): JSX.Element => {
           </motion.div>
         </>
       )}
-      {note.length > 0 && note.map((aNote) => <NoteView key={aNote.noteid} note={aNote} />)}
+      {note?.length > 0 && note.map((aNote) => <NoteView key={aNote.noteid} note={aNote} />)}
       {menu && <Menu />}
       {settings && <Settings />}
       {createCon && <Connections />}

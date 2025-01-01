@@ -1511,7 +1511,11 @@ const Folders = (): JSX.Element => {
           drag={!edit && !folderToChangeColor && !folderToRename && !editCurrentFolder}
           onDrag={handleDrag}
           dragSnapToOrigin={draggedInto === folder.folderid ? false : true}
-          whileDrag={{ zIndex: 900, pointerEvents: "none" }}
+          whileDrag={{
+            zIndex: 900,
+            pointerEvents: "none",
+            boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`
+          }}
           onContextMenu={(e) => openOptions(e, folder)}
           onDragStart={(e) => onDragStart(e, folder)}
           onDragEnd={(e) => {

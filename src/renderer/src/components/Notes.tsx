@@ -1396,7 +1396,6 @@ const Notes = (): JSX.Element => {
   };
 
   const handleDragEnd = (): void => {
-    console.log("drag end");
     if (!noteDragFolder) {
       setNoteDragging(null);
       setNoteDrag(false);
@@ -1593,7 +1592,11 @@ const Notes = (): JSX.Element => {
               backgroundColor: userPreferences.darkMode ? "#333" : "#e2e8f0",
               minHeight: note.locked ? "125px" : "125px"
             }}
-            whileDrag={{ pointerEvents: "none" }}
+            whileDrag={{
+              pointerEvents: "none",
+              boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`,
+              zIndex: 1000
+            }}
             onContextMenu={(e) => openNotesOptions(e, note)}
             key={note.noteid}
             className={`${search && folder === null ? "my-16" : "my-5"} ${view === "list" ? "h-80 overflow-y-clip" : view === "grid" ? "h-80 overflow-y-clip" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}

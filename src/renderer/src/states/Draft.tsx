@@ -27,6 +27,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
 
   const [title, setTitle] = useState(noteToEdit ? noteToEdit.title : "");
   const [value, setValue] = useState(noteToEdit ? noteToEdit.htmlText : "");
+  const [rendered, setRendered] = useState(false);
   const [changed, setChanged] = useState(false);
   const [locked, setLocked] = useState(noteToEdit ? noteToEdit.locked : false);
   const [saving, setSaving] = useState(false);
@@ -93,8 +94,15 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
       );
       if (contains.length > 0) {
         setValue(contains[0].htmlText);
+        console.log("contains unsaved changes");
       }
     }
+  }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setRendered(true);
+    }, 100);
   }, []);
 
   useEffect(() => {
@@ -650,7 +658,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
   return (
     <>
       <div
-        className={`fixed z-20 inset-0 bg-transparent`}
+        className={`fixed z-20 inset-0 bg-transparent shadow-md`}
         onClick={() => {
           setNoteToEdit((prev) => prev.filter((prev) => prev.noteid !== noteToEdit.noteid));
           if (changed) {
@@ -687,9 +695,12 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
           bottom: `${position.bottom}%`,
           right: `${position.right}%`
         }}
-        className={`fixed min-w-80 min-h-80 max-w-[95%] max-h-[90%] rounded-md shadow-md ${
+        className={`fixed min-w-80 min-h-80 max-w-[95%] max-h-[90%] overflow-hidden rounded-md shadow-md ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
         } z-40`}
+        whileDrag={{
+          boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`
+        }}
       >
         <div className="flex justify-between items-center pr-5">
           <input
@@ -731,7 +742,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
             formats={formats}
             value={value}
             onChange={(e) => {
-              if (!changed) {
+              if (!changed && !noteToEdit.isNew && rendered) {
                 setChanged(true);
               }
               setValue(e);
