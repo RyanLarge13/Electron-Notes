@@ -1,21 +1,34 @@
 import { useState, useContext } from "react";
+import { motion } from "framer-motion";
 import UserContext from "@renderer/contexxt/UserContext";
 import { BsArrowsExpand } from "react-icons/bs";
 import { PiArrowsInLineVertical } from "react-icons/pi";
+import { Folder } from "@renderer/types/types";
 
-const NestedFolder = ({ moving, childFolders, parentId, level, open }) => {
-  return (
-    <Tree moving={moving} folders={childFolders} parentId={parentId} level={level} open={open} />
-  );
+type TreeProps = {
+  moving: boolean;
+  folders: Folder[];
+  parentId: string;
+  level: number;
+  open: {
+    item: {
+      title: string | null;
+    };
+  };
 };
 
-const Tree = ({ moving, folders, parentId, level, open }) => {
+const NestedFolder = ({ moving, folders, parentId, level, open }: TreeProps): JSX.Element => {
+  return <Tree moving={moving} folders={folders} parentId={parentId} level={level} open={open} />;
+};
+
+const Tree = ({ moving, folders, parentId, level, open }: TreeProps): JSX.Element => {
   const { setFolder, setSelectedFolder, userPreferences } = useContext(UserContext);
 
   const childFolders = folders.filter((fold) => fold.parentFolderId !== parentId);
   const topFolders = folders.filter((fold) => fold.parentFolderId === parentId);
 
   const [folderStates, setFolderStates] = useState({});
+  const [dragging, setDragging] = useState(false);
 
   const toggleNested = (e, folderId: string): void => {
     e.stopPropagation();
@@ -25,21 +38,56 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
     }));
   };
 
+  const handleMouseEnter = (e, folderId): void => {
+    setTimeout(() => {}, 1000);
+  };
+
+  const handleDragStart = (e, folderId): void => {
+    e.stopPropagation();
+    setDragging(true);
+    if (folderStates[folderId]) {
+      toggleNested(e, folderId);
+    }
+  };
+
+  const handleDrag = (e): void => {
+    e.stopPropagation();
+  };
+
+  const handleDragEnd = (e): void => {
+    e.stopPropagation();
+    setDragging(false);
+  };
+
   return (
     <>
       {topFolders.length > 0 && (
         <>
           {topFolders.map((fold) => (
-            <div
+            <motion.div
               key={fold.folderid}
+              drag={true}
+              onDragStart={(e) => handleDragStart(e, fold.folderid)}
+              onDrag={handleDrag}
+              onDragEnd={handleDragEnd}
+              dragSnapToOrigin={true}
+              dragConstraints={{ left: 0, right: 0 }}
+              onMouseEnter={(e) => handleMouseEnter(e, fold.folderid)}
+              whileDrag={{
+                boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`,
+                zIndex: 1000
+              }}
               style={{ marginLeft: level * 5 }}
               className={`w-full relative py-2 px-3 rounded-md ${
                 userPreferences.darkMode
                   ? "bg-[#333] hover:bg-[#444]"
                   : "bg-slate-200 hover:bg-slate-300"
-              } duration-200 my-2 cursor-pointer`}
+              } duration-200 my-2 cursor-pointer shadow-md`}
               onClick={(e) => {
                 e.stopPropagation();
+                if (dragging) {
+                  return;
+                }
                 moving ? setSelectedFolder(fold) : setFolder(fold);
               }}
             >
@@ -63,14 +111,14 @@ const Tree = ({ moving, folders, parentId, level, open }) => {
                 {folderStates[fold.folderid] && (
                   <NestedFolder
                     moving={moving}
-                    childFolders={childFolders}
+                    folders={childFolders}
                     parentId={fold.folderid}
                     level={level + 1}
                     open={open}
                   />
                 )}
               </div>
-            </div>
+            </motion.div>
           ))}
         </>
       )}

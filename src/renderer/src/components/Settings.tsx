@@ -761,9 +761,9 @@ const Settings = (): JSX.Element => {
           transition: { duration: resizing ? 0 : 0.25 },
           left: `${settingsWidth}%`
         }}
-        className={`fixed no-scroll-bar flex flex-col justify-start z-40 right-0 top-0 bottom-0 p-5 ${
+        className={`fixed z-40 right-0 top-0 bottom-0 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"
-        } rounded-r-md overflow-y-auto no-scroll-bar`}
+        } rounded-r-md`}
       >
         <div
           className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute left-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full cursor-grab`}
@@ -771,402 +771,12 @@ const Settings = (): JSX.Element => {
           onPointerMove={handleResizeWidthMove}
           onPointerUp={handleResizeWidthUp}
         ></div>
-        <button
-          onClick={() => setDarkModeTheme()}
-          className="flex justify-between items-center my-3"
-        >
-          <p>Dark Mode</p>
-          <div
-            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            }`}
-          >
-            <div
-              className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                userPreferences.darkMode
-                  ? "right-[1px] left-[50%] bg-green-300"
-                  : "left-[1px] right-[50%] bg-red-300"
-              } rounded-full`}
-            ></div>
-          </div>
-        </button>
-        <button
-          onClick={() => {
-            const newPreferences = {
-              ...userPreferences,
-              layout: view === "list" ? "masonry" : view === "masonry" ? "grid" : "list"
-            };
-            localStorage.setItem("preferences", JSON.stringify(newPreferences));
-            setUserPreferences(newPreferences);
-            setView((prevView) =>
-              prevView === "list" ? "masonry" : view === "masonry" ? "grid" : "list"
-            );
-          }}
-          className="flex justify-between items-center my-3"
-        >
-          <p>View</p>
-          <div
-            className={`ml-3 flex justify-center gap-x-3 px-3 items-center relative text-xl h-[25px] shadow-md rounded-full cursor-pointer ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            }`}
-          >
-            <LuList className={`${view === "list" ? "text-green-300" : "text-red-300"}`} />
-            <BiGrid className={`${view === "grid" ? "text-green-300" : "text-red-300"}`} />
-            <CiGrid42 className={`${view === "masonry" ? "text-green-300" : "text-red-300"}`} />
-          </div>
-        </button>
-        <button
-          onClick={() => {
-            const newPreferences = {
-              ...userPreferences,
-              order: order ? false : true
-            };
-            localStorage.setItem("preferences", JSON.stringify(newPreferences));
-            setUserPreferences(newPreferences);
-            setOrder((prev) => !prev);
-          }}
-          className="flex justify-between items-center my-3"
-        >
-          <p>Order</p>
-          <div
-            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            }`}
-          >
-            <div
-              className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                userPreferences.order
-                  ? "right-[1px] left-[50%] bg-green-300"
-                  : "left-[1px] right-[50%] bg-red-300"
-              } rounded-full`}
-            ></div>
-          </div>
-        </button>
-        <div
-          className={`${
-            userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"
-          } p-2 rounded-md my-5`}
-        >
-          <div className="flex justify-between items-center w-full">
-            <p className="font-semibold">Sort By</p>
-          </div>
-          <div className="pl-5">
-            <button
-              onClick={() => {
-                const newPreferences = {
-                  ...userPreferences,
-                  filter: "Title"
-                };
-                localStorage.setItem("preferences", JSON.stringify(newPreferences));
-                setUserPreferences(newPreferences);
-                setFilter("Title");
-              }}
-              className="flex justify-between items-center my-3 w-full"
-            >
-              <p>Sort by Title</p>
-              <div
-                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-                }`}
-              >
-                <div
-                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                    filter === "Title"
-                      ? "right-[1px] left-[50%] bg-green-300"
-                      : "left-[1px] right-[50%] bg-red-300"
-                  } rounded-full`}
-                ></div>
-              </div>
-            </button>
-            <button
-              onClick={() => {
-                const newPreferences = {
-                  ...userPreferences,
-                  filter: "Date"
-                };
-                localStorage.setItem("preferences", JSON.stringify(newPreferences));
-                setUserPreferences(newPreferences);
-                setFilter("Date");
-              }}
-              className="flex justify-between items-center my-3 w-full"
-            >
-              <p>Sort By Date</p>
-              <div
-                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-                }`}
-              >
-                <div
-                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                    filter === "Date"
-                      ? "right-[1px] left-[50%] bg-green-300"
-                      : "left-[1px] right-[50%] bg-red-300"
-                  } rounded-full`}
-                ></div>
-              </div>
-            </button>
-            <button
-              onClick={() => {
-                const newPreferences = {
-                  ...userPreferences,
-                  filter: "Updated"
-                };
-                localStorage.setItem("preferences", JSON.stringify(newPreferences));
-                setUserPreferences(newPreferences);
-                setFilter("Updated");
-              }}
-              className="flex justify-between items-center my-3 w-full"
-            >
-              <p>Sort by Updated</p>
-              <div
-                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-                }`}
-              >
-                <div
-                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                    filter === "Updated"
-                      ? "right-[1px] left-[50%] bg-green-300"
-                      : "left-[1px] right-[50%] bg-red-300"
-                  } rounded-full`}
-                ></div>
-              </div>
-            </button>
-          </div>
-        </div>
-        <button
-          onClick={() =>
-            setTheme((prev) => {
-              if (prev !== "") {
-                return "";
-              }
-              return "bg-amber-300";
-            })
-          }
-          className="flex justify-between items-center my-5"
-        >
-          <p>Theme</p>
-          <div
-            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            }`}
-          >
-            <div
-              className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                theme ? "right-[1px] left-[50%] bg-green-300" : "left-[1px] right-[50%] bg-red-300"
-              } rounded-full`}
-            ></div>
-          </div>
-        </button>
-        {theme && (
-          <div className="mb-3 pt-1 relative">
-            <div
-              className={`absolute top-0 right-0 left-0 h-1 rounded-full ${userPreferences.theme}`}
-            ></div>
-            <Colors setColor={setNewTheme} />
-          </div>
-        )}
-        <button onClick={() => setAutoSave()} className="flex justify-between items-center my-3">
-          <p>Auto Save Notes</p>
-          <div
-            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            }`}
-          >
-            <div
-              className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                userPreferences.autosave
-                  ? "right-[1px] left-[50%] bg-green-300"
-                  : "left-[1px] right-[50%] bg-red-300"
-              } rounded-full`}
-            ></div>
-          </div>
-        </button>
-        <button
-          onClick={() => setConfirmOps((prev) => !prev)}
-          className="flex justify-between items-center my-3"
-        >
-          <p>Confirm Ops</p>
-          <div
-            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            }`}
-          >
-            <div
-              className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                confirmOps
-                  ? "right-[1px] left-[50%] bg-green-300"
-                  : "left-[1px] right-[50%] bg-red-300"
-              } rounded-full`}
-            ></div>
-          </div>
-        </button>
-        <button
-          onClick={() => setLockPin((prev) => !prev)}
-          className="flex justify-between items-center my-3"
-        >
-          <p>Change Lock Pin</p>
-          <div
-            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            }`}
-          >
-            <div
-              className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                lockPin
-                  ? "right-[1px] left-[50%] bg-green-300"
-                  : "left-[1px] right-[50%] bg-red-300"
-              } rounded-full`}
-            ></div>
-          </div>
-        </button>
-        {lockPin && (
-          <form
-            className={`${userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"} flex justify-start items-center gap-x-3`}
-          >
-            <input
-              ref={firstInput}
-              value={newLockPin.first}
-              type="password"
-              onChange={(e) => handlePinInput(e, "first")}
-              className={`w-10 h-10 p-3 ${
-                userPreferences.darkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-300 text-slate-700"
-              } text-xl text-center font-semibold rounded-md shadow-sm outline ${userPreferences.theme ? userPreferences.theme.replace("bg", "outline") : "outline-slate-500"}`}
-            />
-            <input
-              ref={secondInput}
-              value={newLockPin.second}
-              type="password"
-              className={`w-10 h-10 p-3 ${
-                userPreferences.darkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-300 text-slate-700"
-              } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
-              onChange={(e) => handlePinInput(e, "second")}
-            />
-            <input
-              ref={thirdInput}
-              value={newLockPin.third}
-              type="password"
-              className={`w-10 h-10 p-3 ${
-                userPreferences.darkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-300 text-slate-700"
-              } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
-              onChange={(e) => handlePinInput(e, "third")}
-            />
-            <input
-              ref={fourthInput}
-              value={newLockPin.fourth}
-              type="password"
-              className={`w-10 h-10 p-3 ${
-                userPreferences.darkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-300 text-slate-700"
-              } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
-              onChange={(e) => handlePinInput(e, "fourth")}
-            />
-            {createNewPin ? (
-              <div className="text-xs">
-                <p>enter your new pin</p>
-              </div>
-            ) : (
-              <div className="text-xs">
-                <p>enter your current lock pin</p>
-                <p>if you have not set one yet the default is 1234</p>
-              </div>
-            )}
-          </form>
-        )}
-        <button
-          onClick={() => setUsername((prev) => !prev)}
-          className="flex justify-between items-center my-3"
-        >
-          <p>Update Username</p>
-          <div
-            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            }`}
-          >
-            <div
-              className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                username
-                  ? "right-[1px] left-[50%] bg-green-300"
-                  : "left-[1px] right-[50%] bg-red-300"
-              } rounded-full`}
-            ></div>
-          </div>
-        </button>
-        {username && (
-          <div className="mt-1">
-            <form onSubmit={changeUsername}>
-              <input
-                type="username"
-                placeholder="new username"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-                className={`text-sm p-2 w-full rounded-sm ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-300 text-black"}`}
-              />
-            </form>
-          </div>
-        )}
-        <button
-          onClick={() => setPassword((prev) => !prev)}
-          className="flex justify-between items-center my-3"
-        >
-          <p>Reset Password</p>
-          <div
-            className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            }`}
-          >
-            <div
-              className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                password
-                  ? "right-[1px] left-[50%] bg-green-300"
-                  : "left-[1px] right-[50%] bg-red-300"
-              } rounded-full`}
-            ></div>
-          </div>
-        </button>
-        {password && (
-          <div className="mt-1 mb-3">
-            <form onSubmit={changePass} className="flex flex-col justify-start items-start gap-y-2">
-              <input
-                type="password"
-                placeholder="current password"
-                value={currentPass}
-                onChange={(e) => setCurrentPass(e.target.value)}
-                className={`text-sm p-2 w-full rounded-sm ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-300 text-black"}`}
-              />
-              <input
-                type="password"
-                placeholder="new password"
-                value={newPass}
-                onChange={(e) => setNewPass(e.target.value)}
-                className={`text-sm p-2 w-full rounded-sm ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-300 text-black"}`}
-              />
-              <button
-                type="submit"
-                className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} rounded-sm text-sm w-[195px] text-black p-2 font-semibold duration-200`}
-              >
-                {newPassLoading ? <ClipLoader size={18} /> : "Submit"}
-              </button>
-            </form>
-          </div>
-        )}
-        <div
-          className={`${
-            userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"
-          } p-2 rounded-md my-5`}
-        >
+        <div className="no-scroll-bar h-full flex flex-col justify-start p-5 overflow-y-auto">
           <button
-            onClick={() => setNotifyAll((prev) => !prev)}
-            className="flex justify-between items-center w-full"
+            onClick={() => setDarkModeTheme()}
+            className="flex justify-between items-center my-3"
           >
-            <p className="font-semibold">In App Notifications</p>
+            <p>Dark Mode</p>
             <div
               className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
                 userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
@@ -1174,67 +784,464 @@ const Settings = (): JSX.Element => {
             >
               <div
                 className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                  notifyAll
+                  userPreferences.darkMode
                     ? "right-[1px] left-[50%] bg-green-300"
                     : "left-[1px] right-[50%] bg-red-300"
                 } rounded-full`}
               ></div>
             </div>
           </button>
-          <div className="pl-5">
-            <button
-              onClick={() => setNotifySuccess((prev) => !prev)}
-              className="flex justify-between items-center my-3 w-full"
+          <button
+            onClick={() => {
+              const newPreferences = {
+                ...userPreferences,
+                layout: view === "list" ? "masonry" : view === "masonry" ? "grid" : "list"
+              };
+              localStorage.setItem("preferences", JSON.stringify(newPreferences));
+              setUserPreferences(newPreferences);
+              setView((prevView) =>
+                prevView === "list" ? "masonry" : view === "masonry" ? "grid" : "list"
+              );
+            }}
+            className="flex justify-between items-center my-3"
+          >
+            <p>View</p>
+            <div
+              className={`ml-3 flex justify-center gap-x-3 px-3 items-center relative text-xl h-[25px] shadow-md rounded-full cursor-pointer ${
+                userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              }`}
             >
-              <p>Success Prompts</p>
-              <div
-                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-                }`}
-              >
-                <div
-                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                    notifyAll && notifySuccess
-                      ? "right-[1px] left-[50%] bg-green-300"
-                      : "left-[1px] right-[50%] bg-red-300"
-                  } rounded-full`}
-                ></div>
-              </div>
-            </button>
-            <button
-              onClick={() => setNotifyErrors((prev) => !prev)}
-              className="flex justify-between items-center my-3 w-full"
+              <LuList className={`${view === "list" ? "text-green-300" : "text-red-300"}`} />
+              <BiGrid className={`${view === "grid" ? "text-green-300" : "text-red-300"}`} />
+              <CiGrid42 className={`${view === "masonry" ? "text-green-300" : "text-red-300"}`} />
+            </div>
+          </button>
+          <button
+            onClick={() => {
+              const newPreferences = {
+                ...userPreferences,
+                order: order ? false : true
+              };
+              localStorage.setItem("preferences", JSON.stringify(newPreferences));
+              setUserPreferences(newPreferences);
+              setOrder((prev) => !prev);
+            }}
+            className="flex justify-between items-center my-3"
+          >
+            <p>Order</p>
+            <div
+              className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              }`}
             >
-              <p>Error Prompts</p>
               <div
-                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
-                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-                }`}
+                className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                  userPreferences.order
+                    ? "right-[1px] left-[50%] bg-green-300"
+                    : "left-[1px] right-[50%] bg-red-300"
+                } rounded-full`}
+              ></div>
+            </div>
+          </button>
+          <div
+            className={`${
+              userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"
+            } p-2 rounded-md my-5`}
+          >
+            <div className="flex justify-between items-center w-full">
+              <p className="font-semibold">Sort By</p>
+            </div>
+            <div className="pl-5">
+              <button
+                onClick={() => {
+                  const newPreferences = {
+                    ...userPreferences,
+                    filter: "Title"
+                  };
+                  localStorage.setItem("preferences", JSON.stringify(newPreferences));
+                  setUserPreferences(newPreferences);
+                  setFilter("Title");
+                }}
+                className="flex justify-between items-center my-3 w-full"
               >
+                <p>Sort by Title</p>
                 <div
-                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
-                    notifyAll && notifyErrors
-                      ? "right-[1px] left-[50%] bg-green-300"
-                      : "left-[1px] right-[50%] bg-red-300"
-                  } rounded-full`}
-                ></div>
-              </div>
-            </button>
+                  className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                    userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                      filter === "Title"
+                        ? "right-[1px] left-[50%] bg-green-300"
+                        : "left-[1px] right-[50%] bg-red-300"
+                    } rounded-full`}
+                  ></div>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  const newPreferences = {
+                    ...userPreferences,
+                    filter: "Date"
+                  };
+                  localStorage.setItem("preferences", JSON.stringify(newPreferences));
+                  setUserPreferences(newPreferences);
+                  setFilter("Date");
+                }}
+                className="flex justify-between items-center my-3 w-full"
+              >
+                <p>Sort By Date</p>
+                <div
+                  className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                    userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                      filter === "Date"
+                        ? "right-[1px] left-[50%] bg-green-300"
+                        : "left-[1px] right-[50%] bg-red-300"
+                    } rounded-full`}
+                  ></div>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  const newPreferences = {
+                    ...userPreferences,
+                    filter: "Updated"
+                  };
+                  localStorage.setItem("preferences", JSON.stringify(newPreferences));
+                  setUserPreferences(newPreferences);
+                  setFilter("Updated");
+                }}
+                className="flex justify-between items-center my-3 w-full"
+              >
+                <p>Sort by Updated</p>
+                <div
+                  className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                    userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                      filter === "Updated"
+                        ? "right-[1px] left-[50%] bg-green-300"
+                        : "left-[1px] right-[50%] bg-red-300"
+                    } rounded-full`}
+                  ></div>
+                </div>
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col justify-start items-start mt-3">
-          <p className="mb-1">Short Cuts</p>
-          {userPreferences?.commands?.map((command) => (
-            <button
-              key={command.text}
-              className={`flex justify-between w-full text-sm p-2 ${
-                userPreferences.darkMode ? "hover:bg-slate-700" : "hover:bg-slate-300"
-              } duration-200 items-start`}
+          <button
+            onClick={() =>
+              setTheme((prev) => {
+                if (prev !== "") {
+                  return "";
+                }
+                return "bg-amber-300";
+              })
+            }
+            className="flex justify-between items-center my-5"
+          >
+            <p>Theme</p>
+            <div
+              className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              }`}
             >
-              <p>{command.text}</p>
-              <p>{command.command}</p>
+              <div
+                className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                  theme
+                    ? "right-[1px] left-[50%] bg-green-300"
+                    : "left-[1px] right-[50%] bg-red-300"
+                } rounded-full`}
+              ></div>
+            </div>
+          </button>
+          {theme && (
+            <div className="mb-3 pt-1 relative">
+              <div
+                className={`absolute top-0 right-0 left-0 h-1 rounded-full ${userPreferences.theme}`}
+              ></div>
+              <Colors setColor={setNewTheme} />
+            </div>
+          )}
+          <button onClick={() => setAutoSave()} className="flex justify-between items-center my-3">
+            <p>Auto Save Notes</p>
+            <div
+              className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              }`}
+            >
+              <div
+                className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                  userPreferences.autosave
+                    ? "right-[1px] left-[50%] bg-green-300"
+                    : "left-[1px] right-[50%] bg-red-300"
+                } rounded-full`}
+              ></div>
+            </div>
+          </button>
+          <button
+            onClick={() => setConfirmOps((prev) => !prev)}
+            className="flex justify-between items-center my-3"
+          >
+            <p>Confirm Ops</p>
+            <div
+              className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              }`}
+            >
+              <div
+                className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                  confirmOps
+                    ? "right-[1px] left-[50%] bg-green-300"
+                    : "left-[1px] right-[50%] bg-red-300"
+                } rounded-full`}
+              ></div>
+            </div>
+          </button>
+          <button
+            onClick={() => setLockPin((prev) => !prev)}
+            className="flex justify-between items-center my-3"
+          >
+            <p>Change Lock Pin</p>
+            <div
+              className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              }`}
+            >
+              <div
+                className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                  lockPin
+                    ? "right-[1px] left-[50%] bg-green-300"
+                    : "left-[1px] right-[50%] bg-red-300"
+                } rounded-full`}
+              ></div>
+            </div>
+          </button>
+          {lockPin && (
+            <form
+              className={`${userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"} flex justify-start items-center gap-x-3`}
+            >
+              <input
+                ref={firstInput}
+                value={newLockPin.first}
+                type="password"
+                onChange={(e) => handlePinInput(e, "first")}
+                className={`w-10 h-10 p-3 ${
+                  userPreferences.darkMode
+                    ? "bg-slate-700 text-slate-300"
+                    : "bg-slate-300 text-slate-700"
+                } text-xl text-center font-semibold rounded-md shadow-sm outline ${userPreferences.theme ? userPreferences.theme.replace("bg", "outline") : "outline-slate-500"}`}
+              />
+              <input
+                ref={secondInput}
+                value={newLockPin.second}
+                type="password"
+                className={`w-10 h-10 p-3 ${
+                  userPreferences.darkMode
+                    ? "bg-slate-700 text-slate-300"
+                    : "bg-slate-300 text-slate-700"
+                } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
+                onChange={(e) => handlePinInput(e, "second")}
+              />
+              <input
+                ref={thirdInput}
+                value={newLockPin.third}
+                type="password"
+                className={`w-10 h-10 p-3 ${
+                  userPreferences.darkMode
+                    ? "bg-slate-700 text-slate-300"
+                    : "bg-slate-300 text-slate-700"
+                } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
+                onChange={(e) => handlePinInput(e, "third")}
+              />
+              <input
+                ref={fourthInput}
+                value={newLockPin.fourth}
+                type="password"
+                className={`w-10 h-10 p-3 ${
+                  userPreferences.darkMode
+                    ? "bg-slate-700 text-slate-300"
+                    : "bg-slate-300 text-slate-700"
+                } text-xl text-center font-semibold rounded-md shadow-sm outline outline-slate-500`}
+                onChange={(e) => handlePinInput(e, "fourth")}
+              />
+              {createNewPin ? (
+                <div className="text-xs">
+                  <p>enter your new pin</p>
+                </div>
+              ) : (
+                <div className="text-xs">
+                  <p>enter your current lock pin</p>
+                  <p>if you have not set one yet the default is 1234</p>
+                </div>
+              )}
+            </form>
+          )}
+          <button
+            onClick={() => setUsername((prev) => !prev)}
+            className="flex justify-between items-center my-3"
+          >
+            <p>Update Username</p>
+            <div
+              className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              }`}
+            >
+              <div
+                className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                  username
+                    ? "right-[1px] left-[50%] bg-green-300"
+                    : "left-[1px] right-[50%] bg-red-300"
+                } rounded-full`}
+              ></div>
+            </div>
+          </button>
+          {username && (
+            <div className="mt-1">
+              <form onSubmit={changeUsername}>
+                <input
+                  type="username"
+                  placeholder="new username"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  className={`text-sm p-2 w-full rounded-sm ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-300 text-black"}`}
+                />
+              </form>
+            </div>
+          )}
+          <button
+            onClick={() => setPassword((prev) => !prev)}
+            className="flex justify-between items-center my-3"
+          >
+            <p>Reset Password</p>
+            <div
+              className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+              }`}
+            >
+              <div
+                className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                  password
+                    ? "right-[1px] left-[50%] bg-green-300"
+                    : "left-[1px] right-[50%] bg-red-300"
+                } rounded-full`}
+              ></div>
+            </div>
+          </button>
+          {password && (
+            <div className="mt-1 mb-3">
+              <form
+                onSubmit={changePass}
+                className="flex flex-col justify-start items-start gap-y-2"
+              >
+                <input
+                  type="password"
+                  placeholder="current password"
+                  value={currentPass}
+                  onChange={(e) => setCurrentPass(e.target.value)}
+                  className={`text-sm p-2 w-full rounded-sm ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-300 text-black"}`}
+                />
+                <input
+                  type="password"
+                  placeholder="new password"
+                  value={newPass}
+                  onChange={(e) => setNewPass(e.target.value)}
+                  className={`text-sm p-2 w-full rounded-sm ${userPreferences.darkMode ? "bg-slate-700 text-white" : "bg-slate-300 text-black"}`}
+                />
+                <button
+                  type="submit"
+                  className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} rounded-sm text-sm w-[195px] text-black p-2 font-semibold duration-200`}
+                >
+                  {newPassLoading ? <ClipLoader size={18} /> : "Submit"}
+                </button>
+              </form>
+            </div>
+          )}
+          <div
+            className={`${
+              userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"
+            } p-2 rounded-md my-5`}
+          >
+            <button
+              onClick={() => setNotifyAll((prev) => !prev)}
+              className="flex justify-between items-center w-full"
+            >
+              <p className="font-semibold">In App Notifications</p>
+              <div
+                className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                  userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                }`}
+              >
+                <div
+                  className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                    notifyAll
+                      ? "right-[1px] left-[50%] bg-green-300"
+                      : "left-[1px] right-[50%] bg-red-300"
+                  } rounded-full`}
+                ></div>
+              </div>
             </button>
-          ))}
+            <div className="pl-5">
+              <button
+                onClick={() => setNotifySuccess((prev) => !prev)}
+                className="flex justify-between items-center my-3 w-full"
+              >
+                <p>Success Prompts</p>
+                <div
+                  className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                    userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                      notifyAll && notifySuccess
+                        ? "right-[1px] left-[50%] bg-green-300"
+                        : "left-[1px] right-[50%] bg-red-300"
+                    } rounded-full`}
+                  ></div>
+                </div>
+              </button>
+              <button
+                onClick={() => setNotifyErrors((prev) => !prev)}
+                className="flex justify-between items-center my-3 w-full"
+              >
+                <p>Error Prompts</p>
+                <div
+                  className={`ml-3 flex justify-center items-center relative w-[50px] h-[25px] shadow-md rounded-full cursor-pointer ${
+                    userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-[1px] bottom-[1px] duration-200 ${
+                      notifyAll && notifyErrors
+                        ? "right-[1px] left-[50%] bg-green-300"
+                        : "left-[1px] right-[50%] bg-red-300"
+                    } rounded-full`}
+                  ></div>
+                </div>
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-col justify-start items-start mt-3">
+            <p className="mb-1">Short Cuts</p>
+            {userPreferences?.commands?.map((command) => (
+              <button
+                key={command.text}
+                className={`flex justify-between w-full text-sm p-2 ${
+                  userPreferences.darkMode ? "hover:bg-slate-700" : "hover:bg-slate-300"
+                } duration-200 items-start`}
+              >
+                <p>{command.text}</p>
+                <p>{command.command}</p>
+              </button>
+            ))}
+          </div>
         </div>
       </motion.div>
     </>
