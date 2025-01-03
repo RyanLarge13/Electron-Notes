@@ -39,7 +39,15 @@ const Tree = ({ moving, folders, parentId, level, open }: TreeProps): JSX.Elemen
   };
 
   const handleMouseEnter = (e, folderId): void => {
-    setTimeout(() => {}, 1000);
+    if (dragging) {
+      toggleNested(e, folderId);
+    }
+  };
+
+  const handleMouseLeave = (e, folderId) => {
+    if (dragging) {
+      toggleNested(e, folderId);
+    }
   };
 
   const handleDragStart = (e, folderId): void => {
@@ -73,7 +81,9 @@ const Tree = ({ moving, folders, parentId, level, open }: TreeProps): JSX.Elemen
               dragSnapToOrigin={true}
               dragConstraints={{ left: 0, right: 0 }}
               onMouseEnter={(e) => handleMouseEnter(e, fold.folderid)}
+              onMouseLeave={(e) => handleMouseLeave(e, fold.folderid)}
               whileDrag={{
+                pointerEvents: "none",
                 boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`,
                 zIndex: 1000
               }}
