@@ -113,10 +113,6 @@ const Header = (): JSX.Element => {
       setMenu(false);
       return;
     }
-    if (note) {
-      setNote(null);
-      return;
-    }
     if (editCurrentFolder) {
       setEditCurrentFolder(false);
     }
