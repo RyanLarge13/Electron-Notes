@@ -57,6 +57,7 @@ const Notes = (): JSX.Element => {
     allData,
     folder,
     search,
+    note,
     noteDragging,
     setNoteIsMoving,
     setNoteDragFolder,
@@ -1264,12 +1265,20 @@ const Notes = (): JSX.Element => {
     setContextMenu(newMenu);
   };
 
-  const openNote = (note): void => {
-    if (note.locked) {
-      setAwaitingNote(note);
+  const openNote = (aNote): void => {
+    if (aNote.locked) {
+      setAwaitingNote(aNote);
       return setPinInput(true);
     }
-    setNote((prev) => [...prev, note]);
+    if (note.length > 0) {
+      if (note.filter((theNote) => theNote.noteid === aNote.noteid).length > 0) {
+        return;
+      } else {
+        setNote((prev) => [...prev, aNote]);
+      }
+    } else {
+      setNote([aNote]);
+    }
   };
 
   const unlockNote = async (): Promise<void> => {

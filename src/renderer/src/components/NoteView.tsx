@@ -4,16 +4,25 @@ import { motion } from "framer-motion";
 import { FaCopy, FaEdit } from "react-icons/fa";
 import UserContext from "@renderer/contexxt/UserContext";
 import { IoCloseCircle } from "react-icons/io5";
-import { MdDragHandle } from "react-icons/md";
+import { MdDragHandle, MdMinimize } from "react-icons/md";
 import { CiDesktop } from "react-icons/ci";
 import { Tooltip } from "react-tooltip";
 import { Note } from "@renderer/types/types";
 
 const NoteView = ({ note }: { note: Note }): JSX.Element => {
-  const { userPreferences, setUserPreferences, setNote, setNoteToEdit, setSystemNotif } =
-    useContext(UserContext);
+  const {
+    userPreferences,
+    minimizeArray,
+    setMinimizeArray,
+    setUserPreferences,
+    setNote,
+    setNoteToEdit,
+    setSystemNotif
+  } = useContext(UserContext);
 
   const [resizing, setResizing] = useState(false);
+
+  const [includesMinimize, setIncludesMinimized] = useState(false);
 
   const [htmlToRender, setHtmlToRender] = useState(note.htmlText);
 
@@ -29,6 +38,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
   const [noteLeft, setNoteLeft] = useState(
     userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.left || 50
   );
+  const [offsets, setOffsets] = useState({ top: 0, left: 0 });
 
   const noteRef = useRef(null);
 
@@ -40,6 +50,18 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
       setHtmlToRender(contains[0].htmlText);
     }
   }, []);
+
+  useEffect(() => {
+    if (minimizeArray.length > 0) {
+      if (minimizeArray.includes(note.noteid)) {
+        setIncludesMinimized(true);
+      } else {
+        setIncludesMinimized(false);
+      }
+    } else {
+      setIncludesMinimized(false);
+    }
+  }, [minimizeArray]);
 
   const editNote = (): void => {
     setNoteToEdit((prev) => [...prev, note]);
@@ -144,6 +166,8 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
 
     let newTop = rect.top;
     let newLeft = rect.left;
+
+    setOffsets({ top: newTop - noteTop, left: newLeft - noteLeft });
 
     let newRectRight = rect.right;
     let newRectBottom = rect.bottom;
@@ -262,19 +286,40 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
 
   const handleCancelH = (): void => {
     setResizing(false);
-    console.log("cancel");
   };
 
   const handleCancelW = (): void => {
     setResizing(false);
-    console.log("cancel");
+  };
+
+  const minimize = (): void => {
+    if (noteRef.current) {
+      const fromTop = noteRef.current.getBoundingClientRect().top;
+      console.log(fromTop);
+    }
+  };
+
+  const minimizeThisNote = (noteid: string): void => {
+    setMinimizeArray((prev: string[]): string[] => {
+      if (prev.length > 0) {
+        if (prev.includes(noteid)) {
+          return prev.filter((id) => id !== noteid);
+        } else {
+          minimize();
+          return [...prev, noteid];
+        }
+      } else {
+        minimize();
+        return [noteid];
+      }
+    });
   };
 
   return (
     <>
       <motion.div
         ref={noteRef}
-        drag={!resizing}
+        drag={!resizing && !includesMinimize}
         // dragConstraints={{ top: 0, left: 0 }}
         dragMomentum={false}
         dragSnapToOrigin={false}
@@ -292,7 +337,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
         whileDrag={{ boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`, cursor: "grabbing" }}
         className={`shadow-md fixed z-40 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
-        } overflow-hidden origin-bottom select-none rounded-md cursor shadow-md pb-5 min-w-80 min-h-80 max-w-[95%] max-h-[90%]`}
+        } ${includesMinimize ? `w-80 h-10 min-h-10 max-h-10` : ""} overflow-hidden origin-bottom select-none rounded-md cursor shadow-md pb-5 min-w-80 min-h-80 max-w-[95%] max-h-[90%]`}
       >
         <div
           className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute isolate right-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full ${resizing ? "cursor-grabbing" : "cursor-grab"}`}
@@ -312,25 +357,37 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
           className={`p-2 sticky z-[40] top-0 ${userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"} rounded-t-md flex justify-between items-center`}
         >
           <p>
-            Created On{" "}
-            {new Date(note.createdAt).toLocaleDateString("en-US", {
+            {includesMinimize
+              ? note.title
+              : `Created On 
+            ${new Date(note.createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
               year: "numeric"
-            })}
+            })}`}
           </p>
-          <div className="flex justify-between items-center gap-x-3">
+          <div className="flex justify-between items-center gap-x-2">
             <Tooltip id="move-note" />
+            <Tooltip id="minimize-note" />
             <Tooltip id="new-win-note" />
             <Tooltip id="close-note" />
             <button
-              className="cursor-move text-xl"
+              className="cursor-move text-xs text-black p-[3px] rounded-full bg-amber-300"
               data-tooltip-id="move-note"
               data-tooltip-content="Move Around Your Note"
             >
               <MdDragHandle />
             </button>
             <button
+              onClick={() => minimizeThisNote(note.noteid)}
+              className="text-xs text-black p-[3px] rounded-full bg-orange-300"
+              data-tooltip-id="minimize-note"
+              data-tooltip-content="Minimize Your Note"
+            >
+              <MdMinimize />
+            </button>
+            <button
+              className="text-xs text-black p-[3px] rounded-full bg-blue-300"
               onClick={() => openWindow(note)}
               data-tooltip-id="new-win-note"
               data-tooltip-content="Open Your Note In New Window"
@@ -338,6 +395,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
               <CiDesktop />
             </button>
             <button
+              className="text-xs text-black p-[3px] rounded-full bg-rose-300"
               data-tooltip-id="close-note"
               data-tooltip-content="Close Note"
               onClick={() =>
