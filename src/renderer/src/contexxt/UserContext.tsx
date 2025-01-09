@@ -306,7 +306,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
       );
       return setNotesToRender(sortedNotesAsc);
     }
-  }, [order, notes, filter]);
+  }, [order, notes, filter, mainTitle]);
 
   const installCache = (data): void => {
     const cachedAllData = {

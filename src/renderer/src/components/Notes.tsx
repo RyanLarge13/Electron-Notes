@@ -21,7 +21,7 @@ import {
 } from "react-icons/fa";
 import Masonry from "react-masonry-css";
 import { TbEdit, TbNotes, TbTrash, TbX } from "react-icons/tb";
-import { Note } from "@renderer/types/types";
+import { AllData, Note } from "@renderer/types/types";
 import { v4 as uuidv4 } from "uuid";
 import cheerio from "cheerio";
 import { motion } from "framer-motion";
@@ -53,6 +53,7 @@ const Notes = (): JSX.Element => {
     setSearch,
     setFolder,
     setUserPreferences,
+    setMainTitle,
     view,
     allData,
     folder,
@@ -770,13 +771,21 @@ const Notes = (): JSX.Element => {
       actions: []
     });
     try {
-      setAllData((prevData) => {
-        const newNotes = prevData.notes.filter((aNote: Note) => aNote.noteid !== note.noteid);
-        return {
-          ...prevData,
-          notes: newNotes
-        };
-      });
+      if (note.locked) {
+        setTrashedNotes((prev: Note[]): Note[] =>
+          prev.filter((aNote: Note): boolean => aNote.noteid !== note.noteid)
+        );
+      } else {
+        setAllData((prevData: AllData): AllData => {
+          const newNotes: Note[] = prevData.notes.filter(
+            (aNote: Note): boolean => aNote.noteid !== note.noteid
+          );
+          return {
+            ...prevData,
+            notes: newNotes
+          };
+        });
+      }
       deleteANote(token, note.noteid)
         .then(() => {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
@@ -1615,15 +1624,17 @@ const Notes = (): JSX.Element => {
             className={`${search && folder === null ? "my-20" : "my-5"} ${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                updateFavorite(!note.favorite, note);
-              }}
-              className={`absolute top-[-5px] duration-100 hover:scale-[1.25] left-[-5px] ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
-            >
-              {note.favorite === true ? <BsStarFill /> : <BsStar />}
-            </button>
+            {!note.trashed ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateFavorite(!note.favorite, note);
+                }}
+                className={`absolute top-[-5px] duration-100 hover:scale-[1.25] left-[-5px] ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+              >
+                {note.favorite === true ? <BsStarFill /> : <BsStar />}
+              </button>
+            ) : null}
             {search && folder === null ? (
               <button
                 onClick={(e) => {
