@@ -70,7 +70,8 @@ const Notes = (): JSX.Element => {
     user,
     setNoteDragging,
     setNoteDrag,
-    noteDragFolder
+    noteDragFolder,
+    setMinimizeArray
   } = useContext(UserContext);
 
   const [pinInput, setPinInput] = useState(false);
@@ -1272,6 +1273,9 @@ const Notes = (): JSX.Element => {
     }
     if (note.length > 0) {
       if (note.filter((theNote) => theNote.noteid === aNote.noteid).length > 0) {
+        setMinimizeArray((prev) => {
+          return prev.filter((noteid) => noteid !== aNote.noteid);
+        });
         return;
       } else {
         setNote((prev) => [...prev, aNote]);
@@ -1608,7 +1612,7 @@ const Notes = (): JSX.Element => {
             }}
             onContextMenu={(e) => openNotesOptions(e, note)}
             key={note.noteid}
-            className={`${search && folder === null ? "my-16" : "my-5"} ${view === "list" ? "h-80 overflow-y-clip" : view === "grid" ? "h-80 overflow-y-clip" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
+            className={`${search && folder === null ? "my-20" : "my-5"} ${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
             <button
@@ -1616,7 +1620,7 @@ const Notes = (): JSX.Element => {
                 e.stopPropagation();
                 updateFavorite(!note.favorite, note);
               }}
-              className={`absolute top-[-3px] left-[-3px] text-sm ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+              className={`absolute top-[-5px] duration-100 hover:scale-[1.25] left-[-5px] ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
             >
               {note.favorite === true ? <BsStarFill /> : <BsStar />}
             </button>
@@ -1758,7 +1762,7 @@ const Notes = (): JSX.Element => {
               </div>
             ) : (
               <div
-                className="mt-3 renderHtml"
+                className="mt-3 renderHtml max-h-[75%] overflow-y-clip"
                 dangerouslySetInnerHTML={{
                   __html:
                     note.htmlText.slice(

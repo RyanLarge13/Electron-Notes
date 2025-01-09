@@ -1300,6 +1300,10 @@ const Folders = (): JSX.Element => {
       cancelMove();
       return;
     }
+    if (folderDragging.folderid === draggedOverFolder.folderid) {
+      cancelMove();
+      return;
+    }
     if (!userPreferences.confirm) {
       return moveFolderAndContents();
     }

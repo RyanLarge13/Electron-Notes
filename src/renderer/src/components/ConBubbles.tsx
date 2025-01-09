@@ -98,7 +98,7 @@ const ConBubbles = (): JSX.Element => {
   return (
     <>
       {connections.map((con, index) => (
-        <div key={con.id}>
+        <div key={index}>
           <AnimatePresence>
             {conOptions.id === con.id && (
               <motion.div

@@ -4,10 +4,11 @@ import { motion } from "framer-motion";
 import { FaCopy, FaEdit } from "react-icons/fa";
 import UserContext from "@renderer/contexxt/UserContext";
 import { IoCloseCircle } from "react-icons/io5";
-import { MdDragHandle, MdMinimize } from "react-icons/md";
-import { CiDesktop } from "react-icons/ci";
+import { MdCancel, MdDragHandle, MdMaximize, MdMinimize, MdNotAccessible } from "react-icons/md";
+import { CiDesktop, CiMaximize1 } from "react-icons/ci";
 import { Tooltip } from "react-tooltip";
 import { Note } from "@renderer/types/types";
+import { TbMaximize } from "react-icons/tb";
 
 const NoteView = ({ note }: { note: Note }): JSX.Element => {
   const {
@@ -38,7 +39,6 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
   const [noteLeft, setNoteLeft] = useState(
     userPreferences?.noteDems?.find((dem) => dem.id === note.noteid)?.left || 50
   );
-  const [offsets, setOffsets] = useState({ top: 0, left: 0 });
 
   const noteRef = useRef(null);
 
@@ -152,13 +152,16 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
 
   const openWindow = async (note: Note): Promise<void> => {
     await window.openNewWin.openNoteInNewWindow(note, userPreferences.darkMode);
-    setNote([]);
+    setNote((prev: Note[]): Note[] => prev.filter((aNote: Note) => aNote.noteid !== note.noteid));
+    setMinimizeArray((prev: string[]): string[] => prev.filter((id: string) => id !== note.noteid));
   };
 
   const handleDragEnd = (): void => {
     let newDems: { id: string; top: number; left: number; width: number; height: number }[] = [];
-    // const newTop = e.clientY - noteHeight / 2;
-    // const newLeft = e.clientX - noteWidth / 2;
+
+    if (!noteRef.current) {
+      return;
+    }
 
     const rect = noteRef.current.getBoundingClientRect();
     const totalHeight = window.innerHeight;
@@ -166,8 +169,6 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
 
     let newTop = rect.top;
     let newLeft = rect.left;
-
-    setOffsets({ top: newTop - noteTop, left: newLeft - noteLeft });
 
     let newRectRight = rect.right;
     let newRectBottom = rect.bottom;
@@ -292,11 +293,23 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
     setResizing(false);
   };
 
-  const minimize = (): void => {
-    if (noteRef.current) {
-      const fromTop = noteRef.current.getBoundingClientRect().top;
-      console.log(fromTop);
+  const updateDems = (): void => {
+    if (!noteRef.current) {
+      return;
     }
+
+    const rect = noteRef.current.getBoundingClientRect();
+
+    const top = rect.top;
+    const left = rect.left;
+
+    const width = 100 - (rect.right / window.innerWidth) * 100;
+    const height = 100 - (rect.bottom / window.innerHeight) * 100;
+
+    setNoteTop(top);
+    setNoteLeft(left);
+    setNoteWidth(width);
+    setNoteHeight(height);
   };
 
   const minimizeThisNote = (noteid: string): void => {
@@ -305,14 +318,19 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
         if (prev.includes(noteid)) {
           return prev.filter((id) => id !== noteid);
         } else {
-          minimize();
+          updateDems();
           return [...prev, noteid];
         }
       } else {
-        minimize();
+        updateDems();
         return [noteid];
       }
     });
+  };
+
+  const findIndex = (noteid: string): number => {
+    const index = minimizeArray.indexOf(noteid);
+    return index;
   };
 
   return (
@@ -323,21 +341,46 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
         // dragConstraints={{ top: 0, left: 0 }}
         dragMomentum={false}
         dragSnapToOrigin={false}
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: 1,
-          right: `${noteWidth}%`,
-          bottom: `${noteHeight}%`,
-          top: `${noteTop}px`,
-          left: `${noteLeft}px`,
-          transition: { duration: !resizing ? 0 : 0.25 }
-        }}
+        initial={
+          includesMinimize
+            ? {
+                x: 0,
+                y: 0,
+                right: 0,
+                left: 0,
+                top: 0,
+                bottom: 0
+              }
+            : {
+                right: `${noteWidth}%`,
+                bottom: `${noteHeight}%`,
+                top: `${noteTop}px`,
+                left: `${noteLeft}px`
+              }
+        }
+        animate={
+          includesMinimize
+            ? {
+                x: 0 + 100 * findIndex(note.noteid),
+                y: 0 + 30 * findIndex(note.noteid),
+                top: 0,
+                left: 0,
+                right: "100%",
+                bottom: "100%",
+                zIndex: findIndex(note.noteid)
+              }
+            : {
+                right: `${noteWidth}%`,
+                bottom: `${noteHeight}%`,
+                top: `${noteTop}px`,
+                left: `${noteLeft}px`
+              }
+        }
         onDragEnd={handleDragEnd}
-        style={{ touchAction: "none" }}
         whileDrag={{ boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`, cursor: "grabbing" }}
         className={`shadow-md fixed z-40 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
-        } ${includesMinimize ? `w-80 h-10 min-h-10 max-h-10` : ""} overflow-hidden origin-bottom select-none rounded-md cursor shadow-md pb-5 min-w-80 min-h-80 max-w-[95%] max-h-[90%]`}
+        } ${includesMinimize ? `w-80 h-10 min-h-10 max-h-10 max-w-80 min-w-80 shadow-white shadow-sm` : "min-w-80 min-h-80 max-w-[95%] max-h-[90%]"} overflow-hidden origin-bottom select-none rounded-md cursor shadow-md pb-5`}
       >
         <div
           className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute isolate right-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full ${resizing ? "cursor-grabbing" : "cursor-grab"}`}
@@ -367,40 +410,45 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
             })}`}
           </p>
           <div className="flex justify-between items-center gap-x-2">
-            <Tooltip id="move-note" />
-            <Tooltip id="minimize-note" />
-            <Tooltip id="new-win-note" />
-            <Tooltip id="close-note" />
+            <Tooltip id={`move-note-${note.noteid}`} />
+            <Tooltip id={`minimize-note-${note.noteid}`} />
+            <Tooltip id={`new-win-note-${note.noteid}`} />
+            <Tooltip id={`close-note-${note.noteid}`} />
             <button
-              className="cursor-move text-xs text-black p-[3px] rounded-full bg-amber-300"
-              data-tooltip-id="move-note"
-              data-tooltip-content="Move Around Your Note"
+              className={`${includesMinimize ? "cursor-not-allowed" : "cursor-move"} text-xs text-black p-[3px] rounded-full bg-sky-300`}
+              data-tooltip-id={`move-note-${note.noteid}`}
+              data-tooltip-content={includesMinimize ? "" : "Move Around Your Note"}
             >
-              <MdDragHandle />
+              {includesMinimize ? <MdNotAccessible /> : <MdDragHandle />}
             </button>
             <button
               onClick={() => minimizeThisNote(note.noteid)}
               className="text-xs text-black p-[3px] rounded-full bg-orange-300"
-              data-tooltip-id="minimize-note"
-              data-tooltip-content="Minimize Your Note"
+              data-tooltip-id={`minimize-note-${note.noteid}`}
+              data-tooltip-content={includesMinimize ? "Maximize" : "Minimize"}
             >
-              <MdMinimize />
+              {includesMinimize ? <TbMaximize /> : <MdMinimize />}
             </button>
             <button
-              className="text-xs text-black p-[3px] rounded-full bg-blue-300"
+              className="text-xs text-black p-[3px] rounded-full bg-green-300"
               onClick={() => openWindow(note)}
-              data-tooltip-id="new-win-note"
-              data-tooltip-content="Open Your Note In New Window"
+              data-tooltip-id={`new-win-note-${note.noteid}`}
+              data-tooltip-content="Open In New Window"
             >
               <CiDesktop />
             </button>
             <button
               className="text-xs text-black p-[3px] rounded-full bg-rose-300"
-              data-tooltip-id="close-note"
+              data-tooltip-id={`close-note-${note.noteid}`}
               data-tooltip-content="Close Note"
-              onClick={() =>
-                setNote((prev) => prev.filter((aNote) => aNote.noteid !== note.noteid))
-              }
+              onClick={() => {
+                setNote((prev: Note[]) =>
+                  prev.filter((aNote: Note) => aNote.noteid !== note.noteid)
+                );
+                setMinimizeArray((prev: string[]) =>
+                  prev.filter((theNote: string) => theNote !== note.noteid)
+                );
+              }}
             >
               <IoCloseCircle />
             </button>
@@ -439,6 +487,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
         </div>
         <div className="overflow-y-auto h-full no-scroll-bar">
           <div
+            onDoubleClick={() => editNote()}
             className="renderHtml mt-5 px-5"
             dangerouslySetInnerHTML={{ __html: htmlToRender }}
           ></div>

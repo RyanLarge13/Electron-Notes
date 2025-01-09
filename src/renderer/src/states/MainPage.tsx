@@ -528,7 +528,7 @@ const MainPage = (): JSX.Element => {
                       <button
                         onClick={() => addActionToList(index)}
                         key={action.title}
-                        className={`flex flex-col gap-y-1 w-full h-full duration-200 rounded-lg shadow-md justify-center items-center ${userPreferences.darkMode ? (userPreferences.quickActions.includes(index) ? "bg-[#555] text-white" : "bg-[#444] text-white") : userPreferences.quickActions.includes(index) ? "bg-slate-300 text-black" : "bg-slate-200 text-black"}`}
+                        className={`flex flex-col gap-y-1 w-full h-full duration-200 rounded-lg shadow-md justify-center items-center ${userPreferences.darkMode ? (userPreferences.quickActions.includes(index) ? "bg-[#555] text-white" : "bg-[#444] text-white hover:bg-[#555]") : userPreferences.quickActions.includes(index) ? "bg-slate-300 text-black" : "bg-slate-200 text-black hover:bg-slate-300"}`}
                       >
                         <div
                           className={`p-3 duration-200 rounded-full w-min ${userPreferences.darkMode ? (userPreferences.quickActions.includes(index) ? "bg-[#444] text-white" : "bg-[#555] text-white") : userPreferences.quickActions.includes(index) ? "bg-slate-400 text-black" : "bg-slate-300 text-black"} shadow-md`}
