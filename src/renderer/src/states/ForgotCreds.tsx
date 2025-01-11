@@ -261,7 +261,7 @@ const ForgotCreds = ({
       </p>
       <form
         onSubmit={(e) => handleForgotCreds(e)}
-        className="rounded-md shadow-lg bg-slate-200 p-5 flex flex-col justify-center items-center mt-10 mx-10 text-slate-900 w-96"
+        className="rounded-md shadow-lg bg-slate-200 p-5 flex flex-col justify-center items-center mt-10 mx-10 text-[#222] w-96"
       >
         <input
           type="email"
@@ -273,7 +273,7 @@ const ForgotCreds = ({
         />
         <button
           type="submit"
-          className="py-2 px-4 rounded-md shadow-md bg-amber-300 text-black mt-3 font-semibold self-start hover:bg-slate-900 focus:bg-slate-900 focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
+          className="py-2 px-4 rounded-md shadow-md bg-amber-300 text-black mt-3 font-semibold self-start hover:bg-[#222] focus:bg-[#222] focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
         >
           {resetLoading ? <ClipLoader size={19} /> : "Submit"}
         </button>

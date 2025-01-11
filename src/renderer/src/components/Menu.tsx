@@ -455,7 +455,7 @@ const Menu = (): JSX.Element => {
             </a>
             <button
               onClick={() => confirmDeleteAccount()}
-              className="p-2 text-red-500 underline rounded-md shadow-md w-full text-sm duration-200"
+              className="p-2 text-red-500 underline w-full text-sm duration-200"
             >
               Delete Account
             </button>

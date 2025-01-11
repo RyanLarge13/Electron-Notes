@@ -1,8 +1,9 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { ContextProps, Folder, Note } from "@renderer/types/types";
-import { getuserData } from "@renderer/utils/api";
+import { getUserData } from "@renderer/utils/api";
 import "@renderer/threads/handleConnections";
 import LocalCache from "../utils/cache";
+import { ActionFunction } from "react-router-dom";
 
 const UserContext = createContext({} as ContextProps);
 
@@ -354,7 +355,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   };
 
   const fetchUser = (token: string, cacheInstalled: boolean): void => {
-    getuserData(token)
+    getUserData(token)
       .then((res) => {
         const data = res.data.data;
         const newAllData = {
@@ -460,6 +461,32 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
       });
   };
 
+  const networkNotificationError = (actions: ActionFunction[]): void => {
+    const newError = {
+      show: true,
+      title: "Network Error",
+      text: "Our application was not able to reach the server, please check your internet connection and try again",
+      color: "bg-red-300",
+      hasCancel: true,
+      actions: [
+        {
+          text: "close",
+          func: () =>
+            setSystemNotif({
+              show: false,
+              title: "",
+              text: "",
+              color: "",
+              hasCancel: false,
+              actions: []
+            })
+        },
+        ...actions
+      ]
+    };
+    setSystemNotif(newError);
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -554,7 +581,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         folderSearchText,
         setFolderSearchText,
         minimizeArray,
-        setMinimizeArray
+        setMinimizeArray,
+        networkNotificationError
       }}
     >
       {children}

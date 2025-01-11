@@ -1029,23 +1029,8 @@ const Account = (): JSX.Element => {
         </button>
       </div>
       <Notes />
-      {/* <div className="hover:bg-rose-200 hover:bg-red-200 hover:bg-amber-200 hover:bg-yellow-200 hover:bg-lime-200 hover:bg-green-200 hover:bg-cyan-200 hover:bg-sky-200 hover:bg-blue-200 hover:bg-indigo-200 hover:bg-violet-200 hover:bg-fuchsia-200 hover:bg-pink-200"></div> */}
-      <div
-        className="bg-transparent"
-        onMouseLeave={() => {
-          if (hoverConnections) {
-            setTimeout(() => {
-              setHoverConnections(false);
-            }, 250);
-          }
-        }}
-      >
+      <div className="bg-transparent">
         <button
-          onMouseEnter={() => {
-            setTimeout(() => {
-              setHoverConnections(true);
-            }, 750);
-          }}
           className={`fixed top-3 right-3 rounded-full ${
             userPreferences.theme ? themeStringText : "text-amber-300"
           } ${

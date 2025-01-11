@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLock, FaSave, FaUnlock } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { motion, useDragControls } from "framer-motion";
 import { createNewNote, updateNote } from "@renderer/utils/api";
 import { ClipLoader } from "react-spinners";
 import { v4 as uuidv4 } from "uuid";
@@ -10,6 +10,7 @@ import UserContext from "@renderer/contexxt/UserContext";
 import "react-quill/dist/quill.snow.css";
 import "../assets/quill.css";
 import { Note } from "@renderer/types/types";
+import { MdDragHandle } from "react-icons/md";
 
 const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
   const {
@@ -51,6 +52,8 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
   let autoSaveInterval;
 
   const navigate = useNavigate();
+  const noteDragControl = useDragControls();
+
   const textThemeString = userPreferences?.theme
     ? userPreferences.theme.replace("bg", "text")
     : "text-amber-300";
@@ -682,6 +685,8 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
       <motion.div
         drag={!resizing}
         dragSnapToOrigin={false}
+        dragListener={false}
+        dragControls={noteDragControl}
         // dragConstraints={{ top: 0, left: 0 }}
         initial={{
           top: `${position.top}px`,
@@ -695,7 +700,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
           bottom: `${position.bottom}%`,
           right: `${position.right}%`
         }}
-        className={`fixed min-w-80 min-h-80 max-w-[95%] max-h-[90%] overflow-hidden rounded-md shadow-md ${
+        className={`fixed min-w-80 min-h-80 max-w-[95%] max-h-[90%] overflow-hidden rounded-md shadow-xl ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
         } z-40`}
         whileDrag={{
@@ -713,25 +718,25 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
               userPreferences.darkMode ? "bg-[#222]" : "bg-white"
             } focus:outline-none rounded-md`}
           />
-          <div className="flex gap-x-3">
-            <button onClick={() => setLocked((prev) => !prev)}>
-              {locked ? (
-                <FaLock
-                  className={`${userPreferences.theme ? textThemeString : "text-amber-300"}`}
-                />
-              ) : (
-                <FaUnlock />
-              )}
+          <div className="flex gap-x-2">
+            <button
+              className="text-xs text-black p-[3px] rounded-full bg-sky-300 cursor-move"
+              onPointerDown={(e) => noteDragControl.start(e)}
+              style={{ touchAction: "none" }}
+            >
+              <MdDragHandle />
+            </button>
+            <button
+              className="text-xs text-black p-[3px] rounded-full bg-orange-300"
+              onClick={() => setLocked((prev) => !prev)}
+            >
+              {locked ? <FaLock /> : <FaUnlock />}
             </button>
             <button
               onClick={() => saveNote()}
-              className={`${userPreferences.darkMode ? "text-slate-200" : "text-black"}`}
+              className={`text-xs text-black p-[3px] rounded-full bg-green-300 ${saving ? "cursor-progress" : "cursor-pointer"}`}
             >
-              {saving ? (
-                <ClipLoader size={16} color={`${userPreferences.darkMode ? "#fff" : "#000"}`} />
-              ) : (
-                <FaSave />
-              )}
+              {saving ? <ClipLoader size={8} color="#000" /> : <FaSave />}
             </button>
           </div>
         </div>

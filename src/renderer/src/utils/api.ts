@@ -57,7 +57,7 @@ export const deleteUser = (token: string): Promise<AxiosResponse> => {
   return res;
 };
 
-export const getuserData = (token: string): Promise<AxiosResponse> => {
+export const getUserData = (token: string): Promise<AxiosResponse> => {
   const res = Axios.get(`${devUrl}/users/seperated/data`, {
     headers: {
       Authorization: `Bearer ${token}`
@@ -239,5 +239,14 @@ export const acceptRequestConnection = (
     },
     { headers: { Authorization: `Bearer ${token}` } }
   );
+  return res;
+};
+
+export const declineConnectionRequest = (
+  token: string,
+  reqId: string,
+  userEmail: string
+): Promise<AxiosResponse> => {
+  const res = Axios.delete("");
   return res;
 };

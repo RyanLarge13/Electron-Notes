@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { acceptRequestConnection } from "@renderer/utils/api";
+import { acceptRequestConnection, declineConnectionRequest } from "@renderer/utils/api";
 import { FaUserCheck } from "react-icons/fa";
 import { TiCancel } from "react-icons/ti";
 import { Tooltip } from "react-tooltip";
@@ -14,6 +14,7 @@ const ConBubbles = (): JSX.Element => {
     setConnections,
     hoverConnections,
     userPreferences,
+    setHoverConnections,
     token,
     setSystemNotif
   } = useContext(UserContext);
@@ -95,6 +96,17 @@ const ConBubbles = (): JSX.Element => {
       });
   };
 
+  const declineRequest = async (requestId: string, userEmail: string): Promise<void> => {
+    // Do confirmation
+    // Then checks
+    try {
+      const declinedRequest = declineConnectionRequest(token, requestId, userEmail);
+      console.log(declinedRequest);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <>
       {connections.map((con, index) => (
@@ -112,7 +124,7 @@ const ConBubbles = (): JSX.Element => {
                   transition: { duration: 0.025 }
                 }}
                 style={{
-                  right: hoverConnections ? 5 * index + 60 : 5,
+                  right: hoverConnections ? 25 * index + 60 : 25,
                   zIndex: hoverConnections ? index : -1
                 }}
                 className={`fixed right-10 shadow-md rounded-md outline outline-slate-800 outline-2 text-white duration-200 ${
@@ -157,7 +169,7 @@ const ConBubbles = (): JSX.Element => {
               })
             }
             style={{
-              right: hoverConnections ? 5 * index + 50 : 5,
+              right: hoverConnections ? 25 * index + 60 : 25,
               zIndex: hoverConnections ? index : -1
             }}
             className={`fixed top-3 rounded-full ${
@@ -189,7 +201,7 @@ const ConBubbles = (): JSX.Element => {
                   transition: { duration: 0.025 }
                 }}
                 style={{
-                  top: hoverConnections ? 5 * index + 60 : 5,
+                  top: hoverConnections ? 25 * index + 60 : 25,
                   zIndex: hoverConnections ? index : -1
                 }}
                 className={`fixed right-10 shadow-md rounded-md outline outline-slate-800 outline-2 text-white duration-200 ${
@@ -209,6 +221,7 @@ const ConBubbles = (): JSX.Element => {
                   <FaUserCheck />
                 </button>
                 <button
+                  onClick={() => declineRequest(conReq.id, conReq.email)}
                   className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
                     userPreferences.darkMode
                       ? "bg-slate-700 hover:bg-slate-600"
@@ -221,8 +234,10 @@ const ConBubbles = (): JSX.Element => {
               </motion.div>
             )}
           </AnimatePresence>
+          <Tooltip id={`user-email-tooltip-${conReq.email}`} />
           <button
             key={conReq.id}
+            onMouseEnter={() => setHoverConnections(true)}
             onClick={() =>
               setOptions((prev) => {
                 if (prev.id === conReq.id) {
@@ -231,8 +246,10 @@ const ConBubbles = (): JSX.Element => {
                 return conReq;
               })
             }
-            style={{ top: 5 * index + 60, zIndex: index }}
-            className={`fixed right-3 rounded-full shadow-md outline outline-slate-800 outline-2 ${
+            style={{ top: 25 * index + 60, zIndex: index }}
+            data-tooltip-content={conReq.email}
+            data-tooltip-id={`user-email-tooltip-${conReq.email}`}
+            className={`fixed right-3 hover:z-[999] rounded-full shadow-md outline outline-slate-800 outline-2 ${
               userPreferences.theme ? themeStringText : "text-amber-300"
             } ${
               userPreferences.darkMode

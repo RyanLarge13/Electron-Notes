@@ -11,6 +11,7 @@
   "git.ignoreLimitWarning": true,
   "cSpell.words": [
     "contexxt",
+    "Creds",
     "Dems",
     "folderid",
     "maximizable",
@@ -22,6 +23,7 @@
     "Notif",
     "parentfolderid",
     "Prefs",
+    "signedup",
     "Usergroup",
     "uuidv"
   ]

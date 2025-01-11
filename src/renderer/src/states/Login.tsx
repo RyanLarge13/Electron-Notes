@@ -135,7 +135,7 @@ const Login = (): JSX.Element => {
           <p className="text-center mt-10">Login to access your notes</p>
           <form
             onSubmit={(e) => handleLogin(e)}
-            className="rounded-md shadow-lg bg-slate-200 p-5 flex flex-col justify-center items-center mt-10 mx-10 text-slate-900 w-96"
+            className="rounded-md shadow-lg bg-slate-200 p-5 flex flex-col justify-center items-center mt-10 mx-10 text-[#222] w-96"
           >
             <input
               type="text"
@@ -160,7 +160,7 @@ const Login = (): JSX.Element => {
             />
             <button
               type="submit"
-              className="py-2 px-4 rounded-md shadow-md bg-amber-200 text-black mt-3 font-semibold self-start hover:bg-slate-900 focus:bg-slate-900 focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
+              className="py-2 px-4 rounded-md shadow-md bg-amber-200 text-black mt-3 font-semibold self-start hover:bg-[#222] focus:bg-[#222] focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
             >
               Login &rarr;
             </button>
@@ -168,7 +168,7 @@ const Login = (): JSX.Element => {
             <p>don&apos;t have an account?</p>
             <button
               onClick={() => setSignup(true)}
-              className="py-2 px-4 rounded-md shadow-md bg-amber-300 text-black mt-3 font-semibold self-start hover:bg-slate-900 focus:bg-slate-900 focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
+              className="py-2 px-4 rounded-md shadow-md bg-amber-300 text-black mt-3 font-semibold self-start hover:bg-[#222] focus:bg-[#222] focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
             >
               Signup
             </button>

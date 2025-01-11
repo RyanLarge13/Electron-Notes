@@ -1,11 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useDragControls } from "framer-motion";
 import { FaCopy, FaEdit } from "react-icons/fa";
 import UserContext from "@renderer/contexxt/UserContext";
 import { IoCloseCircle } from "react-icons/io5";
-import { MdCancel, MdDragHandle, MdMaximize, MdMinimize, MdNotAccessible } from "react-icons/md";
-import { CiDesktop, CiMaximize1 } from "react-icons/ci";
+import { MdDragHandle, MdMinimize, MdNotAccessible } from "react-icons/md";
+import { CiDesktop } from "react-icons/ci";
 import { Tooltip } from "react-tooltip";
 import { Note } from "@renderer/types/types";
 import { TbMaximize } from "react-icons/tb";
@@ -43,6 +43,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
   const noteRef = useRef(null);
 
   const navigate = useNavigate();
+  const noteDragControl = useDragControls();
 
   useEffect(() => {
     const contains = userPreferences.unsavedNotes.filter((unsaved) => unsaved.id === note.noteid);
@@ -339,6 +340,8 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
         ref={noteRef}
         drag={!resizing && !includesMinimize}
         // dragConstraints={{ top: 0, left: 0 }}
+        dragControls={noteDragControl}
+        dragListener={false}
         dragMomentum={false}
         dragSnapToOrigin={false}
         initial={
@@ -415,6 +418,8 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
             <Tooltip id={`new-win-note-${note.noteid}`} />
             <Tooltip id={`close-note-${note.noteid}`} />
             <button
+              onPointerDown={(e) => noteDragControl.start(e)}
+              style={{ touchAction: "none" }}
               className={`${includesMinimize ? "cursor-not-allowed" : "cursor-move"} text-xs text-black p-[3px] rounded-full bg-sky-300`}
               data-tooltip-id={`move-note-${note.noteid}`}
               data-tooltip-content={includesMinimize ? "" : "Move Around Your Note"}

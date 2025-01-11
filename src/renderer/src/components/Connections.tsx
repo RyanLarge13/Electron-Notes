@@ -13,6 +13,9 @@ const Connections = (): JSX.Element => {
 
   const sendRequest = (e): void => {
     e.preventDefault();
+    if (!email) {
+      return;
+    }
     try {
       setLoading(true);
       createConRequest(token, email)
@@ -23,7 +26,7 @@ const Connections = (): JSX.Element => {
             title: "Connection Request Sent",
             text: res.data.message,
             color: "bg-green-300",
-            hasCancel: false,
+            hasCancel: true,
             actions: [
               {
                 text: "close",
@@ -88,10 +91,10 @@ const Connections = (): JSX.Element => {
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         className={`fixed bottom-10 z-40 right-10 left-10 max-w-[500px] p-5 ${
-          userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+          userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"
         } rounded-md shadow-md`}
       >
-        <p>Create a Connection</p>
+        <p>Create A Connection</p>
         <form onSubmit={sendRequest}>
           <input
             placeholder="Users Email"
@@ -100,13 +103,13 @@ const Connections = (): JSX.Element => {
             onChange={(e) => setEmail(e.target.value)}
             className={`focus:outline-none p-2 text-xl ${
               userPreferences.darkMode ? "text-white" : "text-black"
-            } bg-transparent`}
+            } bg-transparent w-full font-semibold`}
           />
         </form>
         <button
           disabled={loading}
           onClick={(e) => sendRequest(e)}
-          className="mt-5 py-2 px-3 rounded-md shadow-md bg-amber-300 text-black font-bold"
+          className="mt-5 py-2 px-3 w-full rounded-md shadow-md bg-amber-300 text-black font-bold"
         >
           {loading ? <ClipLoader color="#000" size={15} /> : "Send Request"}
         </button>

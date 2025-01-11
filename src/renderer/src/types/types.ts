@@ -1,4 +1,5 @@
 import { SetStateAction, Dispatch } from "react";
+import { ActionFunction } from "react-router-dom";
 
 // Public
 export type Folder = {
@@ -133,6 +134,11 @@ type Nesting = {
   id: string;
 };
 
+type Connection = {
+  conReq: string;
+  conEmail: string;
+};
+
 export interface ContextProps {
   setFolders: Dispatch<SetStateAction<Folder[]>>;
   setNotes: Dispatch<SetStateAction<Note[]>>;
@@ -170,6 +176,26 @@ export interface ContextProps {
   setEditDraft: Dispatch<SetStateAction<boolean>>;
   setSearch: Dispatch<SetStateAction<boolean>>;
   setCreateCon: Dispatch<SetStateAction<boolean>>;
+  setHoverConnections: Dispatch<SetStateAction<boolean>>;
+  setConnections: Dispatch<SetStateAction<Connection[]>>;
+  setConsSent: Dispatch<SetStateAction<Connection[]>>;
+  setConnectionRequests: Dispatch<SetStateAction<Connection[]>>;
+  setShareRequests: Dispatch<SetStateAction<Connection[]>>;
+  setSharedNotes: Dispatch<SetStateAction<Note[]>>;
+  setNoteDrag: Dispatch<SetStateAction<boolean>>;
+  setNoteIsMoving: Dispatch<SetStateAction<boolean>>;
+  setNoteDragFolder: Dispatch<SetStateAction<Note[]>>;
+  setNoteDragging: Dispatch<SetStateAction<Note>>;
+  setFolderSearch: Dispatch<SetStateAction<boolean>>;
+  setFolderSearchText: Dispatch<SetStateAction<string>>;
+  setMinimizeArray: Dispatch<SetStateAction<string[]>>;
+  minimizeArray: string[];
+  folderSearchText: string;
+  folderSearch: boolean;
+  noteDragging: Note;
+  noteDragFolder: Note;
+  noteIsMoving: boolean;
+  noteDrag: boolean;
   folders: Folder[];
   mainTitle: string;
   notes: Note[];
@@ -202,4 +228,12 @@ export interface ContextProps {
   editDraft: boolean;
   search: boolean;
   createCon: boolean;
+  hoverConnections: boolean;
+  favorites: Note[];
+  connections: Connection[];
+  consSent: Connection[];
+  connectionRequests: Connection[];
+  shareRequests: Connection[];
+  sharedNotes: Note[];
+  networkNotificationError: (actions: ActionFunction[]) => void;
 }

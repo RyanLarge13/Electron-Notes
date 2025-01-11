@@ -313,7 +313,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
       <p className="text-center mt-10">Signup and organize</p>
       <form
         onSubmit={(e) => handleSignup(e)}
-        className="rounded-md shadow-lg bg-slate-200 p-5 flex flex-col justify-center items-center mt-10 mx-10 text-slate-900 w-96"
+        className="rounded-md shadow-lg bg-slate-200 p-5 flex flex-col justify-center items-center mt-10 mx-10 text-[#222] w-96"
       >
         <input
           type="text"
@@ -343,7 +343,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
           <button
             type="submit"
             disabled={loadingState}
-            className="py-2 px-4 rounded-md shadow-md bg-amber-300 text-black mt-3 font-semibold self-start hover:bg-slate-900 focus:bg-slate-900 focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
+            className="py-2 px-4 rounded-md shadow-md bg-amber-300 text-black mt-3 font-semibold self-start hover:bg-[#222] focus:bg-[#222] focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"
           >
             Signup &rarr;
           </button>
