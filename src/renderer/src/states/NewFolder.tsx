@@ -17,7 +17,9 @@ const NewFolder = (): JSX.Element => {
     userPreferences,
     setAllData,
     setSelectedFolder,
-    setSystemNotif
+    setSystemNotif,
+    networkNotificationError,
+    resetSystemNotification
   } = useContext(UserContext);
 
   const navigate = useNavigate();
@@ -75,15 +77,7 @@ const NewFolder = (): JSX.Element => {
             actions: [
               {
                 text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: () => resetSystemNotification()
               },
               { text: "undo", func: (): void => {} }
             ]
@@ -114,27 +108,12 @@ const NewFolder = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 },
                 {
                   text: "open note",
                   func: (): void => {
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    });
+                    resetSystemNotification();
                     navigate("/newfolder");
                   }
                 },
@@ -146,43 +125,16 @@ const NewFolder = (): JSX.Element => {
         }
         if (err.request) {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                {
-                  text: "open note",
-                  func: (): void => {
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    });
-                    navigate("/newfolder");
-                  }
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            networkNotificationError([
+              {
+                text: "open note",
+                func: (): void => {
+                  resetSystemNotification();
+                  navigate("/newfolder");
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
         }
       });

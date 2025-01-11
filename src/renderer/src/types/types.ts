@@ -1,5 +1,4 @@
 import { SetStateAction, Dispatch } from "react";
-import { ActionFunction } from "react-router-dom";
 
 // Public
 export type Folder = {
@@ -235,5 +234,6 @@ export interface ContextProps {
   connectionRequests: Connection[];
   shareRequests: Connection[];
   sharedNotes: Note[];
-  networkNotificationError: (actions: ActionFunction[]) => void;
+  networkNotificationError: (actions: SystemNotifAction[]) => void;
+  resetSystemNotification: () => void;
 }

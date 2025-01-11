@@ -34,9 +34,10 @@ const MainPage = (): JSX.Element => {
     setNote,
     setFolder,
     setNoteToEdit,
-    folders,
     setFolderSearchText,
     setFolderSearch,
+    resetSystemNotification,
+    folders,
     folderSearch,
     folderSearchText,
     allData,
@@ -200,14 +201,7 @@ const MainPage = (): JSX.Element => {
           {
             text: "close",
             func: (): void => {
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              });
+              resetSystemNotification();
             }
           },
           {
@@ -248,15 +242,7 @@ const MainPage = (): JSX.Element => {
           actions: [
             {
               text: "close",
-              func: (): void =>
-                setSystemNotif({
-                  show: false,
-                  title: "",
-                  text: "",
-                  color: "",
-                  hasCancel: false,
-                  actions: []
-                })
+              func: (): void => resetSystemNotification()
             }
           ]
         };

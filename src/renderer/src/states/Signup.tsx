@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react
 import { ClipLoader } from "react-spinners";
 
 const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> }): JSX.Element => {
-  const { setSystemNotif, systemNotif } = useContext(UserContext);
+  const { setSystemNotif, resetSystemNotification, systemNotif } = useContext(UserContext);
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -33,15 +33,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };
@@ -61,15 +53,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
             actions: [
               {
                 text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: () => resetSystemNotification()
               }
             ]
           };
@@ -94,15 +78,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
             actions: [
               {
                 text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: () => resetSystemNotification()
               },
               { text: "retry", func: () => handleSignup(e) }
             ]
@@ -122,15 +98,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "retry", func: () => handleSignup(e) }
         ]
@@ -147,14 +115,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
     const userRegex = /^[a-zA-Z0-9_-]{4,}$/;
     const isValid = userRegex.test(username);
     if (isValid) {
-      setSystemNotif({
-        show: false,
-        title: "",
-        text: "",
-        color: "",
-        hasCancel: false,
-        actions: []
-      });
+      resetSystemNotification();
       return true;
     }
     if (!isValid) {
@@ -168,15 +129,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };
@@ -191,14 +144,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const isValid = emailRegex.test(email);
     if (isValid) {
-      setSystemNotif({
-        show: false,
-        title: "",
-        text: "",
-        color: "",
-        hasCancel: false,
-        actions: []
-      });
+      resetSystemNotification();
       return true;
     }
     if (!isValid) {
@@ -212,15 +158,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };
@@ -234,14 +172,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
     const passRegex = /^(?=.*[A-Z].*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
     const isValid = passRegex.test(password);
     if (isValid) {
-      setSystemNotif({
-        show: false,
-        title: "",
-        text: "",
-        color: "",
-        hasCancel: false,
-        actions: []
-      });
+      resetSystemNotification();
       return true;
     }
     if (!isValid) {
@@ -255,15 +186,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };

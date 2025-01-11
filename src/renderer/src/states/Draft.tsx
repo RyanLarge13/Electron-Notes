@@ -18,6 +18,8 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
     folder,
     userPreferences,
     editDraft,
+    networkNotificationError,
+    resetSystemNotification,
     setUserPreferences,
     setNote,
     setDrafts,
@@ -32,12 +34,11 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
   const [changed, setChanged] = useState(false);
   const [locked, setLocked] = useState(noteToEdit ? noteToEdit.locked : false);
   const [saving, setSaving] = useState(false);
-  const [favorite, setFavorite] = useState(noteToEdit?.favorite || false);
-
-  const [dems, setDems] = useState(
+  const [favorite] = useState(noteToEdit?.favorite || false);
+  const [dems] = useState(
     userPreferences?.noteDems?.find((dem) => dem.id === noteToEdit?.noteid) || undefined
   );
-  const [position, setPosition] = useState(
+  const [position] = useState(
     noteToEdit
       ? {
           top: dems?.top || 50,
@@ -47,16 +48,16 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
         }
       : { top: 50, left: 50, bottom: 10, right: 45 }
   );
-  const [resizing, setResizing] = useState(false);
+  const [resizing] = useState(false);
 
   let autoSaveInterval;
 
   const navigate = useNavigate();
   const noteDragControl = useDragControls();
 
-  const textThemeString = userPreferences?.theme
-    ? userPreferences.theme.replace("bg", "text")
-    : "text-amber-300";
+  // const textThemeString = userPreferences?.theme
+  //   ? userPreferences.theme.replace("bg", "text")
+  //   : "text-amber-300";
 
   const modules = {
     toolbar: [
@@ -138,15 +139,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "reload app", func: () => window.location.reload() }
         ]
@@ -179,15 +172,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
             actions: [
               {
                 text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: () => resetSystemNotification()
               },
               {
                 text: "turn off",
@@ -213,15 +198,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -231,29 +208,9 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
         }
         if (err.request) {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            networkNotificationError([
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
         }
         setSaving(false);
@@ -318,10 +275,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
       };
       return newData;
     });
-    // setNoteToEdit(null);
-    // setNote({ ...noteToEdit, htmlText: value });
     setDrafts((prevDrafts) => prevDrafts.filter((aNote) => aNote.noteid !== noteToEdit.noteid));
-    // navigate("/");
     noteToEdit.isNew = false;
     createNewNote(token, newNote)
       .then((res) => {
@@ -350,15 +304,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
             actions: [
               {
                 text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: () => resetSystemNotification()
               },
               { text: "undo", func: (): void => {} }
             ]
@@ -384,28 +330,13 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 },
                 {
                   text: "open note",
                   func: (): void => {
                     navigate("/newnote");
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    });
+                    resetSystemNotification();
                   }
                 },
                 { text: "reload app", func: () => window.location.reload() }
@@ -416,43 +347,16 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
         }
         if (err.request) {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "There was a problem uploading your new note. We are terribly sorry. We only allow to upload a maximum of 100kb notes at this time. If your note is not this large, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                {
-                  text: "open note",
-                  func: (): void => {
-                    navigate("/newnote");
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    });
-                  }
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            networkNotificationError([
+              {
+                text: "open note",
+                func: (): void => {
+                  navigate("/newnote");
+                  resetSystemNotification();
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
         }
         setSaving(false);
@@ -493,15 +397,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
             actions: [
               {
                 text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: () => resetSystemNotification()
               },
               { text: "undo", func: (): void => {} }
             ]
@@ -531,27 +427,12 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 },
                 {
                   text: "open note",
                   func: (): void => {
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    });
+                    resetSystemNotification();
                     navigate("/newnote");
                   }
                 },
@@ -563,43 +444,16 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
         }
         if (err.request) {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                {
-                  text: "open note",
-                  func: (): void => {
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    });
-                    navigate("/newnote");
-                  }
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            networkNotificationError([
+              {
+                text: "open note",
+                func: (): void => {
+                  resetSystemNotification();
+                  navigate("/newnote");
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
         }
         setSaving(false);
@@ -629,28 +483,13 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
       actions: [
         {
           text: "close",
-          func: (): void =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+          func: (): void => resetSystemNotification()
         },
         {
           text: "undo",
           func: (): void => {
             setDrafts((prevDrafts) => prevDrafts.filter((draft) => draft.noteid !== tempId));
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            });
+            resetSystemNotification();
           }
         }
       ]

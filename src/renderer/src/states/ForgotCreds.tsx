@@ -8,7 +8,8 @@ const ForgotCreds = ({
 }: {
   setForgotCreds: Dispatch<SetStateAction<boolean>>;
 }): JSX.Element => {
-  const { setSystemNotif, systemNotif } = useContext(UserContext);
+  const { setSystemNotif, systemNotif, networkNotificationError, resetSystemNotification } =
+    useContext(UserContext);
 
   const [email, setEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
@@ -30,15 +31,7 @@ const ForgotCreds = ({
           actions: [
             {
               text: "close",
-              func: () =>
-                setSystemNotif({
-                  show: false,
-                  title: "",
-                  text: "",
-                  color: "",
-                  hasCancel: false,
-                  actions: []
-                })
+              func: () => resetSystemNotification()
             }
           ]
         };
@@ -66,27 +59,12 @@ const ForgotCreds = ({
             actions: [
               {
                 text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: (): void => resetSystemNotification()
               },
               {
                 text: "Login",
                 func: (): void => {
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  });
+                  resetSystemNotification();
                   setForgotCreds(false);
                 }
               }
@@ -107,27 +85,12 @@ const ForgotCreds = ({
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 },
                 {
                   text: "re-try",
                   func: (): void => {
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    });
+                    resetSystemNotification();
                     handleForgotCreds(e);
                   }
                 },
@@ -137,43 +100,16 @@ const ForgotCreds = ({
             setSystemNotif(newError);
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                {
-                  text: "re-try",
-                  func: (): void => {
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    });
-                    handleForgotCreds(e);
-                  }
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            networkNotificationError([
+              {
+                text: "re-try",
+                func: (): void => {
+                  resetSystemNotification();
+                  handleForgotCreds(e);
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
         });
     } catch (err) {
@@ -187,15 +123,7 @@ const ForgotCreds = ({
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "retry", func: () => handleForgotCreds(e) },
           { text: "reload app", func: () => window.location.reload() }
@@ -210,14 +138,7 @@ const ForgotCreds = ({
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const isValid = emailRegex.test(email);
     if (isValid) {
-      setSystemNotif({
-        show: false,
-        title: "",
-        text: "",
-        color: "",
-        hasCancel: false,
-        actions: []
-      });
+      resetSystemNotification();
       return true;
     }
     if (!isValid) {
@@ -231,15 +152,7 @@ const ForgotCreds = ({
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };

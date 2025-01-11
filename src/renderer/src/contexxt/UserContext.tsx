@@ -1,9 +1,8 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
-import { ContextProps, Folder, Note } from "@renderer/types/types";
+import { ContextProps, Folder, Note, SystemNotifAction } from "@renderer/types/types";
 import { getUserData } from "@renderer/utils/api";
 import "@renderer/threads/handleConnections";
 import LocalCache from "../utils/cache";
-import { ActionFunction } from "react-router-dom";
 
 const UserContext = createContext({} as ContextProps);
 
@@ -461,7 +460,18 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
       });
   };
 
-  const networkNotificationError = (actions: ActionFunction[]): void => {
+  const resetSystemNotification = (): void => {
+    setSystemNotif({
+      show: false,
+      title: "",
+      text: "",
+      color: "",
+      hasCancel: false,
+      actions: []
+    });
+  };
+
+  const networkNotificationError = (actions: SystemNotifAction[]): void => {
     const newError = {
       show: true,
       title: "Network Error",
@@ -471,15 +481,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
       actions: [
         {
           text: "close",
-          func: () =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+          func: (): void => resetSystemNotification()
         },
         ...actions
       ]
@@ -582,7 +584,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setFolderSearchText,
         minimizeArray,
         setMinimizeArray,
-        networkNotificationError
+        networkNotificationError,
+        resetSystemNotification
       }}
     >
       {children}

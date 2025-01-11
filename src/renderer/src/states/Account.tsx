@@ -50,8 +50,8 @@ const Account = (): JSX.Element => {
     setSystemNotif,
     setCreateCon,
     setUserPreferences,
-    setHoverConnections,
-    hoverConnections,
+    networkNotificationError,
+    resetSystemNotification,
     createCon,
     token,
     edit,
@@ -132,14 +132,7 @@ const Account = (): JSX.Element => {
         {
           text: "close",
           func: (): void =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+            resetSystemNotification()
         }
       ]
     });
@@ -240,14 +233,7 @@ const Account = (): JSX.Element => {
               {
                 text: "close",
                 func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                  resetSystemNotification();
               },
               { text: "undo", func: (): void => {} }
             ]
@@ -257,6 +243,9 @@ const Account = (): JSX.Element => {
       })
       .catch((err) => {
         console.log(err);
+        if (err.request) {
+          networkNotificationError([]);
+        }
         // Handle the failed case on the server side to revert the changes made to the moved contents
       });
   };
@@ -287,14 +276,7 @@ const Account = (): JSX.Element => {
               {
                 text: "close",
                 func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                  resetSystemNotification();
               },
               { text: "undo", func: (): void => {} }
             ]
@@ -322,14 +304,7 @@ const Account = (): JSX.Element => {
                 {
                   text: "close",
                   func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                    resetSystemNotification();
                 },
                 { text: "re-try", func: () => deleteAllSelected() },
                 { text: "reload app", func: () => window.location.reload() }
@@ -340,30 +315,10 @@ const Account = (): JSX.Element => {
         }
         if (err.request) {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => deleteAllSelected() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            networkNotificationError([
+              { text: "re-try", func: (): void => deleteAllSelected() },
+              { text: "reload app", func: (): void => window.location.reload() }
+            ]);
           }
         }
       });
@@ -412,14 +367,7 @@ const Account = (): JSX.Element => {
                 {
                   text: "close",
                   func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                    resetSystemNotification();
                 },
                 { text: "undo", func: () => undoMove() }
               ]
@@ -454,14 +402,7 @@ const Account = (): JSX.Element => {
                   {
                     text: "close",
                     func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                      resetSystemNotification();
                   },
                   { text: "re-try", func: () => moveItem() },
                   { text: "reload app", func: () => window.location.reload() }
@@ -472,30 +413,10 @@ const Account = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => moveItem() },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => moveItem() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -542,14 +463,7 @@ const Account = (): JSX.Element => {
                 {
                   text: "close",
                   func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                    resetSystemNotification();
                 },
                 { text: "undo", func: () => undoMove() }
               ]
@@ -585,14 +499,7 @@ const Account = (): JSX.Element => {
                   {
                     text: "close",
                     func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                      resetSystemNotification();
                   },
                   { text: "re-try", func: () => moveItem() },
                   { text: "reload app", func: () => window.location.reload() }
@@ -603,30 +510,10 @@ const Account = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => moveItem() },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => moveItem() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -702,14 +589,7 @@ const Account = (): JSX.Element => {
                 {
                   text: "close",
                   func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                    resetSystemNotification();
                 },
                 { text: "re-try", func: () => editMyFolder() },
                 { text: "reload app", func: () => window.location.reload() }
@@ -720,30 +600,10 @@ const Account = (): JSX.Element => {
         }
         if (err.request) {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "re-try", func: () => editMyFolder() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            networkNotificationError([
+              { text: "re-try", func: () => editMyFolder() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
         }
       });
@@ -919,14 +779,7 @@ const Account = (): JSX.Element => {
                         {
                           text: "close",
                           func: (): void =>
-                            setSystemNotif({
-                              show: false,
-                              title: "",
-                              text: "",
-                              color: "",
-                              hasCancel: false,
-                              actions: []
-                            })
+                            resetSystemNotification();
                         }
                       ]
                     });
@@ -958,14 +811,7 @@ const Account = (): JSX.Element => {
                         {
                           text: "close",
                           func: (): void =>
-                            setSystemNotif({
-                              show: false,
-                              title: "",
-                              text: "",
-                              color: "",
-                              hasCancel: false,
-                              actions: []
-                            })
+                            resetSystemNotification();
                         }
                       ]
                     });
@@ -997,14 +843,7 @@ const Account = (): JSX.Element => {
                         {
                           text: "close",
                           func: (): void =>
-                            setSystemNotif({
-                              show: false,
-                              title: "",
-                              text: "",
-                              color: "",
-                              hasCancel: false,
-                              actions: []
-                            })
+                            resetSystemNotification();
                         }
                       ]
                     });

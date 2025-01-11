@@ -5,7 +5,13 @@ import Signup from "./Signup";
 import ForgotCreds from "./ForgotCreds";
 
 const Login = (): JSX.Element => {
-  const { setToken, setSystemNotif, setLoading } = useContext(UserContext);
+  const {
+    setToken,
+    setSystemNotif,
+    setLoading,
+    networkNotificationError,
+    resetSystemNotification
+  } = useContext(UserContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,28 +48,7 @@ const Login = (): JSX.Element => {
         console.log(err);
         setLoading(false);
         if (err.code === "ERR_NETWORK") {
-          const newError = {
-            show: true,
-            title: "Network Error",
-            text: "Please check your internet connection and try logging in again",
-            color: "bg-red-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
-              }
-            ]
-          };
-          return setSystemNotif(newError);
+          networkNotificationError([]);
         }
         const status = err.response.status;
         if (status >= 400 && status <= 404) {
@@ -76,15 +61,7 @@ const Login = (): JSX.Element => {
             actions: [
               {
                 text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: () => resetSystemNotification()
               }
             ]
           };
