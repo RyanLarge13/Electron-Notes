@@ -1,7 +1,10 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
+import "@renderer/threads/handleConnections";
+
+import { createContext, ReactNode, useEffect, useState } from "react";
+
 import { ContextProps, Folder, Note, SystemNotifAction } from "@renderer/types/types";
 import { getUserData } from "@renderer/utils/api";
-import "@renderer/threads/handleConnections";
+
 import LocalCache from "../utils/cache";
 
 const UserContext = createContext({} as ContextProps);
@@ -526,7 +529,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         show: true,
         title,
         text,
-        color: userPreferences.theme,
+        color: userPreferences.theme || "bg-amber-300",
         hasCancel,
         actions: [
           {

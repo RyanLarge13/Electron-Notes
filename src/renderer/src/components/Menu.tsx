@@ -1,12 +1,14 @@
-import { useContext, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { FaTrashAlt, FaLock, FaFirstdraft } from "react-icons/fa";
-import { LuFileStack } from "react-icons/lu";
-import { deleteUser } from "@renderer/utils/api";
-import { useNavigate } from "react-router-dom";
-import UserContext from "@renderer/contexxt/UserContext";
-import Tree from "./Tree";
+import { useContext, useRef, useState } from "react";
 import { BsStarFill } from "react-icons/bs";
+import { FaFirstdraft, FaLock, FaShareAlt, FaTrashAlt } from "react-icons/fa";
+import { LuFileStack } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
+
+import UserContext from "@renderer/contexxt/UserContext";
+import { deleteUser } from "@renderer/utils/api";
+
+import Tree from "./Tree";
 
 const Menu = (): JSX.Element => {
   const {
@@ -16,11 +18,12 @@ const Menu = (): JSX.Element => {
     setToken,
     setFolders,
     setMainTitle,
-    setSystemNotif,
     setSettings,
     setUserPreferences,
     resetSystemNotification,
     networkNotificationError,
+    showSuccessNotification,
+    showErrorNotification,
     userPreferences,
     favorites,
     user,
@@ -44,21 +47,9 @@ const Menu = (): JSX.Element => {
     : "text-amber-300";
 
   const confirmLogout = (): void => {
-    const newConfirmation = {
-      show: true,
-      title: "Logout",
-      text: "Are you sure you want to logout?",
-      color: "bg-amber-300",
-      hasCancel: false,
-      actions: [
-        {
-          text: "cancel",
-          func: (): void => resetSystemNotification()
-        },
-        { text: "logout", func: (): void => logout() }
-      ]
-    };
-    setSystemNotif(newConfirmation);
+    showSuccessNotification("Logout", "Are you sure you want to logout?", false, [
+      { text: "logout", func: (): void => logout() }
+    ]);
   };
 
   const logout = (): void => {
@@ -66,25 +57,16 @@ const Menu = (): JSX.Element => {
     setUser(null);
     localStorage.removeItem("authToken");
     localStorage.removeItem("pin");
-    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
+    resetSystemNotification();
   };
 
   const confirmDeleteAccount = (): void => {
-    const newConfirmation = {
-      show: true,
-      title: `Delete Account`,
-      text: "Are you sure deleting your entire account is what you want to do? You will lose all of your data",
-      color: "bg-red-600",
-      hasCancel: false,
-      actions: [
-        {
-          text: "CANCEL",
-          func: (): void => resetSystemNotification()
-        },
-        { text: "delete", func: (): void => deleteAccount() }
-      ]
-    };
-    setSystemNotif(newConfirmation);
+    showSuccessNotification(
+      "Delete Account",
+      "Are you sure deleting your entire account is what you want to do? You will lose all of your data",
+      false,
+      [{ text: "delete", func: (): void => deleteAccount() }]
+    );
   };
 
   const showAllNotes = (): void => {
@@ -103,7 +85,7 @@ const Menu = (): JSX.Element => {
   };
 
   const deleteAccount = (): void => {
-    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
+    resetSystemNotification();
     try {
       deleteUser(token)
         .then((res) => {
@@ -117,22 +99,10 @@ const Menu = (): JSX.Element => {
         .catch((err) => {
           console.log(err);
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Delete Account Failed",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                { text: "re-try", func: () => deleteAccount() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            showErrorNotification("Delete Account Failed", err.response.message, true, [
+              { text: "re-try", func: () => deleteAccount() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             networkNotificationError([
@@ -143,22 +113,15 @@ const Menu = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Delete Account Failed",
-        text: "There was an error with the application when trying to delete your account, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
+      showErrorNotification(
+        "Delete Account Failed",
+        "There was an error with the application when trying to delete your account, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [
           { text: "re-try", func: () => deleteAccount() },
           { text: "reload app", func: () => window.location.reload() }
         ]
-      };
-      setSystemNotif(newError);
+      );
     }
   };
 
@@ -331,30 +294,30 @@ const Menu = (): JSX.Element => {
                 />
               </div>
             </button>
-            {/* <button
-            className={`p-3 rounded-md shadow-md my-3 w-full ${
-              userPreferences.darkMode
-                ? "bg-[#333] hover:bg-[#444]"
-                : "bg-slate-300 hover:bg-slate-400"
-            } flex justify-between items-center duration-200`}
-          >
-            <div className="flex justify-center items-center gap-x-5">
-              <p>Shared Notes </p>
-              <p
-                className={`${
-                  userPreferences.theme ? textThemeString : "text-amber-300"
-                } text-sm font-bold`}
-              >
-                Beta
-              </p>
-            </div>
-            <div className="flex justify-center items-center gap-x-3">
-              <p className="font-semibold">0</p>
-              <FaShareAlt
-                className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
-              />
-            </div>
-          </button> */}
+            <button
+              className={`p-3 rounded-md shadow-md my-3 w-full ${
+                userPreferences.darkMode
+                  ? "bg-[#333] hover:bg-[#444]"
+                  : "bg-slate-300 hover:bg-slate-400"
+              } flex justify-between items-center duration-200`}
+            >
+              <div className="flex justify-center items-center gap-x-5">
+                <p>Shared Notes </p>
+                <p
+                  className={`${
+                    userPreferences.theme ? textThemeString : "text-amber-300"
+                  } text-sm font-bold`}
+                >
+                  Beta
+                </p>
+              </div>
+              <div className="flex justify-center items-center gap-x-3">
+                <p className="font-semibold">0</p>
+                <FaShareAlt
+                  className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
+                />
+              </div>
+            </button>
             <p className="text-2xl my-5">Folders</p>
             <Tree
               moving={false}

@@ -1,12 +1,14 @@
-import { useContext, useState, useRef, useEffect } from "react";
+import cheerio from "cheerio";
+import { motion } from "framer-motion";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
-  createNewNote,
-  deleteANote,
-  moveNoteToTrash,
-  updateFavoriteOnNote,
-  updateNote
-} from "@renderer/utils/api";
-import { useNavigate } from "react-router-dom";
+  BsFiletypeDocx,
+  BsFiletypeHtml,
+  BsFiletypePdf,
+  BsFiletypeTxt,
+  BsStar,
+  BsStarFill
+} from "react-icons/bs";
 import {
   FaArrowCircleRight,
   FaArrowRight,
@@ -19,23 +21,22 @@ import {
   FaTrash,
   FaWindowClose
 } from "react-icons/fa";
-import Masonry from "react-masonry-css";
-import { TbEdit, TbNotes, TbTrash, TbX } from "react-icons/tb";
-import { AllData, Note } from "@renderer/types/types";
-import { v4 as uuidv4 } from "uuid";
-import cheerio from "cheerio";
-import { motion } from "framer-motion";
-import UserContext from "@renderer/contexxt/UserContext";
-import {
-  BsFiletypeDocx,
-  BsFiletypeHtml,
-  BsFiletypePdf,
-  BsFiletypeTxt,
-  BsStar,
-  BsStarFill
-} from "react-icons/bs";
-import { MdCancel, MdDeleteForever, MdRestore, MdUpdate } from "react-icons/md";
 import { IoRemoveCircle } from "react-icons/io5";
+import { MdCancel, MdDeleteForever, MdRestore, MdUpdate } from "react-icons/md";
+import { TbEdit, TbNotes, TbTrash, TbX } from "react-icons/tb";
+import Masonry from "react-masonry-css";
+import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
+
+import UserContext from "@renderer/contexxt/UserContext";
+import { AllData, Note } from "@renderer/types/types";
+import {
+  createNewNote,
+  deleteANote,
+  moveNoteToTrash,
+  updateFavoriteOnNote,
+  updateNote
+} from "@renderer/utils/api";
 
 const Notes = (): JSX.Element => {
   const {
@@ -62,7 +63,6 @@ const Notes = (): JSX.Element => {
     setAllData,
     setContextMenu,
     setPosition,
-    setSystemNotif,
     setNoteToEdit,
     setMove,
     setTrashedNotes,
@@ -73,7 +73,9 @@ const Notes = (): JSX.Element => {
     setFolder,
     setUserPreferences,
     resetSystemNotification,
-    networkNotificationError
+    networkNotificationError,
+    showSuccessNotification,
+    showErrorNotification
   } = useContext(UserContext);
 
   const [pinInput, setPinInput] = useState(false);
@@ -91,9 +93,7 @@ const Notes = (): JSX.Element => {
   const renameRef = useRef(null);
 
   const navigate = useNavigate();
-  //  const hoverBgString = userPreferences?.theme
-  //    ? userPreferences.theme.replace("300", "200")
-  //    : "bg-amber-200";
+
   const textThemeString = userPreferences?.theme
     ? userPreferences.theme.replace("bg", "text")
     : "text-amber-300";
@@ -139,20 +139,12 @@ const Notes = (): JSX.Element => {
         unlockNote();
         return;
       }
-      const newError = {
-        show: true,
-        title: "Invalid Pin",
-        text: "Enter your valid pin to view your locked notes",
-        color: "bg-red-300",
-        hasCancel: false,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Invalid Pin",
+        "Enter your valid pin to view your licked note",
+        false,
+        []
+      );
       setPin({ first: "", second: "", third: "", fourth: "" });
       firstInput.current.focus();
     }
@@ -178,21 +170,12 @@ const Notes = (): JSX.Element => {
 
   const confirmDuplicate = (note: Note): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-    const newConfirmation = {
-      show: true,
-      title: `Duplicate ${note.title}`,
-      text: `Are you sure you want to duplicate this note?`,
-      color: "bg-green-400",
-      hasCancel: true,
-      actions: [
-        {
-          text: "cancel",
-          func: () => resetSystemNotification()
-        },
-        { text: "duplicate", func: (): void => duplicate(note) }
-      ]
-    };
-    setSystemNotif(newConfirmation);
+    showSuccessNotification(
+      `Duplicate ${note.title}`,
+      "Are you sure you want to duplicate this note?",
+      true,
+      [{ text: "duplicate", func: (): void => duplicate(note) }]
+    );
   };
 
   const duplicate = (note: Note): void => {
@@ -223,23 +206,12 @@ const Notes = (): JSX.Element => {
             });
             return { ...prevData, notes: newNotes };
           });
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "Duplicated Note",
-              text: `You successfully duplicated your note: ${note.title}`,
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: (): void => resetSystemNotification()
-                },
-                { text: "undo", func: (): void => {} }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification(
+            "Duplicated Note",
+            `You successfully duplicated your note: ${note.title}`,
+            false,
+            [{ text: "undo", func: (): void => {} }]
+          );
         })
         .catch((err) => {
           console.log(err);
@@ -248,24 +220,10 @@ const Notes = (): JSX.Element => {
             return { ...prevData, notes: oldNotes };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Duplicating Note",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => duplicate(note) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Duplicating Note", err.response.message, true, [
+              { text: "re-try", func: () => duplicate(note) },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -278,20 +236,12 @@ const Notes = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Duplicating Note",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem duplicating your note. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Duplicating Note",
+        "Please contact the developer if this issue persists. We seemed to have a problem duplicating your note. Please close the application, reload it and try the operation again.",
+        true,
+        []
+      );
     }
   };
 
@@ -331,23 +281,9 @@ const Notes = (): JSX.Element => {
       navigate("/");
       updateNote(token, newNote)
         .then(() => {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "Updated Note Title",
-              text: "Successfully renamed your note",
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                { text: "undo", func: (): void => {} }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification("Updated Note Title", "Successfully renamed your note", false, [
+            { text: "undo", func: (): void => {} }
+          ]);
         })
         .catch((err) => {
           console.log(err);
@@ -361,24 +297,10 @@ const Notes = (): JSX.Element => {
             return { ...prevData, notes: newNotes };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Updating Note",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => changeTitle(e) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Updating Note", err.response.message, true, [
+              { text: "re-try", func: () => changeTitle(e) },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -391,20 +313,12 @@ const Notes = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Updating Title",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem updating your note. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Updating Title",
+        "Please contact the developer if this issue persists. We seemed to have a problem updating your note. Please close the application, reload it and try the operation again.",
+        true,
+        []
+      );
     }
   };
 
@@ -420,21 +334,12 @@ const Notes = (): JSX.Element => {
   };
 
   const confirmTrash = (note: Note): void => {
-    const newConfirmation = {
-      show: true,
-      title: `Trash ${note.title}`,
-      text: `Are you sure you want to move this note to your trash bin?`,
-      color: "bg-red-400",
-      hasCancel: true,
-      actions: [
-        {
-          text: "cancel",
-          func: () => resetSystemNotification()
-        },
-        { text: "trash", func: () => moveToTrash(note) }
-      ]
-    };
-    setSystemNotif(newConfirmation);
+    showSuccessNotification(
+      `Trash ${note.title}`,
+      "Are you sure you want to move this note to your trash bin?",
+      true,
+      [{ text: "trash", func: () => moveToTrash(note) }]
+    );
   };
 
   const moveToTrash = (note: Note): void => {
@@ -463,23 +368,12 @@ const Notes = (): JSX.Element => {
       }
       moveNoteToTrash(token, note.noteid, !trashed)
         .then(() => {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: `${note.title} ${trashed ? "Moved" : "Trashed"}`,
-              text: `Successfully moved your note ${trashed ? "out of" : "into"} your trash`,
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                { text: "undo", func: (): void => {} }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification(
+            `${note.title} ${trashed ? "Moved" : "Trashed"}`,
+            `Successfully moved your note ${trashed ? "out of" : "into"} your trash`,
+            false,
+            [{ text: "undo", func: (): void => {} }]
+          );
         })
         .catch((err) => {
           console.log(err);
@@ -501,24 +395,15 @@ const Notes = (): JSX.Element => {
                 prevTrash.filter((aNote) => aNote.noteid !== note.noteid)
               );
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: `Issues ${trashed ? "Moving" : "Trashing"} Note`,
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => moveToTrash(note) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification(
+              `Issues ${trashed ? "Moving" : "Trashing"} Note`,
+              err.response.message,
+              true,
+              [
+                { text: "re-try", func: () => moveToTrash(note) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]
+            );
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -546,41 +431,24 @@ const Notes = (): JSX.Element => {
       trashed
         ? setTrashedNotes((prevTrash) => [...prevTrash, newNote])
         : setTrashedNotes((prevTrash) => prevTrash.filter((aNote) => aNote.noteid !== note.noteid));
-      const newError = {
-        show: true,
-        title: `Issues ${trashed ? "Moving" : "Trashing"} Note`,
-        text: `Please contact the developer if this issue persists. We seemed to have a problem ${
+      showErrorNotification(
+        `Issues ${trashed ? "Moving" : "Trashing"} Note`,
+        `Please contact the developer if this issue persists. We seemed to have a problem ${
           trashed ? "moving" : "trashing"
         } your note. Please close the application, reload it and try the operation again.`,
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+        true,
+        []
+      );
     }
   };
 
   const confirmDelete = (note: Note): void => {
-    const newConfirmation = {
-      show: true,
-      title: `Delete ${note.title}`,
-      text: `Are you sure you want to delete this note?`,
-      color: "bg-red-400",
-      hasCancel: true,
-      actions: [
-        {
-          text: "cancel",
-          func: () => resetSystemNotification()
-        },
-        { text: "delete", func: () => deleteNote(note) }
-      ]
-    };
-    setSystemNotif(newConfirmation);
+    showSuccessNotification(
+      `Delete ${note.title}`,
+      "Are you sure you want to delete this note?",
+      true,
+      [{ text: "delete", func: () => deleteNote(note) }]
+    );
   };
 
   const deleteNote = (note: Note): void => {
@@ -604,32 +472,20 @@ const Notes = (): JSX.Element => {
       }
       deleteANote(token, note.noteid)
         .then(() => {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: `${note.title} Deleted`,
-              text: "Successfully deleted your note",
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                { text: "undo", func: (): void => {} }
-              ]
-            };
-            setSystemNotif(newSuccess);
-
-            const newNoteDems = userPreferences.noteDems.filter((aDem) => aDem.id !== note.noteid);
-            setUserPreferences((prev) => {
-              return { ...prev, noteDems: newNoteDems };
-            });
-            localStorage.setItem(
-              "preferences",
-              JSON.stringify({ ...userPreferences, noteDems: newNoteDems })
-            );
-          }
+          showSuccessNotification(
+            `${note.title} Deleted`,
+            "Successfully deleted your note",
+            false,
+            [{ text: "undo", func: (): void => {} }]
+          );
+          const newNoteDems = userPreferences.noteDems.filter((aDem) => aDem.id !== note.noteid);
+          setUserPreferences((prev) => {
+            return { ...prev, noteDems: newNoteDems };
+          });
+          localStorage.setItem(
+            "preferences",
+            JSON.stringify({ ...userPreferences, noteDems: newNoteDems })
+          );
         })
         .catch((err) => {
           console.log(err);
@@ -641,24 +497,10 @@ const Notes = (): JSX.Element => {
             };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Deleting Note",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => deleteNote(note) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Deleting Note", err.response.message, true, [
+              { text: "re-try", func: () => deleteNote(note) },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -671,43 +513,26 @@ const Notes = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Deleting Note",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem deleting your note. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Deleting Note",
+        "Please contact the developer if this issue persists. We seemed to have a problem deleting your note. Please close the application, reload it and try the operation again.",
+        true,
+        []
+      );
     }
   };
 
   const confirmDeleteDraft = (note: Note): void => {
-    const newConfirmation = {
-      show: true,
-      title: `Delete Draft ${note.title}`,
-      text: `Are you sure you want to delete this note?`,
-      color: "bg-red-400",
-      hasCancel: true,
-      actions: [
-        {
-          text: "cancel",
-          func: () => resetSystemNotification()
-        },
-        { text: "delete", func: () => deleteDraft(note) }
-      ]
-    };
-    setSystemNotif(newConfirmation);
+    showSuccessNotification(
+      `Delete Draft ${note.title}`,
+      "Are you sure you want to delete this note?",
+      true,
+      [{ text: "delete", func: () => deleteDraft(note) }]
+    );
   };
 
   const deleteDraft = (note: Note): void => {
-    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
+    resetSystemNotification();
     setContextMenu({
       show: false,
       meta: { title: "", color: "" },
@@ -733,22 +558,12 @@ const Notes = (): JSX.Element => {
       meta: { title: "", color: "" },
       options: []
     });
-    if (userPreferences.notify.notifySuccess) {
-      const newSuccess = {
-        show: true,
-        title: `Saved ${note.title}`,
-        text: "Your file was saved successfully as a plain text file",
-        color: "bg-green-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newSuccess);
-    }
+    showSuccessNotification(
+      `Saved ${note.title}`,
+      "Your file was saved successfully as a plain text file",
+      true,
+      []
+    );
   };
 
   const saveFileToSysAsHtml = async (note: Note): Promise<void> => {
@@ -758,22 +573,12 @@ const Notes = (): JSX.Element => {
       meta: { title: "", color: "" },
       options: []
     });
-    if (userPreferences.notify.notifySuccess) {
-      const newSuccess = {
-        show: true,
-        title: `Saved ${note.title}`,
-        text: "Your file was saved successfully as an HTML file",
-        color: "bg-green-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newSuccess);
-    }
+    showSuccessNotification(
+      `Saved ${note.title}`,
+      "Your file was saved successfully as HTML",
+      true,
+      []
+    );
   };
 
   const saveFileToSysAsPdf = async (note: Note): Promise<void> => {
@@ -784,22 +589,12 @@ const Notes = (): JSX.Element => {
       meta: { title: "", color: "" },
       options: []
     });
-    if (userPreferences.notify.notifySuccess) {
-      const newSuccess = {
-        show: true,
-        title: `Saved ${note.title}`,
-        text: "Your file was saved successfully as a PDF file",
-        color: "bg-green-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newSuccess);
-    }
+    showSuccessNotification(
+      `Saved ${note.title}`,
+      "Your file was successfully saved as a PDF",
+      true,
+      []
+    );
   };
 
   const saveFileToSysAsDocX = async (note: Note): Promise<void> => {
@@ -810,22 +605,12 @@ const Notes = (): JSX.Element => {
       meta: { title: "", color: "" },
       options: []
     });
-    if (userPreferences.notify.notifySuccess) {
-      const newSuccess = {
-        show: true,
-        title: `Saved ${note.title}`,
-        text: "Your file was saved successfully as a docx file",
-        color: "bg-green-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newSuccess);
-    }
+    showSuccessNotification(
+      `Saved ${note.title}`,
+      "Your file was saved successfully as DOCX",
+      true,
+      []
+    );
   };
 
   const openWindow = async (note: Note): Promise<void> => {
@@ -1046,20 +831,12 @@ const Notes = (): JSX.Element => {
       setAwaitingNote(null);
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Unlocking Note",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem reading your pin. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Unlocking Note",
+        "Please contact the developer if this issue persists. We seemed to have a problem reading your pin. Please close the application, reload it and try the operation again",
+        true,
+        []
+      );
     }
   };
 
@@ -1150,13 +927,11 @@ const Notes = (): JSX.Element => {
     if (noteDragFolder) {
       setNoteIsMoving(true);
     }
-    const newPrompt = {
-      show: true,
-      title: "Move Note",
-      text: `Move note ${noteDragging.title} to folder ${noteDragFolder.title}?`,
-      color: "bg-green-300",
-      hasCancel: true,
-      actions: [
+    showSuccessNotification(
+      "Move Note",
+      `Move note ${noteDragging.title} to folder ${noteDragFolder.title}?`,
+      true,
+      [
         {
           text: "cancel",
           func: (): void => {
@@ -1172,8 +947,7 @@ const Notes = (): JSX.Element => {
           func: (): void => moveNote()
         }
       ]
-    };
-    setSystemNotif(newPrompt);
+    );
   };
 
   const saveNote = (note: Note): void => {
@@ -1204,21 +978,7 @@ const Notes = (): JSX.Element => {
     localStorage.setItem("preferences", JSON.stringify(newPrefs));
 
     // Display notification
-    if (userPreferences.notify.notifySuccess || userPreferences.notify.notifyAll) {
-      setSystemNotif({
-        show: true,
-        title: `${note.title}`,
-        text: `${note.title} was saved successfully`,
-        color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`,
-        hasCancel: false,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      });
-    }
+    showSuccessNotification(`${note.title}`, `${note.title} was successfully saved`, false, []);
   };
 
   const updateFavorite = (newFavorite: boolean, note: Note): void => {
@@ -1241,21 +1001,12 @@ const Notes = (): JSX.Element => {
     });
     updateFavoriteOnNote(token, note.noteid, newFavorite)
       .then(() => {
-        if (userPreferences.notify.notifySuccess || userPreferences.notify.notifyAll) {
-          setSystemNotif({
-            show: true,
-            title: `${note.title}`,
-            text: `${note.title} was favored successfully`,
-            color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`,
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void => resetSystemNotification()
-              }
-            ]
-          });
-        }
+        showSuccessNotification(
+          `${note.title}`,
+          `${note.title} was favored successfully`,
+          false,
+          []
+        );
       })
       .catch((err) => {
         console.log(err);
@@ -1266,20 +1017,12 @@ const Notes = (): JSX.Element => {
           };
         });
 
-        const newError = {
-          show: true,
-          title: "Issues Favoring Note",
-          text: "Please contact the developer if this issue persists. We seemed to have a problem favoring your note. Please close the application, reload it and try the operation again.",
-          color: "bg-red-300",
-          hasCancel: true,
-          actions: [
-            {
-              text: "close",
-              func: () => resetSystemNotification()
-            }
-          ]
-        };
-        setSystemNotif(newError);
+        showErrorNotification(
+          "Favoring Note",
+          "Please contact the developer if this issue persists. We seemed to have a problem favoring your note. Please close the application, reload it and try the operation again.",
+          true,
+          []
+        );
       });
   };
 

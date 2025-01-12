@@ -1,17 +1,19 @@
-import { useContext, useState } from "react";
 import { motion } from "framer-motion";
-import { createConRequest } from "../utils/api";
+import { useContext, useState } from "react";
 import { ClipLoader } from "react-spinners";
+
 import UserContext from "@renderer/contexxt/UserContext";
+
+import { createConRequest } from "../utils/api";
 
 const Connections = (): JSX.Element => {
   const {
     userPreferences,
     token,
     setCreateCon,
-    setSystemNotif,
     setConsSent,
-    resetSystemNotification
+    showSuccessNotification,
+    showErrorNotification
   } = useContext(UserContext);
 
   const [email, setEmail] = useState("");
@@ -27,43 +29,20 @@ const Connections = (): JSX.Element => {
       createConRequest(token, email)
         .then((res) => {
           setCreateCon(false);
-          setSystemNotif({
-            show: true,
-            title: "Connection Request Sent",
-            text: res.data.message,
-            color: "bg-green-300",
-            hasCancel: true,
-            actions: [
-              {
-                text: "close",
-                func: (): void => resetSystemNotification()
-              },
-              {
-                text: "cancel",
-                func: (): void => {}
-              }
-            ]
-          });
+          showSuccessNotification("Connection Request Sent", res.data.message, true, [
+            {
+              text: "cancel",
+              func: (): void => {}
+            }
+          ]);
           setConsSent((prev) => [...prev, { id: res.data.data.conreqid, email }]);
           console.log(res);
           setLoading(false);
         })
         .catch((err) => {
-          setLoading(false);
-          setSystemNotif({
-            show: true,
-            title: "Error",
-            text: err.response.data.message,
-            color: "bg-red-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void => resetSystemNotification()
-              }
-            ]
-          });
           console.log(err);
+          setLoading(false);
+          showErrorNotification("Error Sending Request", err.response.data.message, false, []);
         });
     } catch (err) {
       setLoading(false);

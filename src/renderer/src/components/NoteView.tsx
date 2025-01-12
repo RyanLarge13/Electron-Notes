@@ -1,14 +1,15 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion, useDragControls } from "framer-motion";
-import { FaCopy, FaEdit } from "react-icons/fa";
-import UserContext from "@renderer/contexxt/UserContext";
+import { useContext, useEffect, useRef, useState } from "react";
+import { CiDesktop } from "react-icons/ci";
+import { FaCopy, FaEdit, FaShareAlt, FaTrashAlt } from "react-icons/fa";
 import { IoCloseCircle } from "react-icons/io5";
 import { MdDragHandle, MdMinimize, MdNotAccessible } from "react-icons/md";
-import { CiDesktop } from "react-icons/ci";
-import { Tooltip } from "react-tooltip";
-import { Note } from "@renderer/types/types";
 import { TbMaximize } from "react-icons/tb";
+import { useNavigate } from "react-router-dom";
+import { Tooltip } from "react-tooltip";
+
+import UserContext from "@renderer/contexxt/UserContext";
+import { Note } from "@renderer/types/types";
 
 const NoteView = ({ note }: { note: Note }): JSX.Element => {
   const {
@@ -18,8 +19,8 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
     setUserPreferences,
     setNote,
     setNoteToEdit,
-    setSystemNotif,
-    resetSystemNotification
+    showErrorNotification,
+    showSuccessNotification
   } = useContext(UserContext);
 
   const [resizing, setResizing] = useState(false);
@@ -76,65 +77,23 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
     navigator.clipboard
       .writeText(noteText)
       .then(() => {
-        setSystemNotif({
-          show: true,
-          title: "Copied",
-          text: "Your note has been copied as HTML to your clipboard",
-          color: "bg-green-300",
-          hasCancel: false,
-          actions: [
-            {
-              text: "close",
-              func: (): void => resetSystemNotification()
-            }
-          ]
-        });
+        showSuccessNotification(
+          "Copied",
+          "Your note has been copied as HTML to your clipboard",
+          false,
+          []
+        );
       })
       .catch((err) => {
         console.log(err);
-        setSystemNotif({
-          show: true,
-          title: "Copy Failed",
-          text: "We cannot copy your not to the clip board. Try using the context menu to save your note text as a plain text document instead.",
-          color: "bg-red-300",
-          hasCancel: false,
-          actions: [
-            {
-              text: "close",
-              func: (): void => resetSystemNotification()
-            }
-          ]
-        });
+        showErrorNotification(
+          "Copy Failed",
+          "We cannot copy your not to the clip board. Try using the context menu to save your note text as a plain text document instead",
+          false,
+          []
+        );
       });
   };
-
-  // const trashNote = (): void => {
-  //   setSystemNotif({
-  //     show: true,
-  //     title: `Delete Note ${note.title}`,
-  //     text: `Are you sure you want to delete note ${note.title}?`,
-  //     color: "bg-red-300",
-  //     hasCancel: true,
-  //     actions: [
-  //       {
-  //         text: "close",
-  //         func: (): void =>
-  //           setSystemNotif({
-  //             show: false,
-  //             title: "",
-  //             text: "",
-  //             color: "",
-  //             hasCancel: false,
-  //             actions: []
-  //           })
-  //       },
-  //       { text: "trash note", func: (): void => {} },
-  //       { text: "delete", func: (): void => {} }
-  //     ]
-  //   });
-  // };
-
-  // const shareNote = (): void => {};
 
   const openWindow = async (note: Note): Promise<void> => {
     await window.openNewWin.openNoteInNewWindow(note, userPreferences.darkMode);
@@ -319,12 +278,15 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
     return index;
   };
 
+  const trashNote = (): void => {};
+
+  const shareNote = (): void => {};
+
   return (
     <>
       <motion.div
         ref={noteRef}
         drag={!resizing && !includesMinimize}
-        // dragConstraints={{ top: 0, left: 0 }}
         dragControls={noteDragControl}
         dragListener={false}
         dragMomentum={false}
@@ -460,9 +422,9 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
             >
               <FaCopy />
             </button>
-            {/* <button onClick={() => shareNote()}>
+            <button onClick={() => shareNote()}>
               <FaShareAlt />
-            </button> */}
+            </button>
             <button
               data-tooltip-id="edit-note"
               data-tooltip-content="Edit Your Note"
@@ -470,9 +432,9 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
             >
               <FaEdit />
             </button>
-            {/* <button onClick={() => trashNote()}>
+            <button onClick={() => trashNote()}>
               <FaTrashAlt />
-            </button> */}
+            </button>
           </div>
         </div>
         <div className="overflow-y-auto h-full no-scroll-bar">
@@ -483,11 +445,6 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
           ></div>
         </div>
       </motion.div>
-      {/* <div
-        className={`fixed z-40 ${
-          userPreferences.darkMode ? "" : ""
-        } inset-10 hidden md:block md:left-[63%] bg-black bg-opacity-20 overflow-y-auto no-scroll-bar rounded-md shadow-md px-5 pb-5`}
-      ></div> */}
     </>
   );
 };

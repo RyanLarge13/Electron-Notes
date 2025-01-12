@@ -1,11 +1,11 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { acceptRequestConnection, declineConnectionRequest } from "@renderer/utils/api";
 import { FaUserCheck } from "react-icons/fa";
 import { TiCancel } from "react-icons/ti";
 import { Tooltip } from "react-tooltip";
-// import { createConRequest } from "../utils/api";
+
 import UserContext from "@renderer/contexxt/UserContext";
+import { acceptRequestConnection, declineConnectionRequest } from "@renderer/utils/api";
 
 const ConBubbles = (): JSX.Element => {
   const {
@@ -17,7 +17,7 @@ const ConBubbles = (): JSX.Element => {
     resetSystemNotification,
     setConnections,
     setHoverConnections,
-    setSystemNotif
+    showSuccessNotification
   } = useContext(UserContext);
 
   const [options, setOptions] = useState({ id: "", email: "" });
@@ -29,21 +29,12 @@ const ConBubbles = (): JSX.Element => {
 
   const confirmAccept = (requestId: string, userEmail: string): void => {
     if (userPreferences.confirm) {
-      const newConfirmation = {
-        show: true,
-        title: "Accept Connection",
-        text: `Are you sure you know the person from this email? ${userEmail} and you would like to create a connection with them?`,
-        color: "bg-yellow-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "cancel",
-            func: (): void => resetSystemNotification()
-          },
-          { text: "accept", func: () => acceptRequest(requestId, userEmail) }
-        ]
-      };
-      setSystemNotif(newConfirmation);
+      showSuccessNotification(
+        "Accept Connection",
+        `Are you sure you know the person from this email? ${userEmail} and you would like to create a connection with them?`,
+        true,
+        [{ text: "accept", func: () => acceptRequest(requestId, userEmail) }]
+      );
       return;
     }
     acceptRequest(requestId, userEmail);
@@ -53,19 +44,7 @@ const ConBubbles = (): JSX.Element => {
     acceptRequestConnection(token, requestId, userEmail)
       .then((res) => {
         resetSystemNotification();
-        setSystemNotif({
-          show: false,
-          title: "New Connection",
-          text: res.data.data.message,
-          color: "bg-green-300",
-          hasCancel: false,
-          actions: [
-            {
-              text: "close",
-              func: (): void => resetSystemNotification()
-            }
-          ]
-        });
+        showSuccessNotification("New Connection", res.data.data.message, false, []);
         setConnections((prev) => [...prev, { id: res.data.data.conreqid, email: userEmail }]);
         console.log(res);
       })

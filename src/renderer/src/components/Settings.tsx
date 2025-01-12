@@ -1,25 +1,27 @@
-import { useContext, useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import UserContext from "@renderer/contexxt/UserContext";
-import Colors from "./Colors";
-import { updatePassword, updateUsername } from "@renderer/utils/api";
-import { ClipLoader } from "react-spinners";
-import { LuList } from "react-icons/lu";
+import { useContext, useEffect, useRef, useState } from "react";
 import { BiGrid } from "react-icons/bi";
 import { CiGrid42 } from "react-icons/ci";
+import { LuList } from "react-icons/lu";
+import { ClipLoader } from "react-spinners";
+
+import UserContext from "@renderer/contexxt/UserContext";
+import { updatePassword, updateUsername } from "@renderer/utils/api";
+
+import Colors from "./Colors";
 
 const Settings = (): JSX.Element => {
   const {
     setSettings,
     setUserPreferences,
-    setSystemNotif,
     setToken,
     setUser,
     setView,
     setOrder,
     setFilter,
-    resetSystemNotification,
     networkNotificationError,
+    showSuccessNotification,
+    showErrorNotification,
     view,
     order,
     filter,
@@ -50,7 +52,6 @@ const Settings = (): JSX.Element => {
 
   const [resizing, setResizing] = useState(false);
   const [settingsWidth, setSettingsWidth] = useState(userPreferences?.settingsWidth || 66);
-  // const [settingsWidth, setSettingsWidth] = useState(33);
 
   const firstInput = useRef(null);
   const secondInput = useRef(null);
@@ -109,22 +110,15 @@ const Settings = (): JSX.Element => {
       localStorage.setItem("preferences", JSON.stringify(newPreferences));
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Error Updating Preferences",
-        text: "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
+      showErrorNotification(
+        "Error Updating Preferences",
+        "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [
           { text: "re-try", func: () => setNotifyAll(currentState) },
           { text: "reload app", func: () => window.location.reload() }
         ]
-      };
-      setSystemNotif(newError);
+      );
     }
   }, [notifyAll]);
 
@@ -142,22 +136,15 @@ const Settings = (): JSX.Element => {
       localStorage.setItem("preferences", JSON.stringify(newPreferences));
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Error Updating Preferences",
-        text: "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
-          { text: "re-try", func: () => setNotifySuccess(currentState) },
+      showErrorNotification(
+        "Error Updating Preferences",
+        "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [
+          { text: "re-try", func: () => setNotifyAll(currentState) },
           { text: "reload app", func: () => window.location.reload() }
         ]
-      };
-      setSystemNotif(newError);
+      );
     }
   }, [notifySuccess]);
 
@@ -175,22 +162,15 @@ const Settings = (): JSX.Element => {
       localStorage.setItem("preferences", JSON.stringify(newPreferences));
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Error Updating Preferences",
-        text: "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
-          { text: "re-try", func: () => setNotifyErrors(currentState) },
+      showErrorNotification(
+        "Error Updating Preferences",
+        "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [
+          { text: "re-try", func: () => setNotifyAll(currentState) },
           { text: "reload app", func: () => window.location.reload() }
         ]
-      };
-      setSystemNotif(newError);
+      );
     }
   }, [notifyErrors]);
 
@@ -205,22 +185,15 @@ const Settings = (): JSX.Element => {
       localStorage.setItem("preferences", JSON.stringify(newPreferences));
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Error Updating Preferences",
-        text: "There was an error with the application when trying to update your preferences to confirm operations, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
-          { text: "re-try", func: () => setConfirmOps(currentState) },
+      showErrorNotification(
+        "Error Updating Preferences",
+        "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [
+          { text: "re-try", func: () => setNotifyAll(currentState) },
           { text: "reload app", func: () => window.location.reload() }
         ]
-      };
-      setSystemNotif(newError);
+      );
     }
   }, [confirmOps]);
 
@@ -234,22 +207,15 @@ const Settings = (): JSX.Element => {
       setUserPreferences(newPreferences);
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Update Dark Mode Failed",
-        text: "There was an error with the application when trying to update dark mode, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
-          { text: "re-try", func: () => setDarkModeTheme() },
+      showErrorNotification(
+        "Error Updating Preferences",
+        "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [
+          { text: "re-try", func: () => setNotifyAll(currentState) },
           { text: "reload app", func: () => window.location.reload() }
         ]
-      };
-      setSystemNotif(newError);
+      );
     }
   };
 
@@ -262,24 +228,10 @@ const Settings = (): JSX.Element => {
       currentPin[3] === Number(newLockPin.fourth)
     ) {
       setNewLockPin({ first: "", second: "", third: "", fourth: "" });
-      // firstInput.current.focus();
       setCreateNewPin(true);
       return;
     }
-    const newError = {
-      show: true,
-      title: "Invalid Pin",
-      text: "Enter your current valid pin to change it",
-      color: "bg-red-300",
-      hasCancel: false,
-      actions: [
-        {
-          text: "close",
-          func: () => resetSystemNotification()
-        }
-      ]
-    };
-    setSystemNotif(newError);
+    showErrorNotification("Invalid Pin", "Enter your current pin to change it", false, []);
     setNewLockPin({ first: "", second: "", third: "", fourth: "" });
     firstInput.current.focus();
   };
@@ -301,38 +253,23 @@ const Settings = (): JSX.Element => {
       setLockPin(false);
       setCreateNewPin(false);
       setNewLockPin({ first: "", second: "", third: "", fourth: "" });
-      const newConfirmation = {
-        show: true,
-        title: "New Lock Pin",
-        text: "Your new lock pin was created, don't forget this pin or you wont be able to view your locked notes",
-        color: "bg-green-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newConfirmation);
+      showSuccessNotification(
+        "New Lock Pin",
+        "Your new lock pin was created. Don't forget this pin or you wont be able to view your locked notes",
+        true,
+        []
+      );
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Update Pin Failed",
-        text: "There was an error with the application when trying to update your pin, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
+      showErrorNotification(
+        "Update Pin Failed",
+        "There was an error with the application when trying to update your pin, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [
           { text: "re-try", func: () => createANewPin() },
           { text: "reload app", func: () => window.location.reload() }
         ]
-      };
-      setSystemNotif(newError);
+      );
     }
     setCreateNewPin(false);
     setNewLockPin({ first: "", second: "", third: "", fourth: "" });
@@ -379,22 +316,12 @@ const Settings = (): JSX.Element => {
           const newToken = res.data.data.token;
           localStorage.setItem("authToken", newToken);
           setNewUsername("");
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "New Username",
-              text: `Your new username is now ${newUsername}`,
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification(
+            "New Username",
+            `Your new username is now ${newUsername}`,
+            false,
+            []
+          );
         })
         .catch((err) => {
           console.log(err);
@@ -402,24 +329,10 @@ const Settings = (): JSX.Element => {
             return { ...prevUser, username: prevUsername };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Username Update Failed",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => changeUsername(e) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Username Update Failed", err.response.message, true, [
+              { text: "re-try", func: () => changeUsername(e) },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -432,22 +345,15 @@ const Settings = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Update Username Failed",
-        text: "There was an error with the application when trying to update your username, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
+      showErrorNotification(
+        "Update Username Failed",
+        "There was an error with the application when trying to update your username, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [
           { text: "re-try", func: () => changeUsername(e) },
           { text: "reload app", func: () => window.location.reload() }
         ]
-      };
-      setSystemNotif(newError);
+      );
     }
   };
 
@@ -463,40 +369,20 @@ const Settings = (): JSX.Element => {
           localStorage.removeItem("signedup");
           localStorage.removeItem("authToken");
           localStorage.removeItem("pin");
-          const newSuccess = {
-            show: true,
-            title: "Password updated",
-            text: "Be sure to write down your new password so you do not forget it. An email was sent to you containing your new credentials. Please log back in to your account with your new credentials",
-            color: "bg-green-300",
-            hasCancel: true,
-            actions: [
-              {
-                text: "close",
-                func: () => resetSystemNotification()
-              }
-            ]
-          };
-          setSystemNotif(newSuccess);
+          showSuccessNotification(
+            "Password Update",
+            "Be sure to write down your new password so you do not forget it. An email was sent to you containing your new credentials. Please log back in to your account with your new credentials",
+            true,
+            []
+          );
           setNewPassLoading(false);
         })
         .catch((err) => {
           console.log(err);
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Password update Failed",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            showErrorNotification("Password Update Failed", err.response.message, true, [
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             networkNotificationError([
@@ -507,21 +393,12 @@ const Settings = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Update Password Failed",
-        text: "There was an error with the application when trying to update your password, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
-          { text: "reload app", func: () => window.location.reload() }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Update Password Failed",
+        "There was an error with the application when trying to update your password, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [{ text: "reload app", func: () => window.location.reload() }]
+      );
       setNewPassLoading(false);
     }
   };
@@ -537,21 +414,12 @@ const Settings = (): JSX.Element => {
       setUserPreferences(newPreferences);
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Auto Save Change Failed",
-        text: "There was an error with the application when trying to update your settings, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
-          { text: "reload app", func: () => window.location.reload() }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Auto Save Change Failed",
+        "There was an error with the application when trying to update your settings, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [{ text: "reload app", func: () => window.location.reload() }]
+      );
     }
   };
 

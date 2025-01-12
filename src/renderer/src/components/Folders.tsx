@@ -1,32 +1,32 @@
-import { useContext, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { AllData, Folder } from "@renderer/types/types";
+import { useContext, useEffect, useRef, useState } from "react";
 import { CiFolderOn } from "react-icons/ci";
-import { TbNotes } from "react-icons/tb";
-import { useNavigate } from "react-router-dom";
 import {
-  FaCheckCircle,
-  FaFolderPlus,
-  FaRegCheckCircle,
   FaArrowCircleRight,
+  FaCheckCircle,
   FaCopy,
   FaEdit,
+  FaFolderPlus,
   FaPaintBrush,
-  FaWindowClose,
-  FaPlusSquare
+  FaPlusSquare,
+  FaRegCheckCircle,
+  FaWindowClose
 } from "react-icons/fa";
+import { TbNotes } from "react-icons/tb";
+import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+
+import UserContext from "@renderer/contexxt/UserContext";
+import { AllData, Folder } from "@renderer/types/types";
 import {
   createNewFolder,
   createNewNote,
-  updateFolder,
-  // updateMultiFolders,
-  // updateMultiNotes,
   deleteAFolder,
-  duplicateMultipleContents
+  duplicateMultipleContents,
+  updateFolder
 } from "@renderer/utils/api";
+
 import Colors from "./Colors";
-import UserContext from "@renderer/contexxt/UserContext";
 
 const Folders = (): JSX.Element => {
   const {
@@ -45,7 +45,6 @@ const Folders = (): JSX.Element => {
     setNoteDragFolder,
     setPosition,
     setFolder,
-    setSystemNotif,
     setContextMenu,
     setSelectedFolder,
     setAllData,
@@ -57,7 +56,9 @@ const Folders = (): JSX.Element => {
     setUserPreferences,
     setNotes,
     networkNotificationError,
-    resetSystemNotification
+    resetSystemNotification,
+    showSuccessNotification,
+    showErrorNotification
   } = useContext(UserContext);
 
   const [dragging, setDragging] = useState(false);
@@ -106,21 +107,12 @@ const Folders = (): JSX.Element => {
   };
 
   const confirmDelete = (folder: Folder): void => {
-    const newConfirmation = {
-      show: true,
-      title: `Delete ${folder.title}`,
-      text: "Are you sure you want to delete? This will delete all of the contents forever",
-      color: "bg-red-400",
-      hasCancel: true,
-      actions: [
-        {
-          text: "cancel",
-          func: () => resetSystemNotification()
-        },
-        { text: "delete", func: () => deleteFolder(folder.folderid) }
-      ]
-    };
-    setSystemNotif(newConfirmation);
+    showSuccessNotification(
+      `Delete ${folder.title}`,
+      "Are you sure you want to delete? This will delete all of the contents within this folder as well, forever",
+      true,
+      [{ text: "delete", func: () => deleteFolder(folder.folderid) }]
+    );
   };
 
   const createNestedFolder = (folder: Folder): void => {
@@ -179,24 +171,10 @@ const Folders = (): JSX.Element => {
           });
           setNote(null);
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Creating Note",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => createNestedNote(folder) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Creating Note", err.response.message, true, [
+              { text: "re-try", func: () => createNestedNote(folder) },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -225,36 +203,17 @@ const Folders = (): JSX.Element => {
     });
   };
 
-  // const moveFolderContents = (folderId):void => {
-  //   const foldersOfFolder = allData.folders.filter((fold) => fold.parentFolderId === folderId);
-  //   const notesOfFolder = allData.notes.filter((aNote) => aNote.folderid === folderId);
-  //   setMove({
-  //     isMoving: true,
-  //     from: folder.folderid,
-  //     itemTitle: folder.title,
-  //     item: folder,
-  //     type: "folder"
-  //   })
-  // };
-
   const confirmDup = (folder: Folder): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-    const newConfirmation = {
-      show: true,
-      title: `Duplicate ${folder.title}`,
-      text: "Would you like to duplicate this folder and all of its contents or only the folder?",
-      color: folder.color,
-      hasCancel: true,
-      actions: [
-        {
-          text: "cancel",
-          func: () => resetSystemNotification()
-        },
+    showSuccessNotification(
+      `Duplicate ${folder.title}`,
+      "Would you like to duplicate this folder and all of its contents or only the folder?",
+      true,
+      [
         { text: "duplicate all", func: (): void => dupAll(folder) },
         { text: "duplicate folder", func: (): void => dupFolder(folder) }
       ]
-    };
-    setSystemNotif(newConfirmation);
+    );
   };
 
   const buildChildFolders = (
@@ -388,22 +347,7 @@ const Folders = (): JSX.Element => {
               notes: [...oldNotes, ...newNotesArray]
             };
           });
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "Duplicated All Content",
-              text: res.data.message,
-              color: "bg-green-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification("Duplicated All Content", res.data.message, true, []);
         })
         .catch((err) => {
           console.log(err);
@@ -415,24 +359,10 @@ const Folders = (): JSX.Element => {
             };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Duplicating Content",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => dupAll(folder) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Duplicating Content", err.response.message, true, [
+              { text: "re-try", func: () => dupAll(folder) },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -445,32 +375,17 @@ const Folders = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Duplicating Content",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem duplicating your folders and notes. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Duplicating Content",
+        "Please contact the developer if this issue persists. We seemed to have a problem duplicating your folders and notes. Please close the application, reload it and try the operation again",
+        true,
+        []
+      );
     }
   };
 
   const dupFolder = (folder: Folder): void => {
-    setSystemNotif({
-      show: false,
-      title: "",
-      text: "",
-      color: "",
-      hasCancel: false,
-      actions: []
-    });
+    resetSystemNotification();
     const tempId = uuidv4();
     const newFolder = {
       title: folder.title,
@@ -498,23 +413,12 @@ const Folders = (): JSX.Element => {
               folders: updatedFolders
             };
           });
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "Folder Duplicated",
-              text: "Successfully duplicated your folder",
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: (): void => resetSystemNotification()
-                },
-                { text: "undo", func: (): void => {} }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification(
+            "Folder Duplicated",
+            "Successfully duplicated your folder",
+            false,
+            [{ text: "undo", func: (): void => {} }]
+          );
         })
         .catch((err) => {
           setAllData((prevData) => {
@@ -525,24 +429,10 @@ const Folders = (): JSX.Element => {
             };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Duplicating Folder",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => dupFolder(folder) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Duplicating Folder", err.response.message, true, [
+              { text: "re-try", func: () => dupFolder(folder) },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -555,20 +445,12 @@ const Folders = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Duplicating Folder",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem duplicating your folder. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Duplicating Folder",
+        "Please contact the developer if this issue persists. We seemed to have a problem duplicating your folder. Please close the application, reload it and try the operation again",
+        true,
+        []
+      );
     }
   };
 
@@ -585,7 +467,7 @@ const Folders = (): JSX.Element => {
 
   const handleRename = (e): void => {
     e.preventDefault();
-    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
+    resetSystemNotification();
     const oldTitle = folderToRename.title;
     const newFolder = {
       folderId: folderToRename.folderid,
@@ -612,23 +494,9 @@ const Folders = (): JSX.Element => {
       setRenameText("");
       updateFolder(token, newFolder)
         .then(() => {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "Folder Re-Named",
-              text: "Successfully renamed your folder",
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: (): void => resetSystemNotification()
-                },
-                { text: "undo", func: (): void => {} }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification("Folder Re-named", "Successfully re-named your folder", false, [
+            { text: "undo", func: (): void => {} }
+          ]);
         })
         .catch((err) => {
           console.log(err);
@@ -647,24 +515,10 @@ const Folders = (): JSX.Element => {
             };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Renaming Folder",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => handleRename(e) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Re-Naming Folder", err.response.message, true, [
+              { text: "re-try", func: () => handleRename(e) },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -677,20 +531,12 @@ const Folders = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Renaming Folder",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem renaming your folder. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Re-naming Folder",
+        "Please contact the developer if this issue persists. We seemed to have a problem renaming your folder. Please close the application, reload it and try the operation again",
+        true,
+        []
+      );
     }
   };
 
@@ -700,7 +546,7 @@ const Folders = (): JSX.Element => {
   };
 
   const changeColor = (): void => {
-    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
+    resetSystemNotification();
     const tempId = folderToChangeColor.folderid;
     const oldColor = folderToChangeColor.color;
     const newFolder = {
@@ -726,23 +572,9 @@ const Folders = (): JSX.Element => {
       setNewColor(null);
       updateFolder(token, newFolder)
         .then(() => {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "New Folder Color",
-              text: "Your folder color is now updated",
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: (): void => resetSystemNotification()
-                },
-                { text: "undo", func: (): void => {} }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification("New Folder Color", "Your folder color is now updated", false, [
+            { text: "undo", func: (): void => {} }
+          ]);
         })
         .catch((err) => {
           console.log(err);
@@ -759,23 +591,9 @@ const Folders = (): JSX.Element => {
             };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Updating Folder",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Updating Folder", err.response.message, true, [
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -799,20 +617,12 @@ const Folders = (): JSX.Element => {
           folders: newFolders
         };
       });
-      const newError = {
-        show: true,
-        title: "Issues Updating Folder",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem changing your folders color. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Updating Folder",
+        "Please contact the developer if this issue persists. We seemed to have a problem changing your folders color. Please close the application, reload it and try the operation again",
+        true,
+        []
+      );
     }
   };
 
@@ -827,23 +637,9 @@ const Folders = (): JSX.Element => {
       });
       deleteAFolder(token, folderId)
         .then(() => {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "Folder Deleted",
-              text: "Successfully deleted your folder!!",
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: (): void => resetSystemNotification()
-                },
-                { text: "undo", func: (): void => {} }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification("Folder Deleted", "Successfully deleted your folder", false, [
+            { text: "undo", func: (): void => {} }
+          ]);
         })
         .catch((err) => {
           console.log(err);
@@ -855,24 +651,10 @@ const Folders = (): JSX.Element => {
             };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Deleting Folder",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => deleteFolder(folderId) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Deleting Folder", err.response.message, true, [
+              { text: "re-try", func: () => deleteFolder(folderId) },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -885,20 +667,12 @@ const Folders = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Deleting Folder",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem deleting your folder. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Deleting Folder",
+        "Please contact the developer if this issue persists. We seemed to have a problem deleting your folder. Please close the application, reload it and try the operation again",
+        true,
+        []
+      );
     }
   };
 
@@ -937,12 +711,6 @@ const Folders = (): JSX.Element => {
           icon: <FaArrowCircleRight />,
           func: (): void => moveFolder(folder)
         },
-        // {
-        //   title: "move contents",
-        //   icon: <FaArrowCircleRight />,
-        //   // func: () => moveFolderCOntents(folder.folderid);
-        //   func: (): void => {}
-        // },
         {
           title: "duplicate",
           icon: <FaCopy />,
@@ -1010,43 +778,24 @@ const Folders = (): JSX.Element => {
     if (!userPreferences.confirm) {
       return moveFolderAndContents();
     }
-    const newConfirmation = {
-      show: true,
-      title: `Move ${folderDragging.title} to ${draggedOverFolder.title}`,
-      text: `Are you sure you want to move your ${folderDragging.title} folder and all of its contents?`,
-      color: "bg-cyan-300",
-      hasCancel: true,
-      actions: [
-        {
-          text: "cancel",
-          func: (): void => {
-            setDraggedInto("");
-            cancelMove();
-          }
-        },
-        { text: "move", func: (): void => moveFolderAndContents() }
-      ]
-    };
-    setSystemNotif(newConfirmation);
+    showSuccessNotification(
+      `Move ${folderDragging.title} to ${draggedOverFolder.title}`,
+      `Are you sure you want to move your ${folderDragging.title} folder and all of its contents?`,
+      true,
+      [{ text: "move", func: (): void => moveFolderAndContents() }]
+    );
   };
 
   const cancelMove = (): void => {
     setDraggedInto("");
-    setSystemNotif({ show: false, title: "", text: "", color: "", hasCancel: false, actions: [] });
+    resetSystemNotification();
     setDraggedOverFolder(null);
     setDragging(false);
     setFolderDragging(null);
   };
 
   const moveFolderAndContents = (): void => {
-    setSystemNotif({
-      show: false,
-      title: "",
-      text: "",
-      color: "",
-      hasCancel: false,
-      actions: []
-    });
+    resetSystemNotification();
     const folderUpdate = {
       ...folderDragging,
       folderId: folderDragging.folderid,
@@ -1065,23 +814,9 @@ const Folders = (): JSX.Element => {
       setDraggedInto("");
       updateFolder(token, folderUpdate)
         .then(() => {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "Moved Folder",
-              text: "Successfully moved your folder",
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: (): void => resetSystemNotification()
-                },
-                { text: "undo", func: (): void => {} }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification("Moved Folder", "Successfully moved your folder", false, [
+            { text: "undo", func: (): void => {} }
+          ]);
           setFolderDragging(null);
           setDraggedOverFolder(null);
         })
@@ -1097,24 +832,10 @@ const Folders = (): JSX.Element => {
             return { ...prevData, folders: newFolders };
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Moving Folder",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () => resetSystemNotification()
-                  },
-                  { text: "re-try", func: () => moveFolderAndContents() },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Moving Folder", err.response.message, true, [
+              { text: "re-try", func: () => moveFolderAndContents() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -1127,20 +848,12 @@ const Folders = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Moving Folder",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem moving your folder. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Moving Folder",
+        "Please contact the developer if this issue persists. We seemed to have a problem moving your folder. Please close the application, reload it and try the operation again",
+        true,
+        []
+      );
     }
   };
 
