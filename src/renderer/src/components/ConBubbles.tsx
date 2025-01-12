@@ -11,11 +11,12 @@ const ConBubbles = (): JSX.Element => {
   const {
     connections,
     connectionRequests,
-    setConnections,
     hoverConnections,
     userPreferences,
-    setHoverConnections,
     token,
+    resetSystemNotification,
+    setConnections,
+    setHoverConnections,
     setSystemNotif
   } = useContext(UserContext);
 
@@ -37,15 +38,7 @@ const ConBubbles = (): JSX.Element => {
         actions: [
           {
             text: "cancel",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           },
           { text: "accept", func: () => acceptRequest(requestId, userEmail) }
         ]
@@ -59,14 +52,7 @@ const ConBubbles = (): JSX.Element => {
   const acceptRequest = (requestId: string, userEmail: string): void => {
     acceptRequestConnection(token, requestId, userEmail)
       .then((res) => {
-        setSystemNotif({
-          show: false,
-          title: "",
-          text: "",
-          color: "",
-          hasCancel: false,
-          actions: []
-        });
+        resetSystemNotification();
         setSystemNotif({
           show: false,
           title: "New Connection",
@@ -76,15 +62,7 @@ const ConBubbles = (): JSX.Element => {
           actions: [
             {
               text: "close",
-              func: (): void =>
-                setSystemNotif({
-                  show: false,
-                  title: "",
-                  text: "",
-                  color: "",
-                  hasCancel: false,
-                  actions: []
-                })
+              func: (): void => resetSystemNotification()
             }
           ]
         });

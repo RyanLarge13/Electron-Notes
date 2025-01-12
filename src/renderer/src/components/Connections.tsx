@@ -5,8 +5,14 @@ import { ClipLoader } from "react-spinners";
 import UserContext from "@renderer/contexxt/UserContext";
 
 const Connections = (): JSX.Element => {
-  const { userPreferences, setCreateCon, token, setSystemNotif, setConsSent } =
-    useContext(UserContext);
+  const {
+    userPreferences,
+    token,
+    setCreateCon,
+    setSystemNotif,
+    setConsSent,
+    resetSystemNotification
+  } = useContext(UserContext);
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,15 +36,7 @@ const Connections = (): JSX.Element => {
             actions: [
               {
                 text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: (): void => resetSystemNotification()
               },
               {
                 text: "cancel",
@@ -61,15 +59,7 @@ const Connections = (): JSX.Element => {
             actions: [
               {
                 text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: (): void => resetSystemNotification()
               }
             ]
           });

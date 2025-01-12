@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { AllData, Folder, Note } from "@renderer/types/types";
+import { AllData, Folder } from "@renderer/types/types";
 import { CiFolderOn } from "react-icons/ci";
 import { TbNotes } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +30,19 @@ import UserContext from "@renderer/contexxt/UserContext";
 
 const Folders = (): JSX.Element => {
   const {
+    folderSearchText,
+    noteIsMoving,
+    noteDrag,
+    noteDragging,
+    editCurrentFolder,
+    userPreferences,
+    folders,
+    token,
+    edit,
+    selectedForEdit,
+    draggedOverFolder,
+    allData,
+    setNoteDragFolder,
     setPosition,
     setFolder,
     setSystemNotif,
@@ -43,19 +56,8 @@ const Folders = (): JSX.Element => {
     setMove,
     setUserPreferences,
     setNotes,
-    folderSearchText,
-    noteIsMoving,
-    noteDrag,
-    noteDragging,
-    setNoteDragFolder,
-    editCurrentFolder,
-    userPreferences,
-    folders,
-    token,
-    edit,
-    selectedForEdit,
-    draggedOverFolder,
-    allData
+    networkNotificationError,
+    resetSystemNotification
   } = useContext(UserContext);
 
   const [dragging, setDragging] = useState(false);
@@ -113,15 +115,7 @@ const Folders = (): JSX.Element => {
       actions: [
         {
           text: "cancel",
-          func: () =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+          func: () => resetSystemNotification()
         },
         { text: "delete", func: () => deleteFolder(folder.folderid) }
       ]
@@ -195,15 +189,7 @@ const Folders = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => createNestedNote(folder) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -214,58 +200,17 @@ const Folders = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => createNestedNote(folder) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => createNestedNote(folder) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
     } catch (err) {
       console.log(err);
       setNote(null);
-      const newError = {
-        show: true,
-        title: "Issues Creating Note",
-        text: "Please contact the developer if this issue persists. We seemed to have a problem creating a new note. Please close the application, reload it and try the operation again.",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      networkNotificationError([]);
     }
   };
 
@@ -303,15 +248,7 @@ const Folders = (): JSX.Element => {
       actions: [
         {
           text: "cancel",
-          func: () =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+          func: () => resetSystemNotification()
         },
         { text: "duplicate all", func: (): void => dupAll(folder) },
         { text: "duplicate folder", func: (): void => dupFolder(folder) }
@@ -379,14 +316,7 @@ const Folders = (): JSX.Element => {
   const dupAll = (folder: Folder): void => {
     const oldFolders = allData.folders;
     const oldNotes = allData.notes;
-    setSystemNotif({
-      show: false,
-      title: "",
-      text: "",
-      color: "",
-      hasCancel: false,
-      actions: []
-    });
+    resetSystemNotification();
     const newFolders = [];
     const newNotes = [];
     const folderIds = [];
@@ -468,15 +398,7 @@ const Folders = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 }
               ]
             };
@@ -503,15 +425,7 @@ const Folders = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => dupAll(folder) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -522,30 +436,10 @@ const Folders = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => dupAll(folder) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => dupAll(folder) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -560,15 +454,7 @@ const Folders = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -622,15 +508,7 @@ const Folders = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: (): void =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: (): void => resetSystemNotification()
                 },
                 { text: "undo", func: (): void => {} }
               ]
@@ -657,15 +535,7 @@ const Folders = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => dupFolder(folder) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -676,30 +546,10 @@ const Folders = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => dupFolder(folder) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => dupFolder(folder) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -714,15 +564,7 @@ const Folders = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -780,15 +622,7 @@ const Folders = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: (): void =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: (): void => resetSystemNotification()
                 },
                 { text: "undo", func: (): void => {} }
               ]
@@ -823,15 +657,7 @@ const Folders = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => handleRename(e) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -842,30 +668,10 @@ const Folders = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => handleRename(e) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => handleRename(e) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -880,15 +686,7 @@ const Folders = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -938,15 +736,7 @@ const Folders = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: (): void =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: (): void => resetSystemNotification()
                 },
                 { text: "undo", func: (): void => {} }
               ]
@@ -979,15 +769,7 @@ const Folders = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "reload app", func: () => window.location.reload() }
                 ]
@@ -997,29 +779,9 @@ const Folders = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: (): void =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -1046,15 +808,7 @@ const Folders = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };
@@ -1065,14 +819,7 @@ const Folders = (): JSX.Element => {
   const deleteFolder = (folderId: string): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const oldFolder = allData.folders.filter((fold) => fold.folderid == folderId)[0];
-    setSystemNotif({
-      show: false,
-      title: "",
-      text: "",
-      color: "",
-      hasCancel: false,
-      actions: []
-    });
+    resetSystemNotification();
     try {
       setAllData((prevData) => {
         const newFolders = prevData.folders.filter((fold) => fold.folderid !== folderId);
@@ -1090,15 +837,7 @@ const Folders = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: (): void =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: (): void => resetSystemNotification()
                 },
                 { text: "undo", func: (): void => {} }
               ]
@@ -1126,15 +865,7 @@ const Folders = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => deleteFolder(folderId) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -1145,30 +876,10 @@ const Folders = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: (): void =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => deleteFolder(folderId) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => deleteFolder(folderId) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -1183,15 +894,7 @@ const Folders = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };
@@ -1372,15 +1075,7 @@ const Folders = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: (): void =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: (): void => resetSystemNotification()
                 },
                 { text: "undo", func: (): void => {} }
               ]
@@ -1412,15 +1107,7 @@ const Folders = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => moveFolderAndContents() },
                   { text: "reload app", func: () => window.location.reload() }
@@ -1431,30 +1118,10 @@ const Folders = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: (): void =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => moveFolderAndContents() },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => moveFolderAndContents() },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -1469,15 +1136,7 @@ const Folders = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };

@@ -18,7 +18,8 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
     setUserPreferences,
     setNote,
     setNoteToEdit,
-    setSystemNotif
+    setSystemNotif,
+    resetSystemNotification
   } = useContext(UserContext);
 
   const [resizing, setResizing] = useState(false);
@@ -84,15 +85,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
           actions: [
             {
               text: "close",
-              func: (): void =>
-                setSystemNotif({
-                  show: false,
-                  title: "",
-                  text: "",
-                  color: "",
-                  hasCancel: false,
-                  actions: []
-                })
+              func: (): void => resetSystemNotification()
             }
           ]
         });
@@ -108,15 +101,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
           actions: [
             {
               text: "close",
-              func: (): void =>
-                setSystemNotif({
-                  show: false,
-                  title: "",
-                  text: "",
-                  color: "",
-                  hasCancel: false,
-                  actions: []
-                })
+              func: (): void => resetSystemNotification()
             }
           ]
         });

@@ -39,7 +39,26 @@ import { IoRemoveCircle } from "react-icons/io5";
 
 const Notes = (): JSX.Element => {
   const {
+    view,
+    allData,
+    folder,
+    search,
+    note,
+    noteDragging,
+    noteIsMoving,
+    drafts,
+    mainTitle,
+    notesToRender,
+    token,
+    userPreferences,
+    user,
+    noteDragFolder,
     setNote,
+    setNoteIsMoving,
+    setNoteDragFolder,
+    setNoteDragging,
+    setNoteDrag,
+    setMinimizeArray,
     setAllData,
     setContextMenu,
     setPosition,
@@ -53,26 +72,8 @@ const Notes = (): JSX.Element => {
     setSearch,
     setFolder,
     setUserPreferences,
-    setMainTitle,
-    view,
-    allData,
-    folder,
-    search,
-    note,
-    noteDragging,
-    setNoteIsMoving,
-    setNoteDragFolder,
-    noteIsMoving,
-    drafts,
-    mainTitle,
-    notesToRender,
-    token,
-    userPreferences,
-    user,
-    setNoteDragging,
-    setNoteDrag,
-    noteDragFolder,
-    setMinimizeArray
+    resetSystemNotification,
+    networkNotificationError
   } = useContext(UserContext);
 
   const [pinInput, setPinInput] = useState(false);
@@ -147,15 +148,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -194,15 +187,7 @@ const Notes = (): JSX.Element => {
       actions: [
         {
           text: "cancel",
-          func: () =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+          func: () => resetSystemNotification()
         },
         { text: "duplicate", func: (): void => duplicate(note) }
       ]
@@ -211,14 +196,7 @@ const Notes = (): JSX.Element => {
   };
 
   const duplicate = (note: Note): void => {
-    setSystemNotif({
-      show: false,
-      title: "",
-      text: "",
-      color: "",
-      hasCancel: false,
-      actions: []
-    });
+    resetSystemNotification();
     const tempId = uuidv4();
     const noteToDuplicate = {
       title: note.title,
@@ -255,15 +233,7 @@ const Notes = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: (): void =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: (): void => resetSystemNotification()
                 },
                 { text: "undo", func: (): void => {} }
               ]
@@ -288,15 +258,7 @@ const Notes = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => duplicate(note) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -307,30 +269,10 @@ const Notes = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => duplicate(note) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => duplicate(note) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -345,15 +287,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -407,15 +341,7 @@ const Notes = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 },
                 { text: "undo", func: (): void => {} }
               ]
@@ -445,15 +371,7 @@ const Notes = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => changeTitle(e) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -464,30 +382,10 @@ const Notes = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => changeTitle(e) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => changeTitle(e) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -502,15 +400,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -539,15 +429,7 @@ const Notes = (): JSX.Element => {
       actions: [
         {
           text: "cancel",
-          func: () =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+          func: () => resetSystemNotification()
         },
         { text: "trash", func: () => moveToTrash(note) }
       ]
@@ -557,14 +439,7 @@ const Notes = (): JSX.Element => {
 
   const moveToTrash = (note: Note): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-    setSystemNotif({
-      show: false,
-      title: "",
-      text: "",
-      color: "",
-      hasCancel: false,
-      actions: []
-    });
+    resetSystemNotification();
     const trashed = note.trashed;
     const newNote = { ...note, trashed: !trashed };
     try {
@@ -598,15 +473,7 @@ const Notes = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 },
                 { text: "undo", func: (): void => {} }
               ]
@@ -644,15 +511,7 @@ const Notes = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => moveToTrash(note) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -663,30 +522,10 @@ const Notes = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => moveToTrash(note) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => moveToTrash(note) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -718,15 +557,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -744,15 +575,7 @@ const Notes = (): JSX.Element => {
       actions: [
         {
           text: "cancel",
-          func: () =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+          func: () => resetSystemNotification()
         },
         { text: "delete", func: () => deleteNote(note) }
       ]
@@ -762,14 +585,7 @@ const Notes = (): JSX.Element => {
 
   const deleteNote = (note: Note): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-    setSystemNotif({
-      show: false,
-      title: "",
-      text: "",
-      color: "",
-      hasCancel: false,
-      actions: []
-    });
+    resetSystemNotification();
     try {
       if (note.locked) {
         setTrashedNotes((prev: Note[]): Note[] =>
@@ -798,15 +614,7 @@ const Notes = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 },
                 { text: "undo", func: (): void => {} }
               ]
@@ -843,15 +651,7 @@ const Notes = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => deleteNote(note) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -862,30 +662,10 @@ const Notes = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => deleteNote(note) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => deleteNote(note) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -900,15 +680,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -926,15 +698,7 @@ const Notes = (): JSX.Element => {
       actions: [
         {
           text: "cancel",
-          func: () =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+          func: () => resetSystemNotification()
         },
         { text: "delete", func: () => deleteDraft(note) }
       ]
@@ -979,15 +743,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };
@@ -1012,15 +768,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };
@@ -1046,15 +794,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };
@@ -1080,15 +820,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       };
@@ -1323,15 +1055,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -1440,14 +1164,7 @@ const Notes = (): JSX.Element => {
             setNoteDragFolder(null);
             setNoteIsMoving(false);
             setNoteDragging(null);
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            });
+            resetSystemNotification();
           }
         },
         {
@@ -1497,15 +1214,7 @@ const Notes = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: (): void =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: (): void => resetSystemNotification()
           }
         ]
       });
@@ -1531,7 +1240,7 @@ const Notes = (): JSX.Element => {
       };
     });
     updateFavoriteOnNote(token, note.noteid, newFavorite)
-      .then((res) => {
+      .then(() => {
         if (userPreferences.notify.notifySuccess || userPreferences.notify.notifyAll) {
           setSystemNotif({
             show: true,
@@ -1542,15 +1251,7 @@ const Notes = (): JSX.Element => {
             actions: [
               {
                 text: "close",
-                func: (): void =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: (): void => resetSystemNotification()
               }
             ]
           });
@@ -1574,15 +1275,7 @@ const Notes = (): JSX.Element => {
           actions: [
             {
               text: "close",
-              func: () =>
-                setSystemNotif({
-                  show: false,
-                  title: "",
-                  text: "",
-                  color: "",
-                  hasCancel: false,
-                  actions: []
-                })
+              func: () => resetSystemNotification()
             }
           ]
         };

@@ -17,7 +17,6 @@ const Header = (): JSX.Element => {
     setView,
     setEditCurrentFolder,
     setNotes,
-    setNote,
     setNesting,
     setEdit,
     setSearch,
@@ -184,6 +183,8 @@ const Header = (): JSX.Element => {
     return false;
   };
 
+  const pinFavoritesToTop = (): void => {};
+
   return (
     <>
       {optionMenu && (
@@ -278,13 +279,14 @@ const Header = (): JSX.Element => {
                 Edit
                 <BiEdit />
               </button>
-              {/* <button
+              <button
+                onClick={() => pinFavoritesToTop()}
                 className={`text-left p-3 flex justify-between items-center ${
                   userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
                 } duration-200 w-full`}
               >
                 Pin Favorites
-              </button> */}
+              </button>
             </motion.div>
           )}
         </div>

@@ -18,6 +18,8 @@ const Settings = (): JSX.Element => {
     setView,
     setOrder,
     setFilter,
+    resetSystemNotification,
+    networkNotificationError,
     view,
     order,
     filter,
@@ -116,15 +118,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "re-try", func: () => setNotifyAll(currentState) },
           { text: "reload app", func: () => window.location.reload() }
@@ -157,15 +151,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "re-try", func: () => setNotifySuccess(currentState) },
           { text: "reload app", func: () => window.location.reload() }
@@ -198,15 +184,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "re-try", func: () => setNotifyErrors(currentState) },
           { text: "reload app", func: () => window.location.reload() }
@@ -236,15 +214,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "re-try", func: () => setConfirmOps(currentState) },
           { text: "reload app", func: () => window.location.reload() }
@@ -273,15 +243,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "re-try", func: () => setDarkModeTheme() },
           { text: "reload app", func: () => window.location.reload() }
@@ -313,15 +275,7 @@ const Settings = (): JSX.Element => {
       actions: [
         {
           text: "close",
-          func: () =>
-            setSystemNotif({
-              show: false,
-              title: "",
-              text: "",
-              color: "",
-              hasCancel: false,
-              actions: []
-            })
+          func: () => resetSystemNotification()
         }
       ]
     };
@@ -356,15 +310,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           }
         ]
       };
@@ -380,15 +326,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "re-try", func: () => createANewPin() },
           { text: "reload app", func: () => window.location.reload() }
@@ -451,15 +389,7 @@ const Settings = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 }
               ]
             };
@@ -482,15 +412,7 @@ const Settings = (): JSX.Element => {
                 actions: [
                   {
                     text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
+                    func: () => resetSystemNotification()
                   },
                   { text: "re-try", func: () => changeUsername(e) },
                   { text: "reload app", func: () => window.location.reload() }
@@ -501,30 +423,10 @@ const Settings = (): JSX.Element => {
           }
           if (err.request) {
             if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Network Error",
-                text: "Our application was not able to reach the server, please check your internet connection and try again",
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      setSystemNotif({
-                        show: false,
-                        title: "",
-                        text: "",
-                        color: "",
-                        hasCancel: false,
-                        actions: []
-                      })
-                  },
-                  { text: "re-try", func: () => changeUsername(e) },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
+              networkNotificationError([
+                { text: "re-try", func: () => changeUsername(e) },
+                { text: "reload app", func: () => window.location.reload() }
+              ]);
             }
           }
         });
@@ -539,15 +441,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "re-try", func: () => changeUsername(e) },
           { text: "reload app", func: () => window.location.reload() }
@@ -578,15 +472,7 @@ const Settings = (): JSX.Element => {
             actions: [
               {
                 text: "close",
-                func: () =>
-                  setSystemNotif({
-                    show: false,
-                    title: "",
-                    text: "",
-                    color: "",
-                    hasCancel: false,
-                    actions: []
-                  })
+                func: () => resetSystemNotification()
               }
             ]
           };
@@ -605,15 +491,7 @@ const Settings = (): JSX.Element => {
               actions: [
                 {
                   text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
+                  func: () => resetSystemNotification()
                 },
                 { text: "reload app", func: () => window.location.reload() }
               ]
@@ -621,30 +499,9 @@ const Settings = (): JSX.Element => {
             setSystemNotif(newError);
           }
           if (err.request) {
-            const newError = {
-              show: true,
-              title: "Network Error",
-              text: "Our application was not able to reach the server, please check your internet connection and try again",
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    setSystemNotif({
-                      show: false,
-                      title: "",
-                      text: "",
-                      color: "",
-                      hasCancel: false,
-                      actions: []
-                    })
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
-            setSystemNotif(newError);
+            networkNotificationError([
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           setNewPassLoading(false);
         });
@@ -659,15 +516,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "reload app", func: () => window.location.reload() }
         ]
@@ -697,15 +546,7 @@ const Settings = (): JSX.Element => {
         actions: [
           {
             text: "close",
-            func: () =>
-              setSystemNotif({
-                show: false,
-                title: "",
-                text: "",
-                color: "",
-                hasCancel: false,
-                actions: []
-              })
+            func: () => resetSystemNotification()
           },
           { text: "reload app", func: () => window.location.reload() }
         ]
