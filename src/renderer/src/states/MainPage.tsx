@@ -1,20 +1,22 @@
 import { useContext, useEffect, useState } from "react";
-import { ClipLoader } from "react-spinners";
-import { useNavigate } from "react-router-dom";
-import Login from "./Login";
-import Account from "./Account";
-import ContextMenu from "@renderer/components/ContextMenu";
-import SystemNotif from "@renderer/components/SystemNotif";
-import UserContext from "@renderer/contexxt/UserContext";
 import { FaEdit, FaFolderPlus, FaList, FaPlusSquare } from "react-icons/fa";
+import { IoSettings } from "react-icons/io5";
+import { LuFileSearch } from "react-icons/lu";
 import { MdOutlineMenu } from "react-icons/md";
 import { PiPlusMinus, PiSwap } from "react-icons/pi";
 import { TbFolderSearch } from "react-icons/tb";
-import { LuFileSearch } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
+import { ClipLoader } from "react-spinners";
 import { Tooltip } from "react-tooltip";
-import { ContextMenuOption } from "@renderer/types/types";
-import { IoSettings } from "react-icons/io5";
 import { v4 as uuidv4 } from "uuid";
+
+import ContextMenu from "@renderer/components/ContextMenu";
+import SystemNotif from "@renderer/components/SystemNotif";
+import UserContext from "@renderer/contexxt/UserContext";
+import { ContextMenuOption } from "@renderer/types/types";
+
+import Account from "./Account";
+import Login from "./Login";
 
 const MainPage = (): JSX.Element => {
   const {
@@ -27,7 +29,6 @@ const MainPage = (): JSX.Element => {
     setPosition,
     setView,
     setSettings,
-    setSystemNotif,
     setSearch,
     setUserPreferences,
     setNotes,
@@ -37,6 +38,8 @@ const MainPage = (): JSX.Element => {
     setFolderSearchText,
     setFolderSearch,
     resetSystemNotification,
+    showSuccessNotification,
+    showErrorNotification,
     folders,
     folderSearch,
     folderSearchText,
@@ -141,14 +144,7 @@ const MainPage = (): JSX.Element => {
       setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     }
     if (systemNotif.show && Escape) {
-      setSystemNotif({
-        show: false,
-        title: "",
-        text: "",
-        color: "",
-        hasCancel: false,
-        actions: []
-      });
+      resetSystemNotification();
     }
     if (menu && Escape) {
       setMenu(false);
@@ -184,26 +180,18 @@ const MainPage = (): JSX.Element => {
       unsavedChanges.forEach((unsaved) => {
         const note = allData.notes.map((aNote) => aNote.noteid === unsaved.id);
         if (!note[0]) {
-          // renmove that from storage
+          // remove that from storage
         } else {
           unsavedNotes.push(note[0]);
         }
       });
       setNotes(unsavedNotes);
       e.preventDefault();
-      setSystemNotif({
-        show: true,
-        title: "Unsaved Notes",
-        text: `You have unsaved changes to some notes, are you sure you don't want to save first?`,
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => {
-              resetSystemNotification();
-            }
-          },
+      showSuccessNotification(
+        "Unsaved Notes",
+        "You have unsaved changes to some notes, are you sure you don't want to save first?",
+        true,
+        [
           {
             text: "exit",
             func: async (): Promise<void> => {
@@ -212,7 +200,7 @@ const MainPage = (): JSX.Element => {
             }
           }
         ]
-      });
+      );
     } else {
       null;
     }
@@ -232,22 +220,12 @@ const MainPage = (): JSX.Element => {
   const editCurrentFolder = (): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     if (!folder) {
-      if (userPreferences.notify.notifyErrors) {
-        const newError = {
-          show: true,
-          title: "Cannot Edit Home",
-          text: "This is your home folder, you cannot edit the name or color, sorry.",
-          color: "bg-red-300",
-          hasCancel: false,
-          actions: [
-            {
-              text: "close",
-              func: (): void => resetSystemNotification()
-            }
-          ]
-        };
-        setSystemNotif(newError);
-      }
+      showErrorNotification(
+        "Cannot Edit Home",
+        "This is your home folder, you cannot edit the name or color",
+        false,
+        []
+      );
       return;
     }
     setEditCurrentFolder(true);

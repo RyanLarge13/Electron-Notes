@@ -1,13 +1,13 @@
-import { useState, useContext } from "react";
 import { motion } from "framer-motion";
+import { useContext, useState } from "react";
+import { FaLock, FaLockOpen } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { FaLockOpen } from "react-icons/fa";
-import { FaLock } from "react-icons/fa";
-import { createNewFolder } from "@renderer/utils/api";
 import { ClipLoader } from "react-spinners";
 import { v4 as uuidv4 } from "uuid";
+
 import Colors from "@renderer/components/Colors";
 import UserContext from "@renderer/contexxt/UserContext";
+import { createNewFolder } from "@renderer/utils/api";
 
 const NewFolder = (): JSX.Element => {
   const {
@@ -17,9 +17,10 @@ const NewFolder = (): JSX.Element => {
     userPreferences,
     setAllData,
     setSelectedFolder,
-    setSystemNotif,
     networkNotificationError,
-    resetSystemNotification
+    resetSystemNotification,
+    showErrorNotification,
+    showSuccessNotification
   } = useContext(UserContext);
 
   const navigate = useNavigate();
@@ -67,23 +68,9 @@ const NewFolder = (): JSX.Element => {
             folders: updatedFolders
           };
         });
-        if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-          const newSuccess = {
-            show: true,
-            title: "New Folder",
-            text: "Your new folder was successfully created!!",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: () => resetSystemNotification()
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
-        }
+        showSuccessNotification("New Folder", "Your new folder was successfully created", false, [
+          { text: "undo", func: (): void => {} }
+        ]);
         setLoading(false);
       })
       .catch((err) => {
@@ -98,30 +85,16 @@ const NewFolder = (): JSX.Element => {
           return newData;
         });
         if (err.response) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Issues Creating Folder",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                {
-                  text: "open note",
-                  func: (): void => {
-                    resetSystemNotification();
-                    navigate("/newfolder");
-                  }
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
-          }
+          showErrorNotification("Creating Folder", err.response.message, true, [
+            {
+              text: "open note",
+              func: (): void => {
+                resetSystemNotification();
+                navigate("/newfolder");
+              }
+            },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
         }
         if (err.request) {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {

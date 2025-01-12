@@ -1,15 +1,21 @@
 import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
-import { forgotCreds } from "@renderer/utils/api";
-import UserContext from "@renderer/contexxt/UserContext";
 import { ClipLoader } from "react-spinners";
+
+import UserContext from "@renderer/contexxt/UserContext";
+import { forgotCreds } from "@renderer/utils/api";
 
 const ForgotCreds = ({
   setForgotCreds
 }: {
   setForgotCreds: Dispatch<SetStateAction<boolean>>;
 }): JSX.Element => {
-  const { setSystemNotif, systemNotif, networkNotificationError, resetSystemNotification } =
-    useContext(UserContext);
+  const {
+    systemNotif,
+    networkNotificationError,
+    resetSystemNotification,
+    showErrorNotification,
+    showSuccessNotification
+  } = useContext(UserContext);
 
   const [email, setEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
@@ -22,20 +28,12 @@ const ForgotCreds = ({
         setEmail(myEmail);
       } catch (err) {
         console.log(err);
-        const newError = {
-          show: true,
-          title: "Can't Restore Email",
-          color: "bg-red-300",
-          text: "Sorry, there is an issue parsing the previous email you entered, you will need to retype it",
-          hasCancel: false,
-          actions: [
-            {
-              text: "close",
-              func: () => resetSystemNotification()
-            }
-          ]
-        };
-        setSystemNotif(newError);
+        showErrorNotification(
+          "Cannot Restore Email",
+          "Sorry, there is an issue parsing the previous email you entered, you will need to retype it",
+          false,
+          []
+        );
       }
     }
   }, []);
@@ -50,17 +48,11 @@ const ForgotCreds = ({
       forgotCreds(email)
         .then((res) => {
           console.log(res);
-          const newNotification = {
-            show: true,
-            title: "Reset Credentials",
-            text: `Check your email for your new login credentials and to reset your information`,
-            color: "bg-cyan-300",
-            hasCancel: true,
-            actions: [
-              {
-                text: "close",
-                func: (): void => resetSystemNotification()
-              },
+          showSuccessNotification(
+            "Reset Credentials",
+            "Check your email for your new login credentials and to reset your information",
+            true,
+            [
               {
                 text: "Login",
                 func: (): void => {
@@ -69,35 +61,22 @@ const ForgotCreds = ({
                 }
               }
             ]
-          };
-          setSystemNotif(newNotification);
+          );
           setResetLoading(false);
         })
         .catch((err) => {
           console.log(err);
           if (err.response) {
-            const newError = {
-              show: true,
-              title: "Reset Request Failed",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                {
-                  text: "re-try",
-                  func: (): void => {
-                    resetSystemNotification();
-                    handleForgotCreds(e);
-                  }
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
+            showErrorNotification("Reset Request Failed", err.response.message, true, [
+              {
+                text: "re-try",
+                func: (): void => {
+                  resetSystemNotification();
+                  handleForgotCreds(e);
+                }
+              },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
             networkNotificationError([
@@ -114,22 +93,15 @@ const ForgotCreds = ({
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Reset Request Failed",
-        text: "There was a problem issuing your request to reset your password. Please reload the application and try again",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
+      showErrorNotification(
+        "Reset Request Failed",
+        "There was a problem issuing your request to reset your password. Please reload the application and try again",
+        true,
+        [
           { text: "retry", func: () => handleForgotCreds(e) },
           { text: "reload app", func: () => window.location.reload() }
         ]
-      };
-      setSystemNotif(newError);
+      );
       setResetLoading(false);
     }
   };
@@ -143,20 +115,7 @@ const ForgotCreds = ({
     }
     if (!isValid) {
       if (systemNotif.show && systemNotif.title === "Email Rules") return false;
-      const newNotif = {
-        show: true,
-        title: "Email Rules",
-        text: "Email must be a valid email",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newNotif);
+      showErrorNotification("Email Rules", "Email must be a valid email", true, []);
       return false;
     }
     return false;

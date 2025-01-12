@@ -1,39 +1,44 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
-import { updateNote, updateFolder } from "@renderer/utils/api";
-import { useNavigate, Outlet } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
-import { TbFilters } from "react-icons/tb";
-import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
+import { BsAlphabet, BsArrowReturnRight, BsArrowRight } from "react-icons/bs";
+import { FaArrowCircleRight, FaFolder, FaFolderPlus, FaHome, FaPlus } from "react-icons/fa";
+import { FiEdit } from "react-icons/fi";
 import { IoMdShare } from "react-icons/io";
+import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
 import {
   MdCancel,
+  MdDateRange,
   MdDelete,
   MdDriveFileMove,
-  MdOutlineNoteAdd,
   MdGroupAdd,
-  MdSelectAll,
-  MdTabUnselected,
   MdNotes,
-  MdDateRange
+  MdOutlineNoteAdd,
+  MdSelectAll,
+  MdTabUnselected
 } from "react-icons/md";
-import { FiEdit } from "react-icons/fi";
-import { FaArrowCircleRight, FaFolder, FaFolderPlus, FaHome, FaPlus } from "react-icons/fa";
-import { deleteMultipleFolders, moveManyFolders } from "@renderer/utils/api";
-import { AllData, Folder, Note } from "@renderer/types/types";
-import Folders from "@renderer/components/Folders";
-import Header from "@renderer/components/Header";
-import Notes from "@renderer/components/Notes";
-import UserContext from "@renderer/contexxt/UserContext";
-import NoteView from "@renderer/components/NoteView";
-import Menu from "@renderer/components/Menu";
-import Settings from "@renderer/components/Settings";
-import Tree from "@renderer/components/Tree";
-import Colors from "@renderer/components/Colors";
-import { BsAlphabet, BsArrowReturnRight, BsArrowRight } from "react-icons/bs";
+import { TbFilters } from "react-icons/tb";
 import { TiTime } from "react-icons/ti";
+import { Outlet, useNavigate } from "react-router-dom";
+
+import Colors from "@renderer/components/Colors";
 import ConBubbles from "@renderer/components/ConBubbles";
 import Connections from "@renderer/components/Connections";
+import Folders from "@renderer/components/Folders";
+import Header from "@renderer/components/Header";
+import Menu from "@renderer/components/Menu";
+import Notes from "@renderer/components/Notes";
+import NoteView from "@renderer/components/NoteView";
+import Settings from "@renderer/components/Settings";
+import Tree from "@renderer/components/Tree";
+import UserContext from "@renderer/contexxt/UserContext";
+import { AllData, Folder, Note } from "@renderer/types/types";
+import {
+  deleteMultipleFolders,
+  moveManyFolders,
+  updateFolder,
+  updateNote
+} from "@renderer/utils/api";
 
 const Account = (): JSX.Element => {
   const {
@@ -47,11 +52,11 @@ const Account = (): JSX.Element => {
     setEdit,
     setMove,
     setFolder,
-    setSystemNotif,
     setCreateCon,
     setUserPreferences,
     networkNotificationError,
-    resetSystemNotification,
+    showErrorNotification,
+    showSuccessNotification,
     createCon,
     token,
     edit,
@@ -122,20 +127,7 @@ const Account = (): JSX.Element => {
       ...newNote
     };
     updateNote(token, staticNote);
-    setSystemNotif({
-      show: true,
-      title: "Updated",
-      text: `${newNote.title} was updated`,
-      color: userPreferences.theme,
-      hasCancel: false,
-      actions: [
-        {
-          text: "close",
-          func: (): void =>
-            resetSystemNotification()
-        }
-      ]
-    });
+    showSuccessNotification("Updated", `${newNote.title} was updated`, false, []);
   });
 
   const removeUnsavedChanges = (noteId): void => {
@@ -222,24 +214,9 @@ const Account = (): JSX.Element => {
       .then(() => {
         setSelectedForEdit([]);
         setSelectedFolder(null);
-        if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-          const newSuccess = {
-            show: true,
-            title: "Moved Folders",
-            text: "Successfully moved your folders",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void =>
-                  resetSystemNotification();
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
-        }
+        showSuccessNotification("Moved Folders", "Successfully moved your folders", false, [
+          { text: "undo", func: (): void => {} }
+        ]);
       })
       .catch((err) => {
         console.log(err);
@@ -264,25 +241,13 @@ const Account = (): JSX.Element => {
     setEdit(false);
     deleteMultipleFolders(token, selectedForEdit)
       .then((res) => {
-        if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-          const deletedFoldersString = temp.map((fold: Folder) => `${fold.title}`).join("\n");
-          const newSuccess = {
-            show: true,
-            title: "Successfully Deleted",
-            text: `Deleted folders: \n ${deletedFoldersString} \n\n ${res.data.message}`,
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: (): void =>
-                  resetSystemNotification();
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
-        }
+        const deletedFoldersString = temp.map((fold: Folder) => `${fold.title}`).join("\n");
+        showSuccessNotification(
+          "Successfully Deleted",
+          `Deleted folders: \n ${deletedFoldersString} \n\n ${res.data.message}`,
+          false,
+          [{ text: "undo", func: (): void => {} }]
+        );
         setSelectedForEdit([]);
       })
       .catch((err) => {
@@ -293,33 +258,16 @@ const Account = (): JSX.Element => {
           return newData;
         });
         if (err.response) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Issues Deleting Folders",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    resetSystemNotification();
-                },
-                { text: "re-try", func: () => deleteAllSelected() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
-          }
+          showErrorNotification("Issues Deleting Folders", err.response.message, true, [
+            { text: "re-try", func: () => deleteAllSelected() },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
         }
         if (err.request) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            networkNotificationError([
-              { text: "re-try", func: (): void => deleteAllSelected() },
-              { text: "reload app", func: (): void => window.location.reload() }
-            ]);
-          }
+          networkNotificationError([
+            { text: "re-try", func: (): void => deleteAllSelected() },
+            { text: "reload app", func: (): void => window.location.reload() }
+          ]);
         }
       });
   };
@@ -354,26 +302,14 @@ const Account = (): JSX.Element => {
       setSelectedFolder(null);
       updateNote(token, newNote)
         .then(() => {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "Successfully Moved",
-              text: `${move.item[0].title} was successfully moved to ${
-                selectedFolder ? selectedFolder.title : "home"
-              }`,
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    resetSystemNotification();
-                },
-                { text: "undo", func: () => undoMove() }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification(
+            "Successfully Moved",
+            `${move.item[0].title} was successfully moved to ${
+              selectedFolder ? selectedFolder.title : "home"
+            }`,
+            false,
+            [{ text: "undo", func: () => undoMove() }]
+          );
         })
         .catch((err) => {
           console.log(err);
@@ -391,33 +327,16 @@ const Account = (): JSX.Element => {
             return newData;
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Moving Note",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      resetSystemNotification();
-                  },
-                  { text: "re-try", func: () => moveItem() },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Issues Moving Note", err.response.message, true, [
+              { text: "re-try", func: () => moveItem() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => moveItem() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
+            networkNotificationError([
+              { text: "re-try", func: () => moveItem() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
         });
     }
@@ -450,26 +369,14 @@ const Account = (): JSX.Element => {
       setMove(null);
       updateFolder(token, newFolder)
         .then(() => {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-            const newSuccess = {
-              show: true,
-              title: "Successfully Moved",
-              text: `${move.item[0].title} was successfully moved to ${
-                selectedFolder ? selectedFolder.title : "home"
-              }`,
-              color: "bg-green-300",
-              hasCancel: false,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    resetSystemNotification();
-                },
-                { text: "undo", func: () => undoMove() }
-              ]
-            };
-            setSystemNotif(newSuccess);
-          }
+          showSuccessNotification(
+            "Successfully Moved",
+            `${move.item[0].title} was successfully moved to ${
+              selectedFolder ? selectedFolder.title : "home"
+            }`,
+            false,
+            [{ text: "undo", func: () => undoMove() }]
+          );
           setSelectedFolder(null);
         })
         .catch((err) => {
@@ -488,33 +395,16 @@ const Account = (): JSX.Element => {
             return newData;
           });
           if (err.response) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              const newError = {
-                show: true,
-                title: "Issues Moving Folder",
-                text: err.response.message,
-                color: "bg-red-300",
-                hasCancel: true,
-                actions: [
-                  {
-                    text: "close",
-                    func: () =>
-                      resetSystemNotification();
-                  },
-                  { text: "re-try", func: () => moveItem() },
-                  { text: "reload app", func: () => window.location.reload() }
-                ]
-              };
-              setSystemNotif(newError);
-            }
+            showErrorNotification("Issues Moving Folder", err.response.message, true, [
+              { text: "re-try", func: () => moveItem() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
           if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => moveItem() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
+            networkNotificationError([
+              { text: "re-try", func: () => moveItem() },
+              { text: "reload app", func: () => window.location.reload() }
+            ]);
           }
         });
     }
@@ -578,33 +468,16 @@ const Account = (): JSX.Element => {
         });
         setFolder({ ...folder, title: prevTitle, color: prevColor });
         if (err.response) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Issues Updating Folder",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () =>
-                    resetSystemNotification();
-                },
-                { text: "re-try", func: () => editMyFolder() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
-          }
+          showErrorNotification("Issues Updating Folder", err.response.message, true, [
+            { text: "re-try", func: () => editMyFolder() },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
         }
         if (err.request) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            networkNotificationError([
-              { text: "re-try", func: () => editMyFolder() },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
+          networkNotificationError([
+            { text: "re-try", func: () => editMyFolder() },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
         }
       });
   };
@@ -769,20 +642,12 @@ const Account = (): JSX.Element => {
                     localStorage.setItem("preferences", JSON.stringify(userPreferences));
                   } catch (err) {
                     console.log(err);
-                    setSystemNotif({
-                      show: true,
-                      title: "Saving Settings",
-                      text: "We ran into an error when trying to update the filter option in your settings. Please reload the application and try again to save your settings and if the error persists contact the developer at ryanlarge@ryanlarge.dev",
-                      color: "bg-red-300",
-                      hasCancel: true,
-                      actions: [
-                        {
-                          text: "close",
-                          func: (): void =>
-                            resetSystemNotification();
-                        }
-                      ]
-                    });
+                    showErrorNotification(
+                      "Saving Settings",
+                      "We ran into an error when trying to update the filter option in your settings. Please reload the application and try again to save your settings and if the error persists contact the developer at ryanlarge@ryanlarge.dev",
+                      true,
+                      []
+                    );
                   }
                 }}
               >
@@ -801,20 +666,12 @@ const Account = (): JSX.Element => {
                     localStorage.setItem("preferences", JSON.stringify(userPreferences));
                   } catch (err) {
                     console.log(err);
-                    setSystemNotif({
-                      show: true,
-                      title: "Saving Settings",
-                      text: "We ran into an error when trying to update the filter option in your settings. Please reload the application and try again to save your settings and if the error persists contact the developer at ryanlarge@ryanlarge.dev",
-                      color: "bg-red-300",
-                      hasCancel: true,
-                      actions: [
-                        {
-                          text: "close",
-                          func: (): void =>
-                            resetSystemNotification();
-                        }
-                      ]
-                    });
+                    showErrorNotification(
+                      "Saving Settings",
+                      "We ran into an error when trying to update the filter option in your settings. Please reload the application and try again to save your settings and if the error persists contact the developer at ryanlarge@ryanlarge.dev",
+                      true,
+                      []
+                    );
                   }
                 }}
               >
@@ -833,20 +690,12 @@ const Account = (): JSX.Element => {
                     localStorage.setItem("preferences", JSON.stringify(userPreferences));
                   } catch (err) {
                     console.log(err);
-                    setSystemNotif({
-                      show: true,
-                      title: "Saving Settings",
-                      text: "We ran into an error when trying to update the filter option in your settings. Please reload the application and try again to save your settings and if the error persists contact the developer at ryanlarge@ryanlarge.dev",
-                      color: "bg-red-300",
-                      hasCancel: true,
-                      actions: [
-                        {
-                          text: "close",
-                          func: (): void =>
-                            resetSystemNotification();
-                        }
-                      ]
-                    });
+                    showErrorNotification(
+                      "Saving Settings",
+                      "We ran into an error when trying to update the filter option in your settings. Please reload the application and try again to save your settings and if the error persists contact the developer at ryanlarge@ryanlarge.dev",
+                      true,
+                      []
+                    );
                   }
                 }}
               >

@@ -1,17 +1,14 @@
-import { useState, FormEvent, useContext, useEffect } from "react";
-import { loginUser } from "@renderer/utils/api";
+import { FormEvent, useContext, useEffect, useState } from "react";
+
 import UserContext from "@renderer/contexxt/UserContext";
-import Signup from "./Signup";
+import { loginUser } from "@renderer/utils/api";
+
 import ForgotCreds from "./ForgotCreds";
+import Signup from "./Signup";
 
 const Login = (): JSX.Element => {
-  const {
-    setToken,
-    setSystemNotif,
-    setLoading,
-    networkNotificationError,
-    resetSystemNotification
-  } = useContext(UserContext);
+  const { setToken, setLoading, networkNotificationError, showErrorNotification } =
+    useContext(UserContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,20 +49,7 @@ const Login = (): JSX.Element => {
         }
         const status = err.response.status;
         if (status >= 400 && status <= 404) {
-          const newError = {
-            show: true,
-            title: "Incorrect credentials",
-            text: err.response.data.message,
-            color: "bg-red-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: () => resetSystemNotification()
-              }
-            ]
-          };
-          return setSystemNotif(newError);
+          showErrorNotification("Incorrect Credentials", err.response.data.message, false, []);
         }
       });
   };

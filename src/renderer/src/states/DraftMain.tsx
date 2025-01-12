@@ -1,5 +1,7 @@
-import UserContext from "@renderer/contexxt/UserContext";
 import { useContext } from "react";
+
+import UserContext from "@renderer/contexxt/UserContext";
+
 import Draft from "./Draft";
 
 const DraftMain = (): JSX.Element => {

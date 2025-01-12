@@ -1,10 +1,17 @@
-import UserContext from "@renderer/contexxt/UserContext";
-import { signupUser } from "@renderer/utils/api";
 import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 import { ClipLoader } from "react-spinners";
 
+import UserContext from "@renderer/contexxt/UserContext";
+import { signupUser } from "@renderer/utils/api";
+
 const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> }): JSX.Element => {
-  const { setSystemNotif, resetSystemNotification, systemNotif } = useContext(UserContext);
+  const {
+    systemNotif,
+    resetSystemNotification,
+    showSuccessNotification,
+    showErrorNotification,
+    networkNotificationError
+  } = useContext(UserContext);
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -24,40 +31,24 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
     e.preventDefault();
     setLoadingState(true);
     if (!validateEmail() || !validateUsername() || !validatePass()) {
-      const newError = {
-        show: true,
-        title: "Please input valid fields",
-        text: "You must follow the rules for all fields",
-        color: "bg-red-400",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Please Input Valid Fields",
+        "You must follow the rules for all input fields",
+        true,
+        []
+      );
       return false;
     }
     try {
       signupUser({ username, email, password })
         .then((res) => {
           console.log(res);
-          const newNotification = {
-            show: true,
-            title: "Login",
-            text: `Please login with your credentials to access your account for the first time, a new email with your credentials was sent to your email`,
-            color: "bg-cyan-300",
-            hasCancel: true,
-            actions: [
-              {
-                text: "close",
-                func: () => resetSystemNotification()
-              }
-            ]
-          };
-          setSystemNotif(newNotification);
+          showSuccessNotification(
+            "Login",
+            "Please login with your credentials to access your account for the first time, a new email with your credentials was sent to your email",
+            true,
+            []
+          );
           localStorage.removeItem("loginCreds");
           localStorage.removeItem("signupCreds");
           setSignup(false);
@@ -66,44 +57,34 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
         })
         .catch((err) => {
           console.log(err);
-          const newError = {
-            show: true,
-            title: "Issues Signing In",
-            text: `${
+          showErrorNotification(
+            "Signing In",
+            `${
               err.response.data.message ||
               "It looks like there might be an issue with your internet connection, please check your network connection and try again"
             }`,
-            color: "bg-red-300",
-            hasCancel: true,
-            actions: [
-              {
-                text: "close",
-                func: () => resetSystemNotification()
-              },
-              { text: "retry", func: () => handleSignup(e) }
-            ]
-          };
-          setSystemNotif(newError);
+            true,
+            [{ text: "retry", func: () => handleSignup(e) }]
+          );
           setLoadingState(false);
           return false;
         });
     } catch (err) {
       console.log(err);
-      const newError = {
-        show: true,
-        title: "Issues Signing In",
-        text: err,
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
-          { text: "retry", func: () => handleSignup(e) }
-        ]
-      };
-      setSystemNotif(newError);
+      if (err.response) {
+        showErrorNotification(
+          "Signing In",
+          `${
+            err.response.data.message ||
+            "It looks like there might be an issue with your internet connection, please check your network connection and try again"
+          }`,
+          true,
+          [{ text: "retry", func: () => handleSignup(e) }]
+        );
+      }
+      if (err.request) {
+        networkNotificationError([]);
+      }
       setLoadingState(false);
       return false;
     }
@@ -120,20 +101,12 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
     }
     if (!isValid) {
       if (systemNotif.show && systemNotif.title === "Username Rules") return false;
-      const newNotif = {
-        show: true,
-        title: "Username Rules",
-        text: "Username must be: \n - 4 characters \n - contain only _, -, and numbers",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newNotif);
+      showErrorNotification(
+        "Username Rules",
+        "Username must be: \n - 4 characters \n - contain only _, -, and numbers",
+        true,
+        []
+      );
       return false;
     }
 
@@ -149,20 +122,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
     }
     if (!isValid) {
       if (systemNotif.show && systemNotif.title === "Email Rules") return false;
-      const newNotif = {
-        show: true,
-        title: "Email Rules",
-        text: "Email must be a valid email",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newNotif);
+      showErrorNotification("Email Rules", "Email must be a valid email", true, []);
       return false;
     }
     return false;
@@ -177,20 +137,12 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
     }
     if (!isValid) {
       if (systemNotif.show && systemNotif.title === "Password Rules") return false;
-      const newNotif = {
-        show: true,
-        title: "Password Rules",
-        text: "Your password must be: \n - 8 characters long \n - 2 special characters \n - 2 uppercase characters",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: (): void => resetSystemNotification()
-          }
-        ]
-      };
-      setSystemNotif(newNotif);
+      showErrorNotification(
+        "Password Rules",
+        "Your password must be: \n - 8 characters long \n - 2 special characters \n - 2 uppercase characters",
+        true,
+        []
+      );
       return false;
     }
     return false;

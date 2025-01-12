@@ -236,4 +236,16 @@ export interface ContextProps {
   sharedNotes: Note[];
   networkNotificationError: (actions: SystemNotifAction[]) => void;
   resetSystemNotification: () => void;
+  showErrorNotification: (
+    title: string,
+    text: string,
+    hasCancel: boolean,
+    actions: SystemNotifAction[]
+  ) => void;
+  showSuccessNotification: (
+    title: string,
+    text: string,
+    hasCancel: boolean,
+    actions: SystemNotifAction[]
+  ) => void;
 }

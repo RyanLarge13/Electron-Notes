@@ -472,21 +472,71 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   };
 
   const networkNotificationError = (actions: SystemNotifAction[]): void => {
-    const newError = {
-      show: true,
-      title: "Network Error",
-      text: "Our application was not able to reach the server, please check your internet connection and try again",
-      color: "bg-red-300",
-      hasCancel: true,
-      actions: [
-        {
-          text: "close",
-          func: (): void => resetSystemNotification()
-        },
-        ...actions
-      ]
-    };
-    setSystemNotif(newError);
+    if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+      const newError = {
+        show: true,
+        title: "Network Error",
+        text: "Our application was not able to reach the server, please check your internet connection and try again",
+        color: "bg-red-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: (): void => resetSystemNotification()
+          },
+          ...actions
+        ]
+      };
+      setSystemNotif(newError);
+    }
+  };
+
+  const showErrorNotification = (
+    title: string,
+    text: string,
+    hasCancel: boolean,
+    actions: SystemNotifAction[]
+  ): void => {
+    if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
+      setSystemNotif({
+        show: true,
+        title,
+        text,
+        color: "bg-red-300",
+        hasCancel,
+        actions: [
+          {
+            text: "close",
+            func: () => resetSystemNotification()
+          },
+          ...actions
+        ]
+      });
+    }
+  };
+
+  const showSuccessNotification = (
+    title: string,
+    text: string,
+    hasCancel: boolean,
+    actions: SystemNotifAction[]
+  ): void => {
+    if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
+      setSystemNotif({
+        show: true,
+        title,
+        text,
+        color: userPreferences.theme,
+        hasCancel,
+        actions: [
+          {
+            text: "close",
+            func: () => resetSystemNotification()
+          },
+          ...actions
+        ]
+      });
+    }
   };
 
   return (
@@ -585,7 +635,9 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         minimizeArray,
         setMinimizeArray,
         networkNotificationError,
-        resetSystemNotification
+        resetSystemNotification,
+        showErrorNotification,
+        showSuccessNotification
       }}
     >
       {children}

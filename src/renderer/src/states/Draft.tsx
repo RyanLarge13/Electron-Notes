@@ -1,16 +1,18 @@
-import { useState, useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaLock, FaSave, FaUnlock } from "react-icons/fa";
-import { motion, useDragControls } from "framer-motion";
-import { createNewNote, updateNote } from "@renderer/utils/api";
-import { ClipLoader } from "react-spinners";
-import { v4 as uuidv4 } from "uuid";
-import ReactQuill from "react-quill";
-import UserContext from "@renderer/contexxt/UserContext";
 import "react-quill/dist/quill.snow.css";
 import "../assets/quill.css";
-import { Note } from "@renderer/types/types";
+
+import { motion, useDragControls } from "framer-motion";
+import { useContext, useEffect, useState } from "react";
+import { FaLock, FaSave, FaUnlock } from "react-icons/fa";
 import { MdDragHandle } from "react-icons/md";
+import ReactQuill from "react-quill";
+import { useNavigate } from "react-router-dom";
+import { ClipLoader } from "react-spinners";
+import { v4 as uuidv4 } from "uuid";
+
+import UserContext from "@renderer/contexxt/UserContext";
+import { Note } from "@renderer/types/types";
+import { createNewNote, updateNote } from "@renderer/utils/api";
 
 const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
   const {
@@ -20,12 +22,13 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
     editDraft,
     networkNotificationError,
     resetSystemNotification,
+    showErrorNotification,
+    showSuccessNotification,
     setUserPreferences,
     setNote,
     setDrafts,
     setAllData,
-    setNoteToEdit,
-    setSystemNotif
+    setNoteToEdit
   } = useContext(UserContext);
 
   const [title, setTitle] = useState(noteToEdit ? noteToEdit.title : "");
@@ -130,21 +133,12 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
     } catch (err) {
       console.log(err);
       clearInterval(autoSaveInterval);
-      const newError = {
-        show: true,
-        title: "Auto Save Change Failed",
-        text: "There was an error with the application when trying to update your settings, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        color: "bg-red-300",
-        hasCancel: true,
-        actions: [
-          {
-            text: "close",
-            func: () => resetSystemNotification()
-          },
-          { text: "reload app", func: () => window.location.reload() }
-        ]
-      };
-      setSystemNotif(newError);
+      showErrorNotification(
+        "Settings Update Failed",
+        "If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+        true,
+        [{ text: "reload app", func: () => window.location.reload() }]
+      );
     }
   };
 
@@ -162,56 +156,22 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
     updateNote(token, updatedNote)
       .then(() => {
         removeUnsavedChanges();
-        if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-          const newSuccess = {
-            show: true,
-            title: "Auto Save",
-            text: "note saved",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: () => resetSystemNotification()
-              },
-              {
-                text: "turn off",
-                func: (): void => {
-                  turnoffAutoSave();
-                }
-              }
-            ]
-          };
-          setSystemNotif(newSuccess);
-        }
+        showSuccessNotification("Auto Save", "Note saved", false, [
+          {
+            text: "turn off",
+            func: (): void => turnoffAutoSave()
+          }
+        ]);
         setSaving(false);
       })
       .catch((err) => {
         if (err.response) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Issues Updating Note",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
-          }
+          showErrorNotification("Updating Note", err.response.message, true, [
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
         }
         if (err.request) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            networkNotificationError([
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
+          networkNotificationError([{ text: "reload app", func: () => window.location.reload() }]);
         }
         setSaving(false);
       });
@@ -294,23 +254,9 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
           };
           return newData;
         });
-        if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-          const newSuccess = {
-            show: true,
-            title: "New Note",
-            text: "Your new note has been created!",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: () => resetSystemNotification()
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
-        }
+        showSuccessNotification("New Note", "Your note has been created", false, [
+          { text: "undo", func: (): void => {} }
+        ]);
         setSaving(false);
       })
       .catch((err) => {
@@ -320,44 +266,28 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
           return { ...prevData, notes: newNotes };
         });
         if (err.response) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Issues Updating Note",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                {
-                  text: "open note",
-                  func: (): void => {
-                    navigate("/newnote");
-                    resetSystemNotification();
-                  }
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
-          }
+          showErrorNotification("Updating Note", err.response.message, true, [
+            {
+              text: "open note",
+              func: (): void => {
+                navigate("/newnote");
+                resetSystemNotification();
+              }
+            },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
         }
         if (err.request) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            networkNotificationError([
-              {
-                text: "open note",
-                func: (): void => {
-                  navigate("/newnote");
-                  resetSystemNotification();
-                }
-              },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
+          networkNotificationError([
+            {
+              text: "open note",
+              func: (): void => {
+                navigate("/newnote");
+                resetSystemNotification();
+              }
+            },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
         }
         setSaving(false);
       });
@@ -382,28 +312,11 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
       });
       return { ...prevData, notes: newNotes };
     });
-    // setNoteToEdit(null);
-    // setNote({ ...noteToEdit, htmlText: value });
-    // navigate("/");
     updateNote(token, updatedNote)
       .then(() => {
-        if (userPreferences.notify.notifyAll && userPreferences.notify.notifySuccess) {
-          const newSuccess = {
-            show: true,
-            title: "Saved",
-            text: "Your note is saved",
-            color: "bg-green-300",
-            hasCancel: false,
-            actions: [
-              {
-                text: "close",
-                func: () => resetSystemNotification()
-              },
-              { text: "undo", func: (): void => {} }
-            ]
-          };
-          setSystemNotif(newSuccess);
-        }
+        showSuccessNotification("Saved", "Your note was saved successfully", false, [
+          { text: "undo", func: (): void => {} }
+        ]);
         setSaving(false);
       })
       .catch((err) => {
@@ -417,30 +330,16 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
           return { ...prevData, notes: newNotes };
         });
         if (err.response) {
-          if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-            const newError = {
-              show: true,
-              title: "Issues Updating Folder",
-              text: err.response.message,
-              color: "bg-red-300",
-              hasCancel: true,
-              actions: [
-                {
-                  text: "close",
-                  func: () => resetSystemNotification()
-                },
-                {
-                  text: "open note",
-                  func: (): void => {
-                    resetSystemNotification();
-                    navigate("/newnote");
-                  }
-                },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            };
-            setSystemNotif(newError);
-          }
+          showErrorNotification("Updating Folder", err.response.message, true, [
+            {
+              text: "open note",
+              func: (): void => {
+                resetSystemNotification();
+                navigate("/newnote");
+              }
+            },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
         }
         if (err.request) {
           if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
@@ -474,17 +373,11 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
       favorite: favorite
     };
     setDrafts((prev) => [...prev, newDraft]);
-    const newDraftNotif = {
-      show: true,
-      title: "Saved In Drafts",
-      text: "Your note was saved as a draft. This note will be lost when you exit the application, if you would like to save it, go into the menu, edit and save",
-      color: "bg-green-300",
-      hasCancel: false,
-      actions: [
-        {
-          text: "close",
-          func: (): void => resetSystemNotification()
-        },
+    showSuccessNotification(
+      "Saved In Drafts",
+      "Your note was saved as a draft and will be lost if not saved before exiting the application",
+      false,
+      [
         {
           text: "undo",
           func: (): void => {
@@ -493,8 +386,7 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
           }
         }
       ]
-    };
-    setSystemNotif(newDraftNotif);
+    );
   };
 
   return (
@@ -526,7 +418,6 @@ const Draft = ({ noteToEdit }: { noteToEdit: Note }): JSX.Element => {
         dragSnapToOrigin={false}
         dragListener={false}
         dragControls={noteDragControl}
-        // dragConstraints={{ top: 0, left: 0 }}
         initial={{
           top: `${position.top}px`,
           left: `${position.left}px`,
