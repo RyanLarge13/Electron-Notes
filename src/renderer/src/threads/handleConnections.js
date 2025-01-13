@@ -1,7 +1,6 @@
 // handleConnectionsWorker.js
 self.onmessage = (event) => {
   const { connections, connectionRequests, shareRequests, sharedNotes, userEmail } = event.data;
-  console.log("Processing connections in a Web Worker...");
 
   const filteredConnections = connections.map((con) => {
     const connection = { id: con.conid, email: "" };

@@ -44,7 +44,7 @@ const ConBubbles = (): JSX.Element => {
     acceptRequestConnection(token, requestId, userEmail)
       .then((res) => {
         resetSystemNotification();
-        showSuccessNotification("New Connection", res.data.data.message, false, []);
+        showSuccessNotification("New Connection", res.data.message, false, []);
         setConnections((prev) => [...prev, { id: res.data.data.conreqid, email: userEmail }]);
         console.log(res);
       })
@@ -81,8 +81,8 @@ const ConBubbles = (): JSX.Element => {
                   transition: { duration: 0.025 }
                 }}
                 style={{
-                  right: hoverConnections ? 25 * index + 60 : 25,
-                  zIndex: hoverConnections ? index : -1
+                  right: 25 * index + 60,
+                  zIndex: index
                 }}
                 className={`fixed right-10 shadow-md rounded-md outline outline-slate-800 outline-2 text-white duration-200 ${
                   userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
@@ -90,7 +90,6 @@ const ConBubbles = (): JSX.Element => {
               >
                 <p className="mb-2 p-2 pr-10 font-semibold">{conOptions.email}</p>
                 <button
-                  onClick={() => confirmAccept(con.id, con.email)}
                   className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
                     userPreferences.darkMode
                       ? "bg-slate-700 hover:bg-slate-600"
@@ -119,15 +118,19 @@ const ConBubbles = (): JSX.Element => {
             data-tooltip-content={con.email}
             onClick={() =>
               setConOptions((prev) => {
+                console.log(con);
                 if (prev.id === con.id) {
+                  console.log("exists");
                   return { id: "", email: "" };
+                } else {
+                  console.log("Does not exist");
+                  return { id: con.id, email: con.email };
                 }
-                return con;
               })
             }
             style={{
-              right: hoverConnections ? 25 * index + 60 : 25,
-              zIndex: hoverConnections ? index : -1
+              right: 25 * index + 60,
+              zIndex: index
             }}
             className={`fixed top-3 rounded-full ${
               userPreferences.theme ? themeStringText : "text-amber-300"
