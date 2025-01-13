@@ -1,11 +1,13 @@
-import { useContext, useEffect, useState } from "react";
-import { BiEdit, BiGrid, BiListUl, BiMenuAltLeft, BiPlus } from "react-icons/bi";
-import { IoIosSearch } from "react-icons/io";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { IoReturnUpBackSharp } from "react-icons/io5";
-import { FaHome } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useContext, useEffect, useState } from "react";
+import { BiEdit, BiFolderPlus, BiGrid, BiListUl, BiMenuAltLeft } from "react-icons/bi";
+import { BsStarFill, BsThreeDotsVertical } from "react-icons/bs";
+import { CiGrid42 } from "react-icons/ci";
+import { FaHome } from "react-icons/fa";
+import { IoIosSearch } from "react-icons/io";
+import { IoReturnUpBackSharp } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+
 import UserContext from "@renderer/contexxt/UserContext";
 
 const Header = (): JSX.Element => {
@@ -22,6 +24,8 @@ const Header = (): JSX.Element => {
     setSearch,
     setUserPreferences,
     setSettings,
+    setPinFavs,
+    pinFavs,
     settings,
     menu,
     allData,
@@ -39,6 +43,10 @@ const Header = (): JSX.Element => {
   const [optionMenu, setOptionMenu] = useState(false);
 
   const navigate = useNavigate();
+
+  const themeStringText = userPreferences?.theme
+    ? userPreferences.theme.replace("bg", "text")
+    : "text-amber-300";
 
   useEffect(() => {
     const handleNavBack = (e: MouseEvent): void => {
@@ -183,7 +191,9 @@ const Header = (): JSX.Element => {
     return false;
   };
 
-  const pinFavoritesToTop = (): void => {};
+  const pinFavoritesToTop = (): void => {
+    setPinFavs((prev) => !prev);
+  };
 
   return (
     <>
@@ -195,7 +205,7 @@ const Header = (): JSX.Element => {
           userPreferences.darkMode ? "bg-[#222]" : "bg-slate-100"
         } flex justify-between items-center w-full text-xl mt-20 sticky top-0 py-3 bg-opacity-75 backdrop-blur-sm bg-[#222] z-20`}
       >
-        <div className="flex justify-start items-center gap-x-3">
+        <div className={`flex justify-start items-center gap-x-3 ${themeStringText}`}>
           <button onClick={() => setMenu(true)}>
             <BiMenuAltLeft />
           </button>
@@ -223,12 +233,14 @@ const Header = (): JSX.Element => {
           />
         )}
         <div className="relative">
-          <button onClick={() => setSearch((prev) => !prev)}>
-            <IoIosSearch />
-          </button>
-          <button onClick={() => setOptionMenu((prev) => !prev)}>
-            <BsThreeDotsVertical />
-          </button>
+          <div className={`${themeStringText}`}>
+            <button onClick={() => setSearch((prev) => !prev)}>
+              <IoIosSearch />
+            </button>
+            <button onClick={() => setOptionMenu((prev) => !prev)}>
+              <BsThreeDotsVertical />
+            </button>
+          </div>
           {optionMenu && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -246,14 +258,22 @@ const Header = (): JSX.Element => {
                   };
                   localStorage.setItem("preferences", JSON.stringify(newPreferences));
                   setUserPreferences(newPreferences);
-                  setView((prev) => (prev === "list" ? "grid" : "list"));
+                  setView((prev) =>
+                    prev === "list" ? "masonry" : view === "masonry" ? "grid" : "list"
+                  );
                 }}
                 className={`text-left p-3 flex justify-between items-center ${
                   userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                 } duration-200 w-full`}
               >
-                {view === "list" ? "Grid" : "List"}
-                {view === "list" ? <BiGrid /> : <BiListUl />}
+                {view === "list" ? "Masonry" : view === "masonry" ? "Grid" : "List"}
+                {view === "list" ? (
+                  <CiGrid42 className={`${themeStringText}`} />
+                ) : view === "masonry" ? (
+                  <BiGrid className={`${themeStringText}`} />
+                ) : (
+                  <BiListUl className={`${themeStringText}`} />
+                )}
               </button>
               <button
                 onClick={() => {
@@ -265,7 +285,7 @@ const Header = (): JSX.Element => {
                 } duration-200 w-full`}
               >
                 Create Folder
-                <BiPlus />
+                <BiFolderPlus className={`${themeStringText}`} />
               </button>
               <button
                 onClick={() => {
@@ -277,15 +297,16 @@ const Header = (): JSX.Element => {
                 } duration-200 w-full`}
               >
                 Edit
-                <BiEdit />
+                <BiEdit className={`${themeStringText}`} />
               </button>
               <button
                 onClick={() => pinFavoritesToTop()}
                 className={`text-left p-3 flex justify-between items-center ${
-                  userPreferences.darkMode ? "hover:bg-slate-800" : "hover:bg-slate-300"
+                  userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
                 } duration-200 w-full`}
               >
-                Pin Favorites
+                {pinFavs ? "Un-Pin Favorites" : "Pin Favorites"}
+                <BsStarFill className={`${themeStringText}`} />
               </button>
             </motion.div>
           )}

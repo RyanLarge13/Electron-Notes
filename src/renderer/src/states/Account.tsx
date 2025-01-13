@@ -1,21 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
-import { BsAlphabet, BsArrowReturnRight, BsArrowRight } from "react-icons/bs";
+import { BsAlphabet, BsArrowReturnRight, BsArrowRight, BsArrowRightShort } from "react-icons/bs";
 import { FaArrowCircleRight, FaFolder, FaFolderPlus, FaHome, FaPlus } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi";
 import { IoMdShare } from "react-icons/io";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
 import {
-  MdCancel,
-  MdDateRange,
-  MdDelete,
-  MdDriveFileMove,
-  MdGroupAdd,
-  MdNotes,
-  MdOutlineNoteAdd,
-  MdSelectAll,
-  MdTabUnselected
+    MdCancel, MdDateRange, MdDelete, MdDriveFileMove, MdGroupAdd, MdNotes, MdOutlineNoteAdd,
+    MdSelectAll, MdTabUnselected
 } from "react-icons/md";
 import { TbFilters } from "react-icons/tb";
 import { TiTime } from "react-icons/ti";
@@ -34,10 +27,7 @@ import Tree from "@renderer/components/Tree";
 import UserContext from "@renderer/contexxt/UserContext";
 import { AllData, Folder, Note } from "@renderer/types/types";
 import {
-  deleteMultipleFolders,
-  moveManyFolders,
-  updateFolder,
-  updateNote
+    deleteMultipleFolders, moveManyFolders, updateFolder, updateNote
 } from "@renderer/utils/api";
 
 const Account = (): JSX.Element => {
@@ -505,12 +495,15 @@ const Account = (): JSX.Element => {
         <div className="flex justify-end items-center font-semibold gap-x-3 fixed top-5 left-5">
           {nesting.map((folderMeta: { title: string; id: string }, index: number) => (
             <motion.button
+              key={index}
               initial={{ opacity: 0, x: 10 }}
               whileInView={{ opacity: 1, x: 0 }}
-              key={index}
-              className="text-xs inline whitespace-nowrap"
+              className="text-xs flex justify-between items-center whitespace-nowrap"
               onClick={() => navigateFolder(folderMeta.id, index)}
             >
+              {index > 0 ? (
+                <BsArrowRightShort className={`${themeStringText} mr-3 ml-[-7px]`} />
+              ) : null}
               {folderMeta.title}
             </motion.button>
           ))}
@@ -652,7 +645,7 @@ const Account = (): JSX.Element => {
                 }}
               >
                 Title
-                <BsAlphabet />
+                <BsAlphabet className={`${themeStringText}`} />
               </button>
               <button
                 className={`text-left p-3 flex justify-between items-center ${
@@ -676,7 +669,7 @@ const Account = (): JSX.Element => {
                 }}
               >
                 Date
-                <MdDateRange />
+                <MdDateRange className={`${themeStringText}`} />
               </button>
               <button
                 className={`text-left p-3 flex justify-between items-center ${
@@ -700,7 +693,7 @@ const Account = (): JSX.Element => {
                 }}
               >
                 Updated
-                <TiTime />
+                <TiTime className={`${themeStringText}`} />
               </button>
             </motion.div>
           </>
@@ -709,10 +702,10 @@ const Account = (): JSX.Element => {
           onClick={() => setFilterOptions((prev) => !prev)}
           className="flex justify-start items-center gap-x-1"
         >
-          <TbFilters />
+          <TbFilters className={`${themeStringText}`} />
           <p>{filter}</p>
         </button>
-        <button onClick={() => setOrder((prev) => !prev)}>
+        <button onClick={() => setOrder((prev) => !prev)} className={`${themeStringText}`}>
           {order ? <LuArrowDownWideNarrow /> : <LuArrowUpWideNarrow />}
         </button>
       </div>
@@ -787,7 +780,7 @@ const Account = (): JSX.Element => {
             animate={{ opacity: 1, y: 0 }}
             className={`rounded-md shadow-md fixed bottom-10 right-10 ${
               userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
-            } flex flex-col justify-center items-center font-bold w-40 overflow-hidden`}
+            } flex flex-col justify-center items-center w-40 overflow-hidden`}
           >
             <button
               className={`flex justify-between items-center w-full py-3 px-4 ${
@@ -799,7 +792,7 @@ const Account = (): JSX.Element => {
               }}
             >
               New Folder
-              <FaFolderPlus />
+              <FaFolderPlus className={`${themeStringText}`} />
             </button>
             <button
               className={`flex justify-between items-center w-full py-3 px-4 ${
@@ -811,7 +804,7 @@ const Account = (): JSX.Element => {
               }}
             >
               New Note
-              <MdOutlineNoteAdd />
+              <MdOutlineNoteAdd className={`${themeStringText}`} />
             </button>
           </motion.div>
         </>

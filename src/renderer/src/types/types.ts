@@ -1,4 +1,4 @@
-import { SetStateAction, Dispatch } from "react";
+import { Dispatch, SetStateAction } from "react";
 
 // Public
 export type Folder = {
@@ -133,9 +133,9 @@ type Nesting = {
   id: string;
 };
 
-type Connection = {
-  conReq: string;
-  conEmail: string;
+export type Connection = {
+  id: string;
+  email: string;
 };
 
 export interface ContextProps {
@@ -188,6 +188,8 @@ export interface ContextProps {
   setFolderSearch: Dispatch<SetStateAction<boolean>>;
   setFolderSearchText: Dispatch<SetStateAction<string>>;
   setMinimizeArray: Dispatch<SetStateAction<string[]>>;
+  setPinnedFavorites: Dispatch<SetStateAction<Note[]>>;
+  setPinFavs: Dispatch<SetStateAction<boolean>>;
   minimizeArray: string[];
   folderSearchText: string;
   folderSearch: boolean;
@@ -234,6 +236,8 @@ export interface ContextProps {
   connectionRequests: Connection[];
   shareRequests: Connection[];
   sharedNotes: Note[];
+  pinnedFavorites: Note[];
+  pinFavs: boolean;
   networkNotificationError: (actions: SystemNotifAction[]) => void;
   resetSystemNotification: () => void;
   showErrorNotification: (

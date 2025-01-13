@@ -2,24 +2,11 @@ import cheerio from "cheerio";
 import { motion } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
-  BsFiletypeDocx,
-  BsFiletypeHtml,
-  BsFiletypePdf,
-  BsFiletypeTxt,
-  BsStar,
-  BsStarFill
+    BsFiletypeDocx, BsFiletypeHtml, BsFiletypePdf, BsFiletypeTxt, BsStar, BsStarFill
 } from "react-icons/bs";
 import {
-  FaArrowCircleRight,
-  FaArrowRight,
-  FaCopy,
-  FaDesktop,
-  FaEdit,
-  FaFolder,
-  FaLock,
-  FaSave,
-  FaTrash,
-  FaWindowClose
+    FaArrowCircleRight, FaArrowRight, FaCopy, FaDesktop, FaEdit, FaFolder, FaLock, FaSave, FaTrash,
+    FaWindowClose
 } from "react-icons/fa";
 import { IoRemoveCircle } from "react-icons/io5";
 import { MdCancel, MdDeleteForever, MdRestore, MdUpdate } from "react-icons/md";
@@ -31,11 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 import UserContext from "@renderer/contexxt/UserContext";
 import { AllData, Note } from "@renderer/types/types";
 import {
-  createNewNote,
-  deleteANote,
-  moveNoteToTrash,
-  updateFavoriteOnNote,
-  updateNote
+    createNewNote, deleteANote, moveNoteToTrash, updateFavoriteOnNote, updateNote
 } from "@renderer/utils/api";
 
 const Notes = (): JSX.Element => {
@@ -54,6 +37,8 @@ const Notes = (): JSX.Element => {
     userPreferences,
     user,
     noteDragFolder,
+    pinFavs,
+    pinnedFavorites,
     setNote,
     setNoteIsMoving,
     setNoteDragFolder,
@@ -1028,6 +1013,205 @@ const Notes = (): JSX.Element => {
 
   return (
     <div className="w-full py-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 relative mb-3">
+        <div
+          className={`absolute bottom-0 right-0 left-0 h-1 rounded-full w-full ${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`}
+        ></div>
+        {pinFavs
+          ? pinnedFavorites.map((note: Note) => (
+              <motion.div
+                whileHover={{ backgroundColor: userPreferences.darkMode ? "#444" : "#fff" }}
+                initial={{ opacity: 0.25 }}
+                whileInView={{ opacity: 1 }}
+                drag={true}
+                dragSnapToOrigin={true}
+                onDragStart={() => {
+                  setNoteDragging(note);
+                  setNoteDrag(true);
+                }}
+                onDragEnd={() => handleDragEnd()}
+                animate={{
+                  scale: noteIsMoving && noteDragging.noteid === note.noteid ? 0 : 1,
+                  backgroundColor: userPreferences.darkMode ? "#333" : "#e2e8f0",
+                  minHeight: note.locked ? "125px" : "125px"
+                }}
+                whileDrag={{
+                  pointerEvents: "none",
+                  boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`,
+                  zIndex: 1000
+                }}
+                onContextMenu={(e) => openNotesOptions(e, note)}
+                key={note.noteid}
+                className={`${search && folder === null ? "my-20" : "my-5"} ${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
+                onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
+              >
+                {!note.trashed ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateFavorite(!note.favorite, note);
+                    }}
+                    className={`absolute top-[-5px] duration-100 hover:scale-[1.25] left-[-5px] ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+                  >
+                    {note.favorite === true ? <BsStarFill /> : <BsStar />}
+                  </button>
+                ) : null}
+                {search && folder === null ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSearch(false);
+                      setFolder(allData.folders.find((fold) => fold.folderid === note.folderId));
+                    }}
+                    className={`absolute top-[-35px] left-0 right-0 z-20 duration-200 ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444] text-white" : "bg-slate-200 hover:bg-slate-300 text-black"} p-2 rounded-t-md`}
+                  >
+                    <p className="flex justify-center items-center gap-x-3 text-xs">
+                      In <FaFolder />
+                      <FaArrowRight />
+                      {allData.folders.find((fold) => fold.folderid === note.folderId).title}
+                    </p>
+                  </button>
+                ) : null}
+                {checkForUnsaved(note.noteid) ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setUnsavedChangesOptions(note);
+                    }}
+                    className="text-black hover:translate-x-5 duration-200 absolute bottom-8 rounded-tl-md shadow-md right-0 text-xs bg-gradient-to-tr from-orange-300 to-red-400 py-1 px-3"
+                  >
+                    <p>Unsaved Changes</p>
+                  </button>
+                ) : null}
+                {unsavedChangesOptions !== null && unsavedChangesOptions.noteid === note.noteid ? (
+                  <>
+                    <div
+                      className="bg-transparent fixed z-40 inset-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUnsavedChangesOptions(false);
+                      }}
+                    ></div>
+                    <div
+                      className={`duration-200 flex flex-col justify-center items-center absolute bottom-8 rounded-md shadow-md right-[-100px] text-xs bg-gradient-to-tr ${userPreferences.darkMode ? "bg-[#222] text-white" : "bg-slate-100 text-black"} z-40`}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          saveNote(note);
+                        }}
+                        className={`rounded-t-sm w-full min-w-[100px] ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444]" : "bg-slate-100 hover:bg-slate-200"} duration-200 bg-[#333] px-3 py-1 flex justify-between items-center`}
+                      >
+                        save
+                        <FaSave />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeUnsavedChanges(note);
+                        }}
+                        className={`w-full ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444]" : "bg-slate-100 hover:bg-slate-200"} duration-200 bg-[#333] px-3 py-1 flex justify-between items-center`}
+                      >
+                        discard
+                        <IoRemoveCircle />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setUnsavedChangesOptions(null);
+                        }}
+                        className={`rounded-b-sm w-full ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444]" : "bg-slate-100 hover:bg-slate-200"} duration-200 bg-[#333] px-3 py-1 flex justify-between items-center`}
+                      >
+                        cancel
+                        <MdCancel />
+                      </button>
+                    </div>
+                  </>
+                ) : null}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 radial-gradient pointer-events-none"
+                ></div>
+                <div
+                  className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
+                    userPreferences.darkMode ? "bg-[#222] text-white" : "bg-white text-black"
+                  } rounded-tl-md`}
+                >
+                  <p className="flex justify-center items-center gap-x-1">
+                    <MdUpdate className="text-lg" />
+                    <span>
+                      {new Date(note.updated).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric"
+                      })}
+                    </span>
+                  </p>
+                </div>
+                <div className="flex justify-between items-start gap-x-3 pb-1 mb-1">
+                  {renameANote && renameANote.noteid === note.noteid ? (
+                    <form onSubmit={changeTitle}>
+                      <input
+                        ref={renameRef}
+                        value={renameText}
+                        onChange={(e) => setRenameText(e.target.value)}
+                        placeholder={note.title}
+                        className="focus:outline-none font-semibold text-xl bg-transparent"
+                      />
+                    </form>
+                  ) : (
+                    <h3 className="font-semibold text-2xl">{note.title}</h3>
+                  )}
+                  <div className="flex mt-2 justify-between items-center gap-x-3 text-lg">
+                    <button
+                      onClick={(e): void => {
+                        e.stopPropagation();
+                        if (renameANote) {
+                          setRenameANote(null);
+                          setRenameText("");
+                          return;
+                        }
+                        rename(note);
+                      }}
+                      className={`${textThemeString}`}
+                    >
+                      {renameANote && renameANote.noteid ? <TbX /> : <TbEdit />}
+                    </button>
+                    <button
+                      onClick={(e): void => {
+                        e.stopPropagation();
+                        confirmTrash(note);
+                      }}
+                    >
+                      <TbTrash className="text-red-500" />
+                    </button>
+                    <TbNotes className={`${textThemeString}`} />
+                  </div>
+                </div>
+                {note.locked ? (
+                  <div className="absolute bottom-3 left-3 shadow-md">
+                    <FaLock className="text-red-300" />
+                  </div>
+                ) : (
+                  <div
+                    className="mt-3 renderHtml max-h-[75%] overflow-y-clip"
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        note.htmlText.slice(
+                          0,
+                          note.htmlText.length / 5 < 500
+                            ? note.htmlText.length / 5 < 100
+                              ? 100
+                              : 500
+                            : 500
+                        ) + " ..."
+                    }}
+                  ></div>
+                )}
+              </motion.div>
+            ))
+          : null}
+      </div>
       <Masonry
         breakpointCols={masonryBreakPoints}
         className="my-masonry-grid px-5"

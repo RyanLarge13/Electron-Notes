@@ -10,9 +10,12 @@
   },
   "git.ignoreLimitWarning": true,
   "cSpell.words": [
+    "conid",
+    "conreqid",
     "contexxt",
     "Creds",
     "Dems",
+    "Favs",
     "folderid",
     "maximizable",
     "minimizable",

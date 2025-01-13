@@ -76,6 +76,10 @@ const MainPage = (): JSX.Element => {
 
   const navigate = useNavigate();
 
+  const themeStringText = userPreferences?.theme
+    ? userPreferences.theme.replace("bg", "text")
+    : "text-amber-300";
+
   const handleKeyPress = (e): void => {
     const key: string = e.key;
     if (key in keyPresses) {
@@ -234,7 +238,7 @@ const MainPage = (): JSX.Element => {
   const quickActions: ContextMenuOption[] = [
     {
       title: "new folder",
-      icon: <FaFolderPlus />,
+      icon: <FaFolderPlus className={`${themeStringText}`} />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
         navigate("/newfolder");
@@ -242,7 +246,7 @@ const MainPage = (): JSX.Element => {
     },
     {
       title: "new note",
-      icon: <FaPlusSquare />,
+      icon: <FaPlusSquare className={`${themeStringText}`} />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
         setNoteToEdit((prev) => [
@@ -265,7 +269,7 @@ const MainPage = (): JSX.Element => {
     },
     {
       title: "search folders",
-      icon: <TbFolderSearch />,
+      icon: <TbFolderSearch className={`${themeStringText}`} />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
         setFolderSearchText("");
@@ -274,7 +278,7 @@ const MainPage = (): JSX.Element => {
     },
     {
       title: "search notes",
-      icon: <LuFileSearch />,
+      icon: <LuFileSearch className={`${themeStringText}`} />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
         setSearch(true);
@@ -282,7 +286,7 @@ const MainPage = (): JSX.Element => {
     },
     {
       title: "menu",
-      icon: <MdOutlineMenu />,
+      icon: <MdOutlineMenu className={`${themeStringText}`} />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
         setMenu(true);
@@ -290,7 +294,7 @@ const MainPage = (): JSX.Element => {
     },
     {
       title: "edit",
-      icon: <FaEdit />,
+      icon: <FaEdit className={`${themeStringText}`} />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
         setEdit(true);
@@ -298,7 +302,7 @@ const MainPage = (): JSX.Element => {
     },
     {
       title: "change view",
-      icon: <PiSwap />,
+      icon: <PiSwap className={`${themeStringText}`} />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
         const newPreferences = {
@@ -314,7 +318,7 @@ const MainPage = (): JSX.Element => {
     },
     {
       title: "change order",
-      icon: <FaList />,
+      icon: <FaList className={`${themeStringText}`} />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
         setOrder((prevOrder) => !prevOrder);
@@ -322,12 +326,12 @@ const MainPage = (): JSX.Element => {
     },
     {
       title: "edit current folder",
-      icon: <FaEdit />,
+      icon: <FaEdit className={`${themeStringText}`} />,
       func: (): void => editCurrentFolder()
     },
     {
       title: "settings",
-      icon: <IoSettings />,
+      icon: <IoSettings className={`${themeStringText}`} />,
       func: (): void => {
         setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
         setMenu(true);

@@ -27,6 +27,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [shareRequests, setShareRequests] = useState([]);
   const [sharedNotes, setSharedNotes] = useState([]);
   const [notesToRender, setNotesToRender] = useState([]);
+  const [pinnedFavorites, setPinnedFavorites] = useState([]);
+  const [pinFavs, setPinFavs] = useState(false);
   const [order, setOrder] = useState(true);
   const [filter, setFilter] = useState("Title");
   const [note, setNote] = useState<Note[] | []>([]);
@@ -94,6 +96,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         savedFolder: null,
         autoSave: false,
         unsavedNotes: [],
+        pinFavs: false,
         notify: {
           notifyAll: true,
           notifySuccess: true,
@@ -173,6 +176,11 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         } else {
           parsedPreferences.noteDems = [];
         }
+        if ("pinFavs" in parsedPreferences) {
+          null;
+        } else {
+          parsedPreferences.pinFavs = false;
+        }
 
         parsedPreferences.order ? setOrder(parsedPreferences.order) : setOrder(true);
         parsedPreferences.filter ? setFilter(parsedPreferences.filter) : setFilter("Title");
@@ -182,6 +190,10 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
             ? setView("list")
             : setView("masonry");
         setUserPreferences(parsedPreferences);
+
+        if (parsedPreferences.pinFavs === true) {
+          setPinFavs(true);
+        }
         localStorage.setItem("preferences", JSON.stringify(parsedPreferences));
       } catch (err) {
         console.log(err);
@@ -256,6 +268,12 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
 
   useEffect(() => {
     if (!isInitialLoad && allData) {
+      // Add in pinned notes here
+      const pinnedNotes = allData.notes.filter((aNote: Note): boolean => aNote.favorite);
+
+      setPinnedFavorites(pinnedNotes);
+
+      // setFolder and notes
       if (!folder) {
         const topFolders = allData.folders.filter((fold: Folder) => fold.parentFolderId === null);
         topFolders.sort((a: Folder, b: Folder) => a.title.localeCompare(b.title));
@@ -636,6 +654,10 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         folderSearchText,
         setFolderSearchText,
         minimizeArray,
+        pinnedFavorites,
+        pinFavs,
+        setPinFavs,
+        setPinnedFavorites,
         setMinimizeArray,
         networkNotificationError,
         resetSystemNotification,
