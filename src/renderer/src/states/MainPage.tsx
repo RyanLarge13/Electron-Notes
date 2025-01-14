@@ -11,6 +11,7 @@ import { Tooltip } from "react-tooltip";
 import { v4 as uuidv4 } from "uuid";
 
 import ContextMenu from "@renderer/components/ContextMenu";
+import NoteShareComponent from "@renderer/components/NoteShareComponent";
 import SystemNotif from "@renderer/components/SystemNotif";
 import UserContext from "@renderer/contexxt/UserContext";
 import { ContextMenuOption } from "@renderer/types/types";
@@ -416,6 +417,7 @@ const MainPage = (): JSX.Element => {
       "
       ></div>
       <ContextMenu />
+      <NoteShareComponent />
       <SystemNotif />
       {!loading ? (
         !user ? (

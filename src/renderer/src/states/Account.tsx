@@ -7,8 +7,15 @@ import { FiEdit } from "react-icons/fi";
 import { IoMdShare } from "react-icons/io";
 import { LuArrowDownWideNarrow, LuArrowUpWideNarrow } from "react-icons/lu";
 import {
-    MdCancel, MdDateRange, MdDelete, MdDriveFileMove, MdGroupAdd, MdNotes, MdOutlineNoteAdd,
-    MdSelectAll, MdTabUnselected
+  MdCancel,
+  MdDateRange,
+  MdDelete,
+  MdDriveFileMove,
+  MdGroupAdd,
+  MdNotes,
+  MdOutlineNoteAdd,
+  MdSelectAll,
+  MdTabUnselected
 } from "react-icons/md";
 import { TbFilters } from "react-icons/tb";
 import { TiTime } from "react-icons/ti";
@@ -27,7 +34,10 @@ import Tree from "@renderer/components/Tree";
 import UserContext from "@renderer/contexxt/UserContext";
 import { AllData, Folder, Note } from "@renderer/types/types";
 import {
-    deleteMultipleFolders, moveManyFolders, updateFolder, updateNote
+  deleteMultipleFolders,
+  moveManyFolders,
+  updateFolder,
+  updateNote
 } from "@renderer/utils/api";
 
 const Account = (): JSX.Element => {

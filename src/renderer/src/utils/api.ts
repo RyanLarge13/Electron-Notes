@@ -1,5 +1,5 @@
-import Axios from "axios";
-import { AxiosResponse } from "axios";
+import Axios, { AxiosResponse } from "axios";
+
 // const devUrl = "http://localhost:8080";
 const devUrl = "https://notesserver-production-9640.up.railway.app";
 
@@ -217,6 +217,7 @@ export const deleteANote = (token: string, noteId: string): Promise<AxiosRespons
   return res;
 };
 
+// Connection requests -------------------------------------------------------------------------------------------
 export const createConRequest = (token: string, email: string): Promise<AxiosResponse> => {
   const res = Axios.post(
     `${devUrl}/connect/create/request`,
@@ -242,11 +243,20 @@ export const acceptRequestConnection = (
   return res;
 };
 
-export const declineConnectionRequest = (
-  token: string,
-  reqId: string,
-  userEmail: string
-): Promise<AxiosResponse> => {
-  const res = Axios.delete("");
+export const declineConnectionRequest = (token: string, reqId: string): Promise<AxiosResponse> => {
+  const res = Axios.delete(`${devUrl}/connect/remove/request`, {
+    data: { connectionReqId: reqId },
+    headers: { Authorization: `Bearer ${token}` }
+  });
   return res;
 };
+
+export const removeConnection = (email: string, token: string): Promise<AxiosResponse> => {
+  const res = Axios.delete(`${devUrl}/connect/remove`, {
+    data: { userEmail: email },
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res;
+};
+
+// Connection requests -------------------------------------------------------------------------------------------

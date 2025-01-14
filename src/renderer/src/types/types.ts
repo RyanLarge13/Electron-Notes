@@ -138,6 +138,12 @@ export type Connection = {
   email: string;
 };
 
+export type NoteShare = {
+  show: boolean;
+  notes: string[];
+  connections: string[];
+};
+
 export interface ContextProps {
   setFolders: Dispatch<SetStateAction<Folder[]>>;
   setNotes: Dispatch<SetStateAction<Note[]>>;
@@ -190,6 +196,7 @@ export interface ContextProps {
   setMinimizeArray: Dispatch<SetStateAction<string[]>>;
   setPinnedFavorites: Dispatch<SetStateAction<Note[]>>;
   setPinFavs: Dispatch<SetStateAction<boolean>>;
+  setNoteShare: Dispatch<SetStateAction<NoteShare>>;
   minimizeArray: string[];
   folderSearchText: string;
   folderSearch: boolean;
@@ -238,6 +245,7 @@ export interface ContextProps {
   sharedNotes: Note[];
   pinnedFavorites: Note[];
   pinFavs: boolean;
+  noteShare: NoteShare;
   networkNotificationError: (actions: SystemNotifAction[]) => void;
   resetSystemNotification: () => void;
   showErrorNotification: (

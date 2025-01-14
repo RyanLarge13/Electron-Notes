@@ -1,12 +1,26 @@
 import cheerio from "cheerio";
 import { motion } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react";
+import { BiShare } from "react-icons/bi";
 import {
-    BsFiletypeDocx, BsFiletypeHtml, BsFiletypePdf, BsFiletypeTxt, BsStar, BsStarFill
+  BsFiletypeDocx,
+  BsFiletypeHtml,
+  BsFiletypePdf,
+  BsFiletypeTxt,
+  BsStar,
+  BsStarFill
 } from "react-icons/bs";
 import {
-    FaArrowCircleRight, FaArrowRight, FaCopy, FaDesktop, FaEdit, FaFolder, FaLock, FaSave, FaTrash,
-    FaWindowClose
+  FaArrowCircleRight,
+  FaArrowRight,
+  FaCopy,
+  FaDesktop,
+  FaEdit,
+  FaFolder,
+  FaLock,
+  FaSave,
+  FaTrash,
+  FaWindowClose
 } from "react-icons/fa";
 import { IoRemoveCircle } from "react-icons/io5";
 import { MdCancel, MdDeleteForever, MdRestore, MdUpdate } from "react-icons/md";
@@ -16,9 +30,13 @@ import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 import UserContext from "@renderer/contexxt/UserContext";
-import { AllData, Note } from "@renderer/types/types";
+import { AllData, Note, NoteShare } from "@renderer/types/types";
 import {
-    createNewNote, deleteANote, moveNoteToTrash, updateFavoriteOnNote, updateNote
+  createNewNote,
+  deleteANote,
+  moveNoteToTrash,
+  updateFavoriteOnNote,
+  updateNote
 } from "@renderer/utils/api";
 
 const Notes = (): JSX.Element => {
@@ -39,6 +57,7 @@ const Notes = (): JSX.Element => {
     noteDragFolder,
     pinFavs,
     pinnedFavorites,
+    setNoteShare,
     setNote,
     setNoteIsMoving,
     setNoteDragFolder,
@@ -638,6 +657,22 @@ const Notes = (): JSX.Element => {
     });
   };
 
+  const shareNote = (noteId: string): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    setNoteShare((prev: NoteShare): NoteShare => {
+      if (prev.notes.includes(noteId)) {
+        console.log("includes");
+        return {
+          ...prev,
+          show: true,
+          notes: prev.notes.filter((noteid: string): boolean => noteid !== noteId)
+        };
+      }
+      console.log("Does note include");
+      return { show: true, connections: [...prev.connections], notes: [...prev.notes, noteId] };
+    });
+  };
+
   const openNotesOptions = (event, note: Note): void => {
     event.preventDefault();
     event.stopPropagation();
@@ -722,6 +757,11 @@ const Notes = (): JSX.Element => {
           func: () => openWindow(note)
         },
         {
+          title: "share",
+          icon: <BiShare />,
+          func: (): void => shareNote(note.noteid)
+        },
+        {
           title: "move",
           icon: <FaArrowCircleRight />,
           func: () => move(note)
@@ -741,7 +781,6 @@ const Notes = (): JSX.Element => {
           icon: <FaLock />,
           func: () => lockNote(note)
         },
-
         {
           title: "save file as .txt",
           icon: <BsFiletypeTxt />,

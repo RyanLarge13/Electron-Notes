@@ -6,7 +6,11 @@ import { Tooltip } from "react-tooltip";
 
 import UserContext from "@renderer/contexxt/UserContext";
 import { Connection } from "@renderer/types/types";
-import { acceptRequestConnection, declineConnectionRequest } from "@renderer/utils/api";
+import {
+  acceptRequestConnection,
+  declineConnectionRequest,
+  removeConnection
+} from "@renderer/utils/api";
 
 const ConBubbles = (): JSX.Element => {
   const {
@@ -17,8 +21,11 @@ const ConBubbles = (): JSX.Element => {
     token,
     resetSystemNotification,
     setConnections,
+    setConnectionRequests,
     setHoverConnections,
-    showSuccessNotification
+    showSuccessNotification,
+    networkNotificationError,
+    showErrorNotification
   } = useContext(UserContext);
 
   const [options, setOptions] = useState<Connection>({ id: "", email: "" });
@@ -30,6 +37,7 @@ const ConBubbles = (): JSX.Element => {
 
   const outlineThemeString = themeStringText.replace("text", "outline");
 
+  // Handling connection requests ------------------------------------------------------------------
   const confirmAccept = (requestId: string, userEmail: string): void => {
     if (userPreferences.confirm) {
       showSuccessNotification(
@@ -43,32 +51,73 @@ const ConBubbles = (): JSX.Element => {
     acceptRequest(requestId, userEmail);
   };
 
-  const acceptRequest = (requestId: string, userEmail: string): void => {
-    acceptRequestConnection(token, requestId, userEmail)
-      .then((res) => {
-        resetSystemNotification();
-        showSuccessNotification("New Connection", res.data.message, false, []);
-        setConnections((prev) => [...prev, { id: res.data.data.conreqid, email: userEmail }]);
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  const declineRequest = async (requestId: string, userEmail: string): Promise<void> => {
-    // Do confirmation
-    // Then checks
-
+  const acceptRequest = async (requestId: string, userEmail: string): Promise<void> => {
     try {
-      const declinedRequest = declineConnectionRequest(token, requestId, userEmail);
-      console.log(declinedRequest);
+      const response = await acceptRequestConnection(token, requestId, userEmail);
+      console.log(response);
+      showSuccessNotification("New Connection", response.data.message, false, []);
+      setConnections((prev) => [...prev, { id: response.data.data.conreqid, email: userEmail }]);
     } catch (err) {
-      console.log(err);
+      if (err.response) {
+        showErrorNotification("New Connection", err.response.message, true, []);
+      }
+      if (err.request) {
+        networkNotificationError([]);
+      }
     }
   };
 
-  const shareNoteWithUser = (conId: string, conEmail: string): void => {};
+  const declineRequest = async (requestId: string, userEmail: string): Promise<void> => {
+    try {
+      const response = await declineConnectionRequest(token, requestId);
+      console.log(response);
+      setConnectionRequests((prev: Connection[]): Connection[] =>
+        prev.filter((aCon: Connection): boolean => aCon.id !== requestId)
+      );
+      showSuccessNotification(
+        `Declined Connection With ${userEmail}`,
+        response.data.message,
+        true,
+        []
+      );
+    } catch (err) {
+      console.log(err);
+      if (err.response) {
+        showErrorNotification("Declining Connection Request", err.response.message, true, []);
+      }
+      if (err.request) {
+        networkNotificationError([]);
+      }
+    }
+  };
+  // Handling connection requests ------------------------------------------------------------------
+
+  // Handle current connections --------------------------------------------------------------------
+  const removeExistingConnection = async (conId: string, conEmail: string) => {
+    try {
+      const response = await removeConnection(conEmail, token);
+      console.log(response);
+      setConnections((prev: Connection[]) =>
+        prev.filter((aCon: Connection): boolean => aCon.id !== conId)
+      );
+      showSuccessNotification("Removed Connection", response.data.message, false, []);
+    } catch (err) {
+      console.log(err);
+      if (err.response) {
+        showErrorNotification("Removing Connection", err.response.message, true, []);
+      }
+      if (err.request) {
+        networkNotificationError([]);
+      }
+    }
+  };
+  // Handle current connections --------------------------------------------------------------------
+
+  // Note sharing logic ----------------------------------------------------
+  const requestNoteShare = (conId: string, conEmail: string): void => {
+    // Select Note
+  };
+  // Note sharing logic ----------------------------------------------------
 
   return (
     <>
@@ -96,17 +145,7 @@ const ConBubbles = (): JSX.Element => {
               >
                 <p className="mb-2 p-2 pr-12 font-semibold">{conOptions.email}</p>
                 <button
-                  className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
-                    userPreferences.darkMode
-                      ? "bg-[#333] hover:bg-[#444]"
-                      : "bg-slate-300 hover:bg-slate-400"
-                  }`}
-                >
-                  <p>Remove</p>
-                  <TiCancel />
-                </button>
-                <button
-                  onClick={() => shareNoteWithUser(con.id, con.email)}
+                  onClick={() => requestNoteShare(con.id, con.email)}
                   className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
                     userPreferences.darkMode
                       ? "bg-[#333] hover:bg-[#444]"
@@ -115,6 +154,17 @@ const ConBubbles = (): JSX.Element => {
                 >
                   <p>Share Note</p>
                   <FaUserCheck />
+                </button>
+                <button
+                  onClick={() => removeExistingConnection(con.id, con.email)}
+                  className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
+                    userPreferences.darkMode
+                      ? "bg-[#333] hover:bg-[#444]"
+                      : "bg-slate-300 hover:bg-slate-400"
+                  }`}
+                >
+                  <p>Remove</p>
+                  <TiCancel />
                 </button>
               </motion.div>
             )}

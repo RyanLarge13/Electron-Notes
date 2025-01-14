@@ -11,7 +11,7 @@ const UserContext = createContext({} as ContextProps);
 
 export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [allData, setAllData] = useState(null);
+  const [allData, setAllData] = useState({ user: null, notes: [], folders: [] });
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [folders, setFolders] = useState([]);
@@ -46,6 +46,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [noteToEdit, setNoteToEdit] = useState<Note[] | []>([]);
   const [settings, setSettings] = useState(false);
   const [move, setMove] = useState(null);
+
+  const [noteShare, setNoteShare] = useState({ show: true, notes: [], connections: [] });
 
   const [noteDrag, setNoteDrag] = useState(false);
   const [noteDragging, setNoteDragging] = useState(null);
@@ -653,6 +655,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setFolderSearch,
         folderSearchText,
         setFolderSearchText,
+        noteShare,
+        setNoteShare,
         minimizeArray,
         pinnedFavorites,
         pinFavs,
