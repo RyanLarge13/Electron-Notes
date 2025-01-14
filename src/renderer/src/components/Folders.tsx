@@ -951,7 +951,7 @@ const Folders = (): JSX.Element => {
             </motion.div>
           )}
           <div
-            className={`z-10 absolute top-0 right-0 w-[50%] h-3 rounded-bl-md rounded-tr-md ${folder.color} bg-amber-300`}
+            className={`z-10 absolute top-0 right-0 w-[50%] shadow-md h-3 rounded-bl-md rounded-tr-md ${folder.color} bg-amber-300`}
           ></div>
           <div className="flex justify-start items-start gap-x-2">
             <p className="flex justify-center items-center gap-x-1 font-bold text-sm">
