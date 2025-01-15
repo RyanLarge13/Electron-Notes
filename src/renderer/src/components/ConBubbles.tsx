@@ -19,7 +19,7 @@ const ConBubbles = (): JSX.Element => {
     hoverConnections,
     userPreferences,
     token,
-    resetSystemNotification,
+    setNoteShare,
     setConnections,
     setConnectionRequests,
     setHoverConnections,
@@ -114,8 +114,24 @@ const ConBubbles = (): JSX.Element => {
   // Handle current connections --------------------------------------------------------------------
 
   // Note sharing logic ----------------------------------------------------
-  const requestNoteShare = (conId: string, conEmail: string): void => {
+  const requestNoteShare = (conId: string): void => {
     // Select Note
+    setConOptions({ id: "", email: "" });
+    setNoteShare((prev) => {
+      if (prev.connections.includes(conId)) {
+        return {
+          show: true,
+          notes: prev.notes,
+          connections: prev.connections.filter((aCon: string): boolean => aCon !== conId)
+        };
+      } else {
+        return {
+          show: true,
+          notes: prev.notes,
+          connections: [...prev.connections, conId]
+        };
+      }
+    });
   };
   // Note sharing logic ----------------------------------------------------
 
@@ -145,7 +161,7 @@ const ConBubbles = (): JSX.Element => {
               >
                 <p className="mb-2 p-2 pr-12 font-semibold">{conOptions.email}</p>
                 <button
-                  onClick={() => requestNoteShare(con.id, con.email)}
+                  onClick={() => requestNoteShare(con.id)}
                   className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
                     userPreferences.darkMode
                       ? "bg-[#333] hover:bg-[#444]"

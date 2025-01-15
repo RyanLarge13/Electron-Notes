@@ -1,5 +1,7 @@
 import Axios, { AxiosResponse } from "axios";
 
+import { Note } from "@renderer/types/types";
+
 // const devUrl = "http://localhost:8080";
 const devUrl = "https://notesserver-production-9640.up.railway.app";
 
@@ -260,3 +262,18 @@ export const removeConnection = (email: string, token: string): Promise<AxiosRes
 };
 
 // Connection requests -------------------------------------------------------------------------------------------
+
+// Sharing Notes Requests ----------------------------------------------------------------------------------------
+export const createShareNoteRequest = (
+  conEmails: string,
+  noteIds: Note,
+  token: string
+): Promise<AxiosResponse> => {
+  const res = Axios.post(
+    `${devUrl}/share/create/request`,
+    { toEmail: conEmails, note: noteIds },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
+// Sharing Notes Requests ----------------------------------------------------------------------------------------
