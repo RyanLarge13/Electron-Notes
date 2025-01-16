@@ -138,6 +138,13 @@ export type Connection = {
   email: string;
 };
 
+export type ShareReq = {
+  id: string;
+  from: string;
+  to: string;
+  note: string;
+};
+
 export type NoteShare = {
   show: boolean;
   notes: string[];
@@ -185,7 +192,8 @@ export interface ContextProps {
   setConnections: Dispatch<SetStateAction<Connection[]>>;
   setConsSent: Dispatch<SetStateAction<Connection[]>>;
   setConnectionRequests: Dispatch<SetStateAction<Connection[]>>;
-  setShareRequests: Dispatch<SetStateAction<Connection[]>>;
+  setShareRequests: Dispatch<SetStateAction<ShareReq[]>>;
+  setShareRequestsFrom: Dispatch<SetStateAction<ShareReq>>;
   setSharedNotes: Dispatch<SetStateAction<Note[]>>;
   setNoteDrag: Dispatch<SetStateAction<boolean>>;
   setNoteIsMoving: Dispatch<SetStateAction<boolean>>;
@@ -241,11 +249,12 @@ export interface ContextProps {
   connections: Connection[];
   consSent: Connection[];
   connectionRequests: Connection[];
-  shareRequests: Connection[];
+  shareRequests: ShareReq[];
   sharedNotes: Note[];
   pinnedFavorites: Note[];
   pinFavs: boolean;
   noteShare: NoteShare;
+  shareReqFrom: ShareReq;
   networkNotificationError: (actions: SystemNotifAction[]) => void;
   resetSystemNotification: () => void;
   showErrorNotification: (

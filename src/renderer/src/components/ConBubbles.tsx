@@ -19,6 +19,7 @@ const ConBubbles = (): JSX.Element => {
     hoverConnections,
     userPreferences,
     token,
+    shareRequestsFrom,
     setNoteShare,
     setConnections,
     setConnectionRequests,
@@ -182,6 +183,13 @@ const ConBubbles = (): JSX.Element => {
                   <p>Remove</p>
                   <TiCancel />
                 </button>
+                {shareRequestsFrom
+                  .filter((req) => req.to === con.email)
+                  .map((req) => (
+                    <div>
+                      <p>I am a share Req</p>
+                    </div>
+                  ))}
               </motion.div>
             )}
           </AnimatePresence>

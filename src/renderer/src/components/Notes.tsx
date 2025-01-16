@@ -57,6 +57,7 @@ const Notes = (): JSX.Element => {
     noteDragFolder,
     pinFavs,
     pinnedFavorites,
+    shareRequests,
     setNoteShare,
     setNote,
     setNoteIsMoving,
@@ -1056,6 +1057,11 @@ const Notes = (): JSX.Element => {
         <div
           className={`absolute bottom-0 right-0 left-0 h-1 rounded-full w-full ${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`}
         ></div>
+        {shareRequests.map((shareNoteReq: { id: string; from: string; to: string }) => (
+          <div key={shareNoteReq.id}>
+            <p>{shareNoteReq.from}</p>
+          </div>
+        ))}
         {pinFavs
           ? pinnedFavorites.map((note: Note) => (
               <motion.div

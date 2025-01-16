@@ -25,6 +25,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [connectionRequests, setConnectionRequests] = useState([]);
   const [consSent, setConsSent] = useState([]);
   const [shareRequests, setShareRequests] = useState([]);
+  const [shareRequestsFrom, setShareRequestsFrom] = useState([]);
   const [sharedNotes, setSharedNotes] = useState([]);
   const [notesToRender, setNotesToRender] = useState([]);
   const [pinnedFavorites, setPinnedFavorites] = useState([]);
@@ -47,7 +48,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [settings, setSettings] = useState(false);
   const [move, setMove] = useState(null);
 
-  const [noteShare, setNoteShare] = useState({ show: true, notes: [], connections: [] });
+  const [noteShare, setNoteShare] = useState({ show: false, notes: [], connections: [] });
 
   const [noteDrag, setNoteDrag] = useState(false);
   const [noteDragging, setNoteDragging] = useState(null);
@@ -355,18 +356,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
 
   const handleConnections = (cons, conReqs, shareReqs, shareNotes, userEmail): void => {
     const connectionWorker = new Worker("/src/threads/handleConnections.js");
-    connectionWorker.onmessage = (event): void => {
-      const {
-        filteredConnections,
-        filteredConnectionRequests,
-        filteredShareRequests,
-        filteredSharedNotes
-      } = event.data;
-      setConnections(filteredConnections);
-      setConnectionRequests(filteredConnectionRequests);
-      setShareRequests(filteredShareRequests);
-      setSharedNotes(filteredSharedNotes);
-    };
+
+    // Send data to web worker for processing
     connectionWorker.postMessage({
       connections: cons,
       connectionRequests: conReqs,
@@ -374,6 +365,22 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
       sharedNotes: shareNotes,
       userEmail: userEmail
     });
+
+    // Receive data back and set state
+    connectionWorker.onmessage = (event): void => {
+      const {
+        filteredConnections,
+        filteredConnectionRequests,
+        filteredShareRequests,
+        filteredShareRequestsFrom,
+        filteredSharedNotes
+      } = event.data;
+      setConnections(filteredConnections);
+      setConnectionRequests(filteredConnectionRequests);
+      setShareRequests(filteredShareRequests);
+      setShareRequestsFrom(filteredShareRequestsFrom);
+      setSharedNotes(filteredSharedNotes);
+    };
   };
 
   const fetchUser = (token: string, cacheInstalled: boolean): void => {
@@ -660,6 +667,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         minimizeArray,
         pinnedFavorites,
         pinFavs,
+        shareRequestsFrom,
+        setShareRequestsFrom,
         setPinFavs,
         setPinnedFavorites,
         setMinimizeArray,

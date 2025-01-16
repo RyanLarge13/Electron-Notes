@@ -18,13 +18,28 @@ self.onmessage = (event) => {
     return connectionReq;
   });
 
-  const filteredShareRequests = shareRequests.map((shareReq) => {
-    const shareRequest = { id: shareReq.shareReqId, email: "" };
-    shareReq.userOne === userEmail
-      ? (shareRequest.email = shareReq.userTwo)
-      : (shareRequest.email = shareReq.userOne);
-    return shareRequest;
+  let filteredShareRequests = [];
+  let filteredShareRequestsFrom = [];
+
+  shareRequests.map((shareReq) => {
+    if (shareReq.userOne === userEmail) {
+      filteredShareRequestsFrom.push({
+        id: shareReq.id,
+        to: shareReq.userTwo,
+        from: shareReq.userOne,
+        note: shareReq.note
+      });
+    } else {
+      filteredShareRequests.push({
+        id: shareReq.id,
+        from: shareReq.userOne,
+        two: shareReq.userTwo,
+        note: shareReq.note
+      });
+    }
   });
+
+  console.log(shareRequests);
 
   // save for future filtering and sorting and placement
   // for now just send back untouched data
@@ -34,6 +49,7 @@ self.onmessage = (event) => {
   self.postMessage({
     filteredConnections,
     filteredConnectionRequests,
+    filteredShareRequestsFrom,
     filteredShareRequests,
     filteredSharedNotes: sharedNotes
   });
