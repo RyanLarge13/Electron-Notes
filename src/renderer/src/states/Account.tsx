@@ -720,7 +720,7 @@ const Account = (): JSX.Element => {
         </button>
       </div>
       <Notes />
-      <div className="bg-transparent">
+      <div className="bg-transparent z-40">
         <button
           className={`fixed top-3 right-3 rounded-full ${
             userPreferences.theme ? themeStringText : "text-amber-300"

@@ -10,12 +10,17 @@ self.onmessage = (event) => {
     return connection;
   });
 
-  const filteredConnectionRequests = connectionRequests.map((conReq) => {
-    const connectionReq = { id: conReq.conreqid, email: "" };
-    conReq.userOne === userEmail
-      ? (connectionReq.email = conReq.userTwo)
-      : (connectionReq.email = conReq.userOne);
-    return connectionReq;
+  let connectionRequestsReceived = [];
+  let connectionRequestsSent = [];
+
+  connectionRequests.map((conReq) => {
+    if (conReq.userOne === userEmail) {
+      const req = { id: conReq.id, to: conReq.userTwo, from: conReq.userOne };
+      connectionRequestsSent.push(req);
+    } else {
+      const req = { id: conReq.id, to: conReq.userOne, from: conReq.userTwo };
+      connectionRequestsReceived.push(req);
+    }
   });
 
   let filteredShareRequests = [];
@@ -27,19 +32,18 @@ self.onmessage = (event) => {
         id: shareReq.id,
         to: shareReq.userTwo,
         from: shareReq.userOne,
-        note: shareReq.note
+        note: shareReq.noteId
       });
     } else {
       filteredShareRequests.push({
         id: shareReq.id,
         from: shareReq.userOne,
-        two: shareReq.userTwo,
-        note: shareReq.note
+        two: shareReq.userTwo
       });
     }
   });
 
-  console.log(shareRequests);
+  console.log(connectionRequests);
 
   // save for future filtering and sorting and placement
   // for now just send back untouched data
@@ -48,7 +52,8 @@ self.onmessage = (event) => {
 
   self.postMessage({
     filteredConnections,
-    filteredConnectionRequests,
+    connectionRequestsSent,
+    connectionRequestsReceived,
     filteredShareRequestsFrom,
     filteredShareRequests,
     filteredSharedNotes: sharedNotes

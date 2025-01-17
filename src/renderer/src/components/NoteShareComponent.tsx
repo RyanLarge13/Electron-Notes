@@ -7,9 +7,17 @@ import UserContext from "@renderer/contexxt/UserContext";
 import { Connection, Note, NoteShare } from "@renderer/types/types";
 import { createShareNoteRequest } from "@renderer/utils/api";
 
-const NoteShareComponent = () => {
-  const { noteShare, connections, allData, userPreferences, token, setNoteShare } =
-    useContext(UserContext);
+const NoteShareComponent = (): JSX.Element => {
+  const {
+    noteShare,
+    connections,
+    allData,
+    userPreferences,
+    token,
+    setNoteShare,
+    networkNotificationError,
+    showErrorNotification
+  } = useContext(UserContext);
 
   const themeStringText = userPreferences?.theme
     ? userPreferences.theme.replace("bg", "text")
@@ -56,8 +64,15 @@ const NoteShareComponent = () => {
     } catch (err) {
       console.log(err);
       if (err.response) {
+        showErrorNotification(
+          "Sharing Note",
+          `We could not complete your request to share this note`,
+          true,
+          []
+        );
       }
       if (err.request) {
+        networkNotificationError([]);
       }
     }
   };

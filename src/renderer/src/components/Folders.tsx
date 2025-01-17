@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react";
+import { BiSend } from "react-icons/bi";
 import { CiFolderOn } from "react-icons/ci";
 import {
   FaArrowCircleRight,
@@ -696,6 +697,14 @@ const Folders = (): JSX.Element => {
         color: folder.color
       },
       options: [
+        {
+          title: "open",
+          icon: <BiSend />,
+          func: (): void => {
+            setFolder(folder);
+            setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+          }
+        },
         {
           title: "new folder",
           icon: <FaFolderPlus />,

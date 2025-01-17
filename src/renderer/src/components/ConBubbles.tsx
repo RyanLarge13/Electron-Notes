@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
+import { BiMailSend, BiShare } from "react-icons/bi";
 import { FaUserCheck } from "react-icons/fa";
 import { TiCancel } from "react-icons/ti";
 import { Tooltip } from "react-tooltip";
 
 import UserContext from "@renderer/contexxt/UserContext";
-import { Connection } from "@renderer/types/types";
+import { Connection, ConReq, Note } from "@renderer/types/types";
 import {
   acceptRequestConnection,
   declineConnectionRequest,
@@ -15,14 +16,15 @@ import {
 const ConBubbles = (): JSX.Element => {
   const {
     connections,
-    connectionRequests,
+    connectionRequestsReceived,
     hoverConnections,
     userPreferences,
     token,
+    allData,
     shareRequestsFrom,
     setNoteShare,
     setConnections,
-    setConnectionRequests,
+    setConnectionRequestsReceived,
     setHoverConnections,
     showSuccessNotification,
     networkNotificationError,
@@ -72,8 +74,8 @@ const ConBubbles = (): JSX.Element => {
     try {
       const response = await declineConnectionRequest(token, requestId);
       console.log(response);
-      setConnectionRequests((prev: Connection[]): Connection[] =>
-        prev.filter((aCon: Connection): boolean => aCon.id !== requestId)
+      setConnectionRequestsReceived((prev: ConReq[]): ConReq[] =>
+        prev.filter((aCon: ConReq): boolean => aCon.id !== requestId)
       );
       showSuccessNotification(
         `Declined Connection With ${userEmail}`,
@@ -94,7 +96,7 @@ const ConBubbles = (): JSX.Element => {
   // Handling connection requests ------------------------------------------------------------------
 
   // Handle current connections --------------------------------------------------------------------
-  const removeExistingConnection = async (conId: string, conEmail: string) => {
+  const removeExistingConnection = async (conId: string, conEmail: string): Promise<void> => {
     try {
       const response = await removeConnection(conEmail, token);
       console.log(response);
@@ -156,11 +158,11 @@ const ConBubbles = (): JSX.Element => {
                   right: 25 * index + 60,
                   zIndex: index
                 }}
-                className={`fixed rounded-tr-2xl right-10 top-3 shadow-md rounded-md text-white duration-200 ${
+                className={`fixed z-40 rounded-tr-2xl right-10 top-3 shadow-md rounded-md text-white duration-200 ${
                   userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"
                 }`}
               >
-                <p className="mb-2 p-2 pr-12 font-semibold">{conOptions.email}</p>
+                <p className="mb-2 px-5 py-2 pr-12 my-5 font-semibold">{conOptions.email}</p>
                 <button
                   onClick={() => requestNoteShare(con.id)}
                   className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
@@ -170,7 +172,7 @@ const ConBubbles = (): JSX.Element => {
                   }`}
                 >
                   <p>Share Note</p>
-                  <FaUserCheck />
+                  <BiShare />
                 </button>
                 <button
                   onClick={() => removeExistingConnection(con.id, con.email)}
@@ -180,14 +182,24 @@ const ConBubbles = (): JSX.Element => {
                       : "bg-slate-300 hover:bg-slate-400"
                   }`}
                 >
-                  <p>Remove</p>
+                  <p>Remove Connection</p>
                   <TiCancel />
                 </button>
+                <p className="pl-3 mt-3">Share Requests Sent</p>
                 {shareRequestsFrom
                   .filter((req) => req.to === con.email)
                   .map((req) => (
-                    <div>
-                      <p>I am a share Req</p>
+                    // Make this logic part of a new component to allow interaction with the request being sent and the note that is being sent
+                    //   <p>{allData.notes.find((aNote: Note) => aNote.noteid === req.note)?.title}</p>
+                    <div
+                      key={req.id}
+                      className={`p-3 m-5 rounded-md outline outline-1 ${outlineThemeString} flex justify-between items-center`}
+                    >
+                      <p>{allData.notes.find((aNote: Note) => aNote.noteid === req.note)?.title}</p>
+                      <div>
+                        <div className="rounded-full bg-red-300 shadow-md w-[5px] h-[5px]"></div>
+                        <BiMailSend />
+                      </div>
                     </div>
                   ))}
               </motion.div>
@@ -210,7 +222,7 @@ const ConBubbles = (): JSX.Element => {
               right: 25 * index + 60,
               zIndex: index
             }}
-            className={`fixed top-3 rounded-full ${
+            className={`fixed z-40 top-3 rounded-full ${
               userPreferences.theme ? themeStringText : "text-amber-300"
             } ${
               userPreferences.darkMode
@@ -227,8 +239,8 @@ const ConBubbles = (): JSX.Element => {
       {/* Current connections */}
 
       {/* Connection requests */}
-      {connectionRequests.map((conReq, index) => (
-        <div key={conReq.email}>
+      {connectionRequestsReceived.map((conReq, index) => (
+        <div key={conReq.from}>
           <AnimatePresence key={conReq.id}>
             {options.id === conReq.id && (
               <motion.div
@@ -244,13 +256,13 @@ const ConBubbles = (): JSX.Element => {
                   top: hoverConnections ? 25 * index + 60 : 25,
                   zIndex: hoverConnections ? index : -1
                 }}
-                className={`fixed rounded-tr-2xl right-5 shadow-md rounded-md text-white duration-200 ${
+                className={`fixed rounded-tr-2xl z-40 right-5 shadow-md rounded-md text-white duration-200 ${
                   userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"
                 }`}
               >
                 <p className="mb-2 p-2 pr-12 font-semibold">{options.email}</p>
                 <button
-                  onClick={() => confirmAccept(conReq.id, conReq.email)}
+                  onClick={() => confirmAccept(conReq.id, conReq.from)}
                   className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
                     userPreferences.darkMode
                       ? "bg-[#333] hover:bg-[#444]"
@@ -261,7 +273,7 @@ const ConBubbles = (): JSX.Element => {
                   <FaUserCheck />
                 </button>
                 <button
-                  onClick={() => declineRequest(conReq.id, conReq.email)}
+                  onClick={() => declineRequest(conReq.id, conReq.from)}
                   className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
                     userPreferences.darkMode
                       ? "bg-[#333] hover:bg-[#444]"
@@ -274,21 +286,21 @@ const ConBubbles = (): JSX.Element => {
               </motion.div>
             )}
           </AnimatePresence>
-          <Tooltip id={`user-email-tooltip-${conReq.email}`} />
+          <Tooltip id={`user-email-tooltip-${conReq.from}`} />
           <button
             onMouseEnter={() => setHoverConnections(true)}
             onClick={() =>
-              setOptions((prev) => {
+              setOptions((prev: { id: string; email: string }) => {
                 if (prev.id === conReq.id) {
                   return { id: "", email: "" };
                 }
-                return conReq;
+                return { id: conReq.id, email: conReq.from };
               })
             }
             style={{ top: 25 * index + 60, zIndex: index }}
-            data-tooltip-content={conReq.email}
-            data-tooltip-id={`user-email-tooltip-${conReq.email}`}
-            className={`fixed right-5 hover:z-[999] rounded-full shadow-md ${
+            data-tooltip-content={conReq.from}
+            data-tooltip-id={`user-email-tooltip-${conReq.from}`}
+            className={`fixed right-5 hover:z-[999] rounded-full z-40 shadow-md ${
               userPreferences.theme ? themeStringText : "text-amber-300"
             } ${
               userPreferences.darkMode
@@ -296,7 +308,7 @@ const ConBubbles = (): JSX.Element => {
                 : "bg-slate-300 hover:bg-slate-400"
             } ${options.id === conReq.id ? `outline ${outlineThemeString}` : ""} duration-200 w-10 h-10 flex justify-center items-center shadow-sm`}
           >
-            <p className="text-lg font-bold">{conReq.email[0].toUpperCase()}</p>
+            <p className="text-lg font-bold">{conReq.from[0].toUpperCase()}</p>
           </button>
         </div>
       ))}

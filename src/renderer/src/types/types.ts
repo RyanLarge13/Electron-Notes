@@ -151,6 +151,12 @@ export type NoteShare = {
   connections: string[];
 };
 
+export type ConReq = {
+  id: string;
+  from: string;
+  to: string;
+};
+
 export interface ContextProps {
   setFolders: Dispatch<SetStateAction<Folder[]>>;
   setNotes: Dispatch<SetStateAction<Note[]>>;
@@ -191,9 +197,8 @@ export interface ContextProps {
   setHoverConnections: Dispatch<SetStateAction<boolean>>;
   setConnections: Dispatch<SetStateAction<Connection[]>>;
   setConsSent: Dispatch<SetStateAction<Connection[]>>;
-  setConnectionRequests: Dispatch<SetStateAction<Connection[]>>;
   setShareRequests: Dispatch<SetStateAction<ShareReq[]>>;
-  setShareRequestsFrom: Dispatch<SetStateAction<ShareReq>>;
+  setShareRequestsFrom: Dispatch<SetStateAction<ShareReq[]>>;
   setSharedNotes: Dispatch<SetStateAction<Note[]>>;
   setNoteDrag: Dispatch<SetStateAction<boolean>>;
   setNoteIsMoving: Dispatch<SetStateAction<boolean>>;
@@ -205,6 +210,8 @@ export interface ContextProps {
   setPinnedFavorites: Dispatch<SetStateAction<Note[]>>;
   setPinFavs: Dispatch<SetStateAction<boolean>>;
   setNoteShare: Dispatch<SetStateAction<NoteShare>>;
+  setConnectionRequestsReceived: Dispatch<SetStateAction<ConReq[]>>;
+  setConnectionRequestsSent: Dispatch<SetStateAction<ConReq[]>>;
   minimizeArray: string[];
   folderSearchText: string;
   folderSearch: boolean;
@@ -248,13 +255,14 @@ export interface ContextProps {
   favorites: Note[];
   connections: Connection[];
   consSent: Connection[];
-  connectionRequests: Connection[];
   shareRequests: ShareReq[];
   sharedNotes: Note[];
   pinnedFavorites: Note[];
   pinFavs: boolean;
   noteShare: NoteShare;
-  shareReqFrom: ShareReq;
+  shareRequestsFrom: ShareReq[];
+  connectionRequestsReceived: ConReq[];
+  connectionRequestsSent: ConReq[];
   networkNotificationError: (actions: SystemNotifAction[]) => void;
   resetSystemNotification: () => void;
   showErrorNotification: (

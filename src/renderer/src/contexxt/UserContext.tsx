@@ -22,7 +22,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [notes, setNotes] = useState([]);
   const [hoverConnections, setHoverConnections] = useState(false);
   const [connections, setConnections] = useState([]);
-  const [connectionRequests, setConnectionRequests] = useState([]);
+  const [connectionRequestsSent, setConnectionRequestsSent] = useState([]);
+  const [connectionRequestsReceived, setConnectionRequestsReceived] = useState([]);
   const [consSent, setConsSent] = useState([]);
   const [shareRequests, setShareRequests] = useState([]);
   const [shareRequestsFrom, setShareRequestsFrom] = useState([]);
@@ -370,13 +371,15 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     connectionWorker.onmessage = (event): void => {
       const {
         filteredConnections,
-        filteredConnectionRequests,
+        connectionRequestsSent,
+        connectionRequestsReceived,
         filteredShareRequests,
         filteredShareRequestsFrom,
         filteredSharedNotes
       } = event.data;
       setConnections(filteredConnections);
-      setConnectionRequests(filteredConnectionRequests);
+      setConnectionRequestsReceived(connectionRequestsReceived);
+      setConnectionRequestsSent(connectionRequestsSent);
       setShareRequests(filteredShareRequests);
       setShareRequestsFrom(filteredShareRequestsFrom);
       setSharedNotes(filteredSharedNotes);
@@ -644,8 +647,6 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setConsSent,
         consSent,
         setConnections,
-        connectionRequests,
-        setConnectionRequests,
         shareRequests,
         setShareRequests,
         sharedNotes,
@@ -664,6 +665,10 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         setFolderSearchText,
         noteShare,
         setNoteShare,
+        setConnectionRequestsReceived,
+        connectionRequestsReceived,
+        setConnectionRequestsSent,
+        connectionRequestsSent,
         minimizeArray,
         pinnedFavorites,
         pinFavs,
