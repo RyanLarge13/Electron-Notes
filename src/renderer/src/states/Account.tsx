@@ -57,6 +57,7 @@ const Account = (): JSX.Element => {
     networkNotificationError,
     showErrorNotification,
     showSuccessNotification,
+    setNoteShare,
     createCon,
     token,
     edit,
@@ -763,7 +764,7 @@ const Account = (): JSX.Element => {
               }`}
               onClick={() => {
                 setConOptions(false);
-                // addNewNote();
+                setNoteShare({ show: true, connections: [], notes: [] });
               }}
             >
               Share Note

@@ -14,6 +14,8 @@ const NoteShareComponent = (): JSX.Element => {
     allData,
     userPreferences,
     token,
+    connectionRequestsSent,
+    user,
     setNoteShare,
     networkNotificationError,
     showErrorNotification
@@ -91,7 +93,7 @@ const NoteShareComponent = (): JSX.Element => {
     <motion.div
       initial={{ scale: 0.5, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      className={`fixed flex justify-evenly items-stretch inset-5 overflow-hidden rounded-md shadow-md p-5 ${userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-200 text-black"} z-[999]`}
+      className={`fixed flex justify-evenly items-stretch inset-0 overflow-hidden rounded-md shadow-md p-5 ${userPreferences.darkMode ? "bg-[#333] text-white" : "bg-slate-200 text-black"} z-[999]`}
     >
       <div className="basis-1/5 p-3">
         <p className="text-xl font-semibold mb-3 pb-2 border-b border-b-slate-200">
@@ -112,6 +114,20 @@ const NoteShareComponent = (): JSX.Element => {
               <div>
                 <p className="text-xs">{con.email}</p>
               </div>
+            </button>
+          ))}
+        </div>
+        <p className="text-xl mt-5 font-semibold mb-3 pb-2 border-b border-b-slate-200">
+          Your Pending Connections
+        </p>
+        <div>
+          {connectionRequestsSent.map((con) => (
+            <button
+              key={con.id}
+              className="my-2 flex justify-start items-center gap-x-2 rounded-md p-3 hover:shadow-lg w-full duration-200"
+            >
+              <div className="rounded-full w-[5px] h-[5px] bg-red-300 shadow-md"></div>
+              <p>{con.to}</p>
             </button>
           ))}
         </div>
@@ -145,6 +161,7 @@ const NoteShareComponent = (): JSX.Element => {
           <p className="text-xl font-semibold mb-3 pb-2 border-b border-b-slate-200 text-center">
             Share Notes
           </p>
+          <p className="text-3xl text-center font-semibold my-10">{user.username}</p>
           <div className="my-5">
             {noteShare.notes.length > 0 ? (
               <div>
@@ -197,14 +214,14 @@ const NoteShareComponent = (): JSX.Element => {
           <button
             onClick={() => sendShareInfo()}
             disabled={noteShare.connections.length < 1 || noteShare.notes.length < 1}
-            className={`w-full disabled:opacity-25 p-2 flex justify-between items-center ${themeStringText} ${userPreferences.darkMode ? "bg-[#444]" : "bg-slate-300"} rounded-md shadow-md`}
+            className={`w-full disabled:opacity-25 p-2 flex justify-between items-center ${themeStringText} ${userPreferences.darkMode ? "bg-[#444] hover:bg-[#555]" : "bg-slate-300 hover:bg-slate-400"} duration-200 rounded-md shadow-md`}
           >
             Share
             <BiShareAlt />
           </button>
           <button
             onClick={() => cancelShare()}
-            className="w-full p-2 flex justify-between items-center bg-red-300 text-black rounded-md shadow-md"
+            className={`w-full p-2 flex justify-between items-center text-red-300 rounded-md shadow-md ${userPreferences.darkMode ? "bg-[#444] hover:bg-[#555]" : "bg-slate-300 hover:bg-slate-400"} duration-200`}
           >
             Cancel
             <MdCancel />
