@@ -7,6 +7,8 @@ import UserContext from "@renderer/contexxt/UserContext";
 import { Connection, Note, NoteShare } from "@renderer/types/types";
 import { createShareNoteRequest } from "@renderer/utils/api";
 
+import ConnectionRequestsSent from "./ConnectionRequestsSent";
+
 const NoteShareComponent = (): JSX.Element => {
   const {
     noteShare,
@@ -14,11 +16,12 @@ const NoteShareComponent = (): JSX.Element => {
     allData,
     userPreferences,
     token,
-    connectionRequestsSent,
     user,
     setNoteShare,
     networkNotificationError,
-    showErrorNotification
+    showSuccessNotification,
+    showErrorNotification,
+    setShareRequestsFrom
   } = useContext(UserContext);
 
   const themeStringText = userPreferences?.theme
@@ -63,6 +66,18 @@ const NoteShareComponent = (): JSX.Element => {
       const response = await createShareNoteRequest(conEmails[0], notesToSend[0], token);
 
       console.log(response);
+
+      showSuccessNotification("Shared Note", response.data.message, false, []);
+
+      const newShare = {
+        id: response.data.data.notetoshareid,
+        from: user.email,
+        to: conEmails[0],
+        note: notesToSend[0].noteid
+      };
+      setShareRequestsFrom((prev) => [...prev, newShare]);
+
+      setNoteShare({ show: false, connections: [], notes: [] });
     } catch (err) {
       console.log(err);
       if (err.response) {
@@ -120,17 +135,7 @@ const NoteShareComponent = (): JSX.Element => {
         <p className="text-xl mt-5 font-semibold mb-3 pb-2 border-b border-b-slate-200">
           Your Pending Connections
         </p>
-        <div>
-          {connectionRequestsSent.map((con) => (
-            <button
-              key={con.id}
-              className="my-2 flex justify-start items-center gap-x-2 rounded-md p-3 hover:shadow-lg w-full duration-200"
-            >
-              <div className="rounded-full w-[5px] h-[5px] bg-red-300 shadow-md"></div>
-              <p>{con.to}</p>
-            </button>
-          ))}
-        </div>
+        <ConnectionRequestsSent />
       </div>
       <div className="basis-3/5 p-3 overflow-y-auto no-scroll-bar">
         <div

@@ -1,17 +1,19 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
-import { BiMailSend, BiShare } from "react-icons/bi";
+import { BiShare } from "react-icons/bi";
 import { FaUserCheck } from "react-icons/fa";
 import { TiCancel } from "react-icons/ti";
 import { Tooltip } from "react-tooltip";
 
 import UserContext from "@renderer/contexxt/UserContext";
-import { Connection, ConReq, Note } from "@renderer/types/types";
+import { Connection, ConReq } from "@renderer/types/types";
 import {
   acceptRequestConnection,
   declineConnectionRequest,
   removeConnection
 } from "@renderer/utils/api";
+
+import ShareRequestsFrom from "./ShareRequestsFrom";
 
 const ConBubbles = (): JSX.Element => {
   const {
@@ -20,8 +22,6 @@ const ConBubbles = (): JSX.Element => {
     hoverConnections,
     userPreferences,
     token,
-    allData,
-    shareRequestsFrom,
     setNoteShare,
     setConnections,
     setConnectionRequestsReceived,
@@ -185,23 +185,8 @@ const ConBubbles = (): JSX.Element => {
                   <p>Remove Connection</p>
                   <TiCancel />
                 </button>
-                <p className="pl-3 mt-3">Share Requests Sent</p>
-                {shareRequestsFrom
-                  .filter((req) => req.to === con.email)
-                  .map((req) => (
-                    // Make this logic part of a new component to allow interaction with the request being sent and the note that is being sent
-                    //   <p>{allData.notes.find((aNote: Note) => aNote.noteid === req.note)?.title}</p>
-                    <div
-                      key={req.id}
-                      className={`p-3 m-5 rounded-md outline outline-1 ${outlineThemeString} flex justify-between items-center`}
-                    >
-                      <p>{allData.notes.find((aNote: Note) => aNote.noteid === req.note)?.title}</p>
-                      <div>
-                        <div className="rounded-full bg-red-300 shadow-md w-[5px] h-[5px]"></div>
-                        <BiMailSend />
-                      </div>
-                    </div>
-                  ))}
+                <p className="pl-3 mt-3 mb-5">Share Requests Sent</p>
+                <ShareRequestsFrom con={con} setConOptions={setConOptions} />
               </motion.div>
             )}
           </AnimatePresence>

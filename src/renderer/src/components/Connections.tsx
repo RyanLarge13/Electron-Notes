@@ -9,9 +9,10 @@ import { createConRequest } from "../utils/api";
 const Connections = (): JSX.Element => {
   const {
     userPreferences,
+    user,
     token,
     setCreateCon,
-    setConsSent,
+    setConnectionRequestsSent,
     showSuccessNotification,
     showErrorNotification
   } = useContext(UserContext);
@@ -35,8 +36,10 @@ const Connections = (): JSX.Element => {
               func: (): void => {}
             }
           ]);
-          setConsSent((prev) => [...prev, { id: res.data.data.conreqid, email }]);
-          console.log(res);
+          setConnectionRequestsSent((prev) => [
+            ...prev,
+            { id: res.data.data.conreqid, to: email, from: user.email }
+          ]);
           setLoading(false);
         })
         .catch((err) => {

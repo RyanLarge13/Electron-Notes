@@ -39,6 +39,8 @@ export type apiNote = {
 export type User = {
   id: number;
   username: string;
+  email: string;
+  createdAt: Date;
 };
 
 export type ContextMenuOption = {

@@ -261,6 +261,14 @@ export const removeConnection = (email: string, token: string): Promise<AxiosRes
   return res;
 };
 
+export const cancelExistingConReq = (conReqId: string, token: string): Promise<AxiosResponse> => {
+  console.log(conReqId);
+  const res = Axios.delete(`${devUrl}/connect/remove/request/${conReqId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res;
+};
+
 // Connection requests -------------------------------------------------------------------------------------------
 
 // Sharing Notes Requests ----------------------------------------------------------------------------------------
@@ -274,6 +282,16 @@ export const createShareNoteRequest = (
     { toEmail: conEmails, note: noteIds },
     { headers: { Authorization: `Bearer ${token}` } }
   );
+  return res;
+};
+
+export const cancelExistingShare = async (
+  shareReqId: string,
+  token: string
+): Promise<AxiosResponse> => {
+  const res = Axios.delete(`${devUrl}/share/remove/request/${shareReqId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
   return res;
 };
 // Sharing Notes Requests ----------------------------------------------------------------------------------------
