@@ -144,7 +144,11 @@ export type ShareReq = {
   id: string;
   from: string;
   to: string;
-  note: string;
+  note: {
+    noteId: string;
+    title: string;
+    createdAt: string;
+  };
 };
 
 export type NoteShare = {

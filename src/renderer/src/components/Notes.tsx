@@ -30,7 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 import UserContext from "@renderer/contexxt/UserContext";
-import { AllData, Note, NoteShare } from "@renderer/types/types";
+import { AllData, Note, NoteShare, ShareReq } from "@renderer/types/types";
 import {
   createNewNote,
   deleteANote,
@@ -1057,9 +1057,19 @@ const Notes = (): JSX.Element => {
         <div
           className={`absolute bottom-0 right-0 left-0 h-1 rounded-full w-full ${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`}
         ></div>
-        {shareRequests.map((shareNoteReq: { id: string; from: string; to: string }) => (
-          <div key={shareNoteReq.id}>
-            <p>{shareNoteReq.from}</p>
+        {shareRequests.map((shareNoteReq: ShareReq) => (
+          <div
+            key={shareNoteReq.id}
+            className={`${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer outline outline-white mx-3 my-5 pointer-events-auto ${userPreferences.darkMode ? "bg-[#333]" : "bg-[#e2e8f0]"}`}
+          >
+            <p>{shareNoteReq.note.title}</p>
+            <p>
+              {new Date(shareNoteReq.note.createdAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+              })}
+            </p>
           </div>
         ))}
         {pinFavs
@@ -1087,7 +1097,7 @@ const Notes = (): JSX.Element => {
                 }}
                 onContextMenu={(e) => openNotesOptions(e, note)}
                 key={note.noteid}
-                className={`${search && folder === null ? "my-20" : "my-5"} ${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
+                className={`${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
                 onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
               >
                 {!note.trashed ? (

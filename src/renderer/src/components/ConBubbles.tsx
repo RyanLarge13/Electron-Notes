@@ -13,6 +13,7 @@ import {
   removeConnection
 } from "@renderer/utils/api";
 
+import ShareRequests from "./ShareRequests";
 import ShareRequestsFrom from "./ShareRequestsFrom";
 
 const ConBubbles = (): JSX.Element => {
@@ -22,6 +23,7 @@ const ConBubbles = (): JSX.Element => {
     hoverConnections,
     userPreferences,
     token,
+    shareRequests,
     setNoteShare,
     setConnections,
     setConnectionRequestsReceived,
@@ -60,6 +62,7 @@ const ConBubbles = (): JSX.Element => {
       console.log(response);
       showSuccessNotification("New Connection", response.data.message, false, []);
       setConnections((prev) => [...prev, { id: response.data.data.conreqid, email: userEmail }]);
+      setConnectionRequestsReceived((prev) => prev.filter((aCon) => aCon.id !== requestId));
     } catch (err) {
       if (err.response) {
         showErrorNotification("New Connection", err.response.message, true, []);
@@ -156,7 +159,7 @@ const ConBubbles = (): JSX.Element => {
                 }}
                 style={{
                   right: 25 * index + 60,
-                  zIndex: index
+                  zIndex: 10
                 }}
                 className={`fixed z-40 rounded-tr-2xl right-10 top-3 shadow-md rounded-md text-white duration-200 ${
                   userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"
@@ -185,8 +188,18 @@ const ConBubbles = (): JSX.Element => {
                   <p>Remove Connection</p>
                   <TiCancel />
                 </button>
-                <p className="pl-3 mt-3 mb-5">Share Requests Sent</p>
-                <ShareRequestsFrom con={con} setConOptions={setConOptions} />
+                <div
+                  className={`${userPreferences.darkMode ? "bg-[#444]" : "bg-slate-300"} rounded-md p-3 my-3`}
+                >
+                  <p className="pl-3 mt-3 mb-5">Share Requests Sent</p>
+                  <ShareRequestsFrom con={con} setConOptions={setConOptions} />
+                </div>
+                <div
+                  className={`${userPreferences.darkMode ? "bg-[#444]" : "bg-slate-300"} rounded-md p-3 my-3`}
+                >
+                  <p className="pl-3 mt-3 mb-5">Incoming Share Requests</p>
+                  <ShareRequests con={con} setConOptions={setConOptions} />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -205,7 +218,7 @@ const ConBubbles = (): JSX.Element => {
             }
             style={{
               right: 25 * index + 60,
-              zIndex: index
+              zIndex: conOptions.id === con.id ? 999 : index
             }}
             className={`fixed z-40 top-3 rounded-full ${
               userPreferences.theme ? themeStringText : "text-amber-300"
@@ -217,6 +230,13 @@ const ConBubbles = (): JSX.Element => {
             key={con.id}
           >
             <Tooltip id="con-name" />
+            {shareRequests.filter((aReq) => aReq.from === con.email).length ? (
+              <div className="absolute top-0 text-black right-0 flex justify-center items-center rounded-full w-[10px] h-[10px] bg-red-400">
+                <p className="text-[8px] font-bold">
+                  {shareRequests.filter((aReq) => aReq.from === con.email).length}
+                </p>
+              </div>
+            ) : null}
             <p className="text-lg font-bold">{con.email[0].toUpperCase()}</p>
           </button>
         </div>

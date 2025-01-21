@@ -3,13 +3,11 @@ import { useContext, useState } from "react";
 import { BiMailSend } from "react-icons/bi";
 
 import UserContext from "@renderer/contexxt/UserContext";
-import { Note } from "@renderer/types/types";
 import { cancelExistingShare } from "@renderer/utils/api";
 
 const ShareRequestsFrom = ({ con, setConOptions }) => {
   const {
     shareRequestsFrom,
-    allData,
     userPreferences,
     token,
     setNoteShare,
@@ -61,9 +59,9 @@ const ShareRequestsFrom = ({ con, setConOptions }) => {
       <button
         key={req.id}
         onClick={() => setShareReqOptionsShow((prev) => !prev)}
-        className={`p-3 relative w-full rounded-md outline outline-1 ${outlineThemeString} flex justify-between items-center`}
+        className={`p-3 relative w-full rounded-md my-2 outline outline-1 ${outlineThemeString} flex justify-between items-center`}
       >
-        <p>{allData.notes.find((aNote: Note) => aNote.noteid === req.note)?.title}</p>
+        <p>{req.note.title}</p>
         <div>
           <div className="rounded-full bg-red-300 shadow-md w-[5px] h-[5px]"></div>
           <BiMailSend />

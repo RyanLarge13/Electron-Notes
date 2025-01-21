@@ -14,11 +14,12 @@ self.onmessage = (event) => {
   let connectionRequestsSent = [];
 
   connectionRequests.map((conReq) => {
+    console.log(conReq);
     if (conReq.userOne === userEmail) {
       const req = { id: conReq.conreqid, to: conReq.userTwo, from: conReq.userOne };
       connectionRequestsSent.push(req);
     } else {
-      const req = { id: conReq.conreqid, to: conReq.userOne, from: conReq.userTwo };
+      const req = { id: conReq.conreqid, to: conReq.userTwo, from: conReq.userOne };
       connectionRequestsReceived.push(req);
     }
   });
@@ -33,13 +34,14 @@ self.onmessage = (event) => {
         id: shareReq.shareReqId,
         to: shareReq.userTwo,
         from: shareReq.userOne,
-        note: shareReq.noteId
+        note: shareReq.note
       });
     } else {
       filteredShareRequests.push({
         id: shareReq.shareReqId,
         from: shareReq.userOne,
-        two: shareReq.userTwo
+        to: shareReq.userTwo,
+        note: shareReq.note
       });
     }
   });

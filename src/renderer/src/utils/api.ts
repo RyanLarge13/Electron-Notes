@@ -219,6 +219,13 @@ export const deleteANote = (token: string, noteId: string): Promise<AxiosRespons
   return res;
 };
 
+export const fetchASingleNote = (noteId: string, token: string): Promise<AxiosResponse> => {
+  const res = Axios.get(`${devUrl}/notes/find/${noteId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res;
+};
+
 // Connection requests -------------------------------------------------------------------------------------------
 export const createConRequest = (token: string, email: string): Promise<AxiosResponse> => {
   const res = Axios.post(

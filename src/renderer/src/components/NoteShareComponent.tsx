@@ -4,7 +4,7 @@ import { BiShareAlt } from "react-icons/bi";
 import { MdCancel } from "react-icons/md";
 
 import UserContext from "@renderer/contexxt/UserContext";
-import { Connection, Note, NoteShare } from "@renderer/types/types";
+import { Connection, Note, NoteShare, ShareReq } from "@renderer/types/types";
 import { createShareNoteRequest } from "@renderer/utils/api";
 
 import ConnectionRequestsSent from "./ConnectionRequestsSent";
@@ -69,11 +69,15 @@ const NoteShareComponent = (): JSX.Element => {
 
       showSuccessNotification("Shared Note", response.data.message, false, []);
 
-      const newShare = {
+      const newShare: ShareReq = {
         id: response.data.data.notetoshareid,
         from: user.email,
         to: conEmails[0],
-        note: notesToSend[0].noteid
+        note: {
+          noteId: notesToSend[0].noteid,
+          title: notesToSend[0].title,
+          createdAt: notesToSend[0].createdAt.toLocaleDateString()
+        }
       };
       setShareRequestsFrom((prev) => [...prev, newShare]);
 
@@ -119,7 +123,7 @@ const NoteShareComponent = (): JSX.Element => {
             <button
               key={con.id}
               onClick={() => setShareInfo(con.id, null)}
-              className={`flex pl-2 pr-5 py-2 duration-200 rounded-md shadow-md w-full justify-between gap-x-3 items-center ${userPreferences.darkMode ? "bg-[#444] hover:bg-[#555]" : "bg-slate-400"} ${noteShare.connections.includes(con.id) ? `${outlineThemeString} outline outline-1` : ""}`}
+              className={`flex pl-2 pr-5 py-2 duration-200 rounded-md shadow-md w-full justify-between gap-x-3 my-2 items-center ${userPreferences.darkMode ? "bg-[#444] hover:bg-[#555]" : "bg-slate-400"} ${noteShare.connections.includes(con.id) ? `${outlineThemeString} outline outline-1` : ""}`}
             >
               <div
                 className={`rounded-full w-10 h-10 shadow-md flex justify-center items-center ${userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"}`}
@@ -198,10 +202,10 @@ const NoteShareComponent = (): JSX.Element => {
                     .map((recipient: Connection) => (
                       <div
                         key={recipient.id}
-                        className={`flex pl-2 pr-5 py-2 duration-200 rounded-md shadow-md w-full justify-between gap-x-3 items-center ${userPreferences.darkMode ? "bg-[#444] hover:bg-[#555]" : "bg-slate-400"}`}
+                        className={`flex pl-2 pr-5 py-2 duration-200 rounded-md shadow-md w-full justify-between gap-x-3 items-center my-2 ${userPreferences.darkMode ? "bg-[#444] hover:bg-[#555]" : "bg-slate-400"}`}
                       >
                         <div
-                          className={`rounded-full w-10 h-10 shadow-md flex justify-center items-center ${userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"}`}
+                          className={`rounded-full  w-10 h-10 shadow-md flex justify-center items-center ${userPreferences.darkMode ? "bg-[#333]" : "bg-slate-300"}`}
                         >
                           {recipient.email[0].toUpperCase()}
                         </div>
