@@ -301,4 +301,17 @@ export const cancelExistingShare = async (
   });
   return res;
 };
+
+export const createShare = async (
+  shareId: string,
+  fromEmail: string,
+  token: string
+): Promise<AxiosResponse> => {
+  const res = Axios.post(
+    `${devUrl}/share/create`,
+    { shareId: shareId, fromEmail: fromEmail },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
 // Sharing Notes Requests ----------------------------------------------------------------------------------------

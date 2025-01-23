@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { BiShareAlt } from "react-icons/bi";
 import { MdCancel } from "react-icons/md";
 
@@ -17,12 +17,17 @@ const NoteShareComponent = (): JSX.Element => {
     userPreferences,
     token,
     user,
+    shareRequestsFrom,
+    sharedNotes,
     setNoteShare,
     networkNotificationError,
     showSuccessNotification,
     showErrorNotification,
     setShareRequestsFrom
   } = useContext(UserContext);
+
+  // Filter out notes below by users who you have shared notes previously with in the future
+  const [notesToShow] = useState(allData.notes);
 
   const themeStringText = userPreferences?.theme
     ? userPreferences.theme.replace("bg", "text")
@@ -76,7 +81,7 @@ const NoteShareComponent = (): JSX.Element => {
         note: {
           noteId: notesToSend[0].noteid,
           title: notesToSend[0].title,
-          createdAt: notesToSend[0].createdAt.toLocaleDateString()
+          createdAt: new Date(notesToSend[0].createdAt).toLocaleDateString()
         }
       };
       setShareRequestsFrom((prev) => [...prev, newShare]);
@@ -148,7 +153,7 @@ const NoteShareComponent = (): JSX.Element => {
           <p className="text-xl font-semibold">Your Notes</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {allData?.notes?.map((note: Note, index: number) => (
+          {notesToShow.map((note: Note, index: number) => (
             <button
               key={note.noteid}
               onClick={() => setShareInfo(null, note.noteid)}

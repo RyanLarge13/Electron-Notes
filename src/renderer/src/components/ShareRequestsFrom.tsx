@@ -56,7 +56,7 @@ const ShareRequestsFrom = ({ con, setConOptions }) => {
   return shareRequestsFrom
     .filter((req) => req.to === con.email)
     .map((req) => (
-      <button
+      <div
         key={req.id}
         onClick={() => setShareReqOptionsShow((prev) => !prev)}
         className={`p-3 relative w-full rounded-md my-2 outline outline-1 ${outlineThemeString} flex justify-between items-center`}
@@ -74,7 +74,7 @@ const ShareRequestsFrom = ({ con, setConOptions }) => {
           >
             <button
               onClick={() => shareNewNote()}
-              className={`${themeStringText} p-5 duration-200 whitespace-nowrap w-full ${userPreferences.darkMode ? "hover:bg-[#555]" : "hover:bg-slate-400"}`}
+              className={`${themeStringText} px-5 py-3 duration-200 whitespace-nowrap w-full ${userPreferences.darkMode ? "hover:bg-[#555]" : "hover:bg-slate-400"}`}
             >
               Send Another
             </button>
@@ -84,13 +84,22 @@ const ShareRequestsFrom = ({ con, setConOptions }) => {
                 setShareReqOptionsShow(false);
                 cancelExistingShareReq(req.id);
               }}
-              className={`text-red-300 p-5 duration-200 whitespace-nowrap w-full ${userPreferences.darkMode ? "hover:bg-[#555]" : "hover:bg-slate-400"}`}
+              className={`text-red-500 px-5 py-3 duration-200 whitespace-nowrap w-full ${userPreferences.darkMode ? "hover:bg-[#555]" : "hover:bg-slate-400"}`}
             >
               Cancel Request
             </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShareReqOptionsShow(false);
+              }}
+              className={`text-red-300 px-5 py-3 duration-200 whitespace-nowrap w-full ${userPreferences.darkMode ? "hover:bg-[#555]" : "hover:bg-slate-400"}`}
+            >
+              Close
+            </button>
           </motion.div>
         ) : null}
-      </button>
+      </div>
     ));
 };
 
