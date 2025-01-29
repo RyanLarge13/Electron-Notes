@@ -1,7 +1,7 @@
 import cheerio from "cheerio";
 import { motion } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react";
-import { BiShare } from "react-icons/bi";
+import { BiShare, BiShareAlt } from "react-icons/bi";
 import {
   BsFiletypeDocx,
   BsFiletypeHtml,
@@ -20,17 +20,18 @@ import {
   FaLock,
   FaSave,
   FaTrash,
+  FaUser,
   FaWindowClose
 } from "react-icons/fa";
 import { IoRemoveCircle } from "react-icons/io5";
 import { MdCancel, MdDeleteForever, MdRestore, MdUpdate } from "react-icons/md";
-import { TbEdit, TbNotes, TbTrash, TbX } from "react-icons/tb";
+import { TbEdit, TbNotes, TbPinned, TbTrash, TbX } from "react-icons/tb";
 import Masonry from "react-masonry-css";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 import UserContext from "@renderer/contexxt/UserContext";
-import { AllData, Note, NoteShare, ShareReq } from "@renderer/types/types";
+import { AllData, Connection, Note, NoteShare, ShareReq } from "@renderer/types/types";
 import {
   createNewNote,
   deleteANote,
@@ -58,6 +59,8 @@ const Notes = (): JSX.Element => {
     pinFavs,
     pinnedFavorites,
     shareRequests,
+    sharedNotes,
+    connections,
     setNoteShare,
     setNote,
     setNoteIsMoving,
@@ -1057,6 +1060,59 @@ const Notes = (): JSX.Element => {
         <div
           className={`absolute bottom-0 right-0 left-0 h-1 rounded-full w-full ${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`}
         ></div>
+        {sharedNotes.map((shareNote: Note) => (
+          <div
+            key={shareNote.noteid}
+            className={`${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto ${userPreferences.darkMode ? "bg-[#333]" : "bg-[#e2e8f0]"}`}
+            onClick={() => (!renameANote ? openNote(shareNote) : renameRef.current.focus())}
+          >
+            <div
+              className={`duration-200 ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444] text-white" : "bg-slate-200 hover:bg-slate-300 text-black"} p-2 rounded-t-md mb-3`}
+            >
+              <p className="flex justify-center items-center gap-x-3 text-xs">
+                From <FaUser />{" "}
+                {connections.find((aCon: Connection) => aCon.userId === shareNote.from)?.email ||
+                  "Unknown"}
+              </p>
+            </div>
+            <div
+              className={`absolute top-[-5px] left-[-5px] font-bold text-lg ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+            >
+              <BiShareAlt />
+            </div>
+            <p className="font-semibold text-2xl">{shareNote.title}</p>
+            <div
+              className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
+                userPreferences.darkMode ? "bg-[#222] text-white" : "bg-white text-black"
+              } rounded-tl-md`}
+            >
+              <p className="flex justify-center items-center gap-x-1">
+                <MdUpdate className="text-lg" />
+                <span>
+                  {new Date(shareNote.updated).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                  })}
+                </span>
+              </p>
+            </div>
+            <div
+              className="mt-3 renderHtml max-h-[75%] overflow-y-clip"
+              dangerouslySetInnerHTML={{
+                __html:
+                  shareNote.htmlText.slice(
+                    0,
+                    shareNote.htmlText.length / 5 < 500
+                      ? shareNote.htmlText.length / 5 < 100
+                        ? 100
+                        : 500
+                      : 500
+                  ) + " ..."
+              }}
+            ></div>
+          </div>
+        ))}
         {shareRequests.map((shareNoteReq: ShareReq) => (
           <div
             key={shareNoteReq.id}
@@ -1101,15 +1157,22 @@ const Notes = (): JSX.Element => {
                 onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
               >
                 {!note.trashed ? (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      updateFavorite(!note.favorite, note);
-                    }}
-                    className={`absolute top-[-5px] duration-100 hover:scale-[1.25] left-[-5px] ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
-                  >
-                    {note.favorite === true ? <BsStarFill /> : <BsStar />}
-                  </button>
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateFavorite(!note.favorite, note);
+                      }}
+                      className={`absolute top-[-5px] duration-100 hover:scale-[1.25] left-[-5px] ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+                    >
+                      {note.favorite === true ? <BsStarFill /> : <BsStar />}
+                    </button>
+                    <div
+                      className={`absolute top-[-3px] left-3 ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+                    >
+                      <TbPinned />
+                    </div>
+                  </>
                 ) : null}
                 {search && folder === null ? (
                   <button
@@ -1296,9 +1359,25 @@ const Notes = (): JSX.Element => {
             }}
             onContextMenu={(e) => openNotesOptions(e, note)}
             key={note.noteid}
-            className={`${search && folder === null ? "my-20" : "my-5"} ${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
+            className={`${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto`}
             onClick={() => (!renameANote ? openNote(note) : renameRef.current.focus())}
           >
+            {search && folder === null ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSearch(false);
+                  setFolder(allData.folders.find((fold) => fold.folderid === note.folderId));
+                }}
+                className={`duration-200 w-full ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444] text-white" : "bg-slate-200 hover:bg-slate-300 text-black"} p-2 mb-3 rounded-t-md`}
+              >
+                <p className="flex justify-center items-center gap-x-3 text-xs">
+                  In <FaFolder />
+                  <FaArrowRight />
+                  {allData.folders.find((fold) => fold.folderid === note.folderId)?.title || "Home"}
+                </p>
+              </button>
+            ) : null}
             {!note.trashed ? (
               <button
                 onClick={(e) => {
@@ -1308,22 +1387,6 @@ const Notes = (): JSX.Element => {
                 className={`absolute top-[-5px] duration-100 hover:scale-[1.25] left-[-5px] ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
               >
                 {note.favorite === true ? <BsStarFill /> : <BsStar />}
-              </button>
-            ) : null}
-            {search && folder === null ? (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSearch(false);
-                  setFolder(allData.folders.find((fold) => fold.folderid === note.folderId));
-                }}
-                className={`absolute top-[-35px] left-0 right-0 z-20 duration-200 ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444] text-white" : "bg-slate-200 hover:bg-slate-300 text-black"} p-2 rounded-t-md`}
-              >
-                <p className="flex justify-center items-center gap-x-3 text-xs">
-                  In <FaFolder />
-                  <FaArrowRight />
-                  {allData.folders.find((fold) => fold.folderid === note.folderId).title}
-                </p>
               </button>
             ) : null}
             {checkForUnsaved(note.noteid) ? (

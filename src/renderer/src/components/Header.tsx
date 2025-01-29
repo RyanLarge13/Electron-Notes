@@ -192,7 +192,19 @@ const Header = (): JSX.Element => {
   };
 
   const pinFavoritesToTop = (): void => {
+    setOptionMenu(false);
     setPinFavs((prev) => !prev);
+    const newPreferences = {
+      ...userPreferences,
+      pinFavs: !userPreferences.pinFavs
+    };
+    try {
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+    } catch (err) {
+      console.log(
+        `Error updating user preferences in local storage to pin favorites. Error: ${err}`
+      );
+    }
   };
 
   return (

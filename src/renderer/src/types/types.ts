@@ -26,6 +26,7 @@ export type Note = {
   trashed: boolean;
   favorite: boolean;
   isNew?: boolean;
+  from?: string;
 };
 
 export type apiNote = {
@@ -119,6 +120,7 @@ type UserPreferences = {
   autosave: boolean;
   menuWidth: number;
   settingsWidth: number;
+  pinFavs: boolean;
   noteDems: { id: string; width: number; height: number; top: number; left: number }[];
 };
 
@@ -138,6 +140,7 @@ type Nesting = {
 export type Connection = {
   id: string;
   email: string;
+  userId: string;
 };
 
 export type ShareReq = {

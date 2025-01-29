@@ -39,7 +39,7 @@ const ShareRequests = ({
         networkNotificationError([]);
       }
       if (err.response) {
-        showErrorNotification("Accepting Note", err.response.message, true, []);
+        showErrorNotification("Accepting Note", err.response.data.message, true, []);
       }
     }
   };

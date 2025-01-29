@@ -5,8 +5,14 @@ self.onmessage = (event) => {
 
   // Return the connection the user has with other users in an easy format {id: string, email: string}
   const filteredConnections = connections.map((con) => {
-    const connection = { id: con.conid, email: "" };
-    con.userOne === userEmail ? (connection.email = con.userTwo) : (connection.email = con.userOne);
+    const connection = { id: con.conid, email: "", userId: "" };
+    if (con.userOne === userEmail) {
+      connection.email = con.userTwo;
+      connection.userId = con.idTwo;
+    } else {
+      connection.email = con.userOne;
+      connection.userId = con.idOne;
+    }
     return connection;
   });
 
@@ -14,7 +20,6 @@ self.onmessage = (event) => {
   let connectionRequestsSent = [];
 
   connectionRequests.map((conReq) => {
-    console.log(conReq);
     if (conReq.userOne === userEmail) {
       const req = { id: conReq.conreqid, to: conReq.userTwo, from: conReq.userOne };
       connectionRequestsSent.push(req);
@@ -28,7 +33,6 @@ self.onmessage = (event) => {
   let filteredShareRequestsFrom = [];
 
   shareRequests.map((shareReq) => {
-    console.log(shareReq);
     if (shareReq.userOne === userEmail) {
       filteredShareRequestsFrom.push({
         id: shareReq.shareReqId,
@@ -51,12 +55,29 @@ self.onmessage = (event) => {
   // const filteredSharedNotes = sharedNotes.map((shareNote) => {
   // });
 
+  let filteredSharedNotes = [];
+  sharedNotes.forEach((note) => {
+    filteredSharedNotes.push({
+      title: note.sharednotetitle,
+      noteid: note.sharednoteid,
+      locked: note.sharednotelocked,
+      htmlText: note.sharednotehtmltext,
+      folderId: note.sharednotefolderid,
+      createdAt: new Date(note.sharednotecreatedat),
+      updated: new Date(note.sharednoteupdated),
+      trashed: note.sharednotetrashed,
+      favorite: false,
+      isNew: false,
+      from: note.from
+    });
+  });
+
   self.postMessage({
     filteredConnections,
     connectionRequestsSent,
     connectionRequestsReceived,
     filteredShareRequestsFrom,
     filteredShareRequests,
-    filteredSharedNotes: sharedNotes
+    filteredSharedNotes: filteredSharedNotes
   });
 };

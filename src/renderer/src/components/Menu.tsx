@@ -30,7 +30,8 @@ const Menu = (): JSX.Element => {
     allData,
     token,
     drafts,
-    trashedNotes
+    trashedNotes,
+    sharedNotes
   } = useContext(UserContext);
 
   const [resizing, setResizing] = useState(false);
@@ -312,7 +313,7 @@ const Menu = (): JSX.Element => {
                 </p>
               </div>
               <div className="flex justify-center items-center gap-x-3">
-                <p className="font-semibold">0</p>
+                <p className="font-semibold">{sharedNotes.length}</p>
                 <FaShareAlt
                   className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
                 />
