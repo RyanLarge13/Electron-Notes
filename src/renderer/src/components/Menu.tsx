@@ -6,9 +6,27 @@ import { LuFileStack } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
 import UserContext from "@renderer/contexxt/UserContext";
+import { Note } from "@renderer/types/types";
 import { deleteUser } from "@renderer/utils/api";
 
 import Tree from "./Tree";
+
+const MenuButton = ({ notes, title, userPreferences, color, click }): JSX.Element => {
+  return (
+    <button
+      onClick={() => click()}
+      className={`p-3 rounded-md shadow-md my-3 ${
+        userPreferences.darkMode ? "bg-[#333] hover:bg-[#444]" : "bg-slate-300 hover:bg-slate-400"
+      } w-full flex justify-between items-center duration-200`}
+    >
+      <p>{title}</p>
+      <div className="flex justify-center items-center gap-x-3">
+        <p className="font-semibold">{notes?.length || "0"}</p>
+        <LuFileStack className={`${userPreferences.theme ? color : "text-amber-300"} text-sm`} />
+      </div>
+    </button>
+  );
+};
 
 const Menu = (): JSX.Element => {
   const {
@@ -22,8 +40,8 @@ const Menu = (): JSX.Element => {
     setUserPreferences,
     resetSystemNotification,
     networkNotificationError,
-    showSuccessNotification,
     showErrorNotification,
+    confirmOperationNotification,
     userPreferences,
     favorites,
     user,
@@ -47,106 +65,83 @@ const Menu = (): JSX.Element => {
     ? userPreferences.theme.replace("bg", "text")
     : "text-amber-300";
 
-  const confirmLogout = (): void => {
-    showSuccessNotification("Logout", "Are you sure you want to logout?", false, [
-      { text: "logout", func: (): void => logout() }
-    ]);
-  };
-
-  const logout = (): void => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("pin");
+  // Network requests -------------------------------------------------------------------------
+  const deleteAccount = (): void => {
     resetSystemNotification();
-  };
 
-  const confirmDeleteAccount = (): void => {
-    showSuccessNotification(
+    const continueRequest = async (): Promise<void> => {
+      try {
+        await deleteUser(token);
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem("signedup");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("pin");
+      } catch (err) {
+        console.log(err);
+        if (err.response) {
+          showErrorNotification("Delete Account Failed", err.response.message, true, [
+            { text: "re-try", func: () => deleteAccount() },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
+          return;
+        }
+        if (err.request) {
+          networkNotificationError([
+            { text: "re-try", func: () => deleteAccount() },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
+          return;
+        }
+        showErrorNotification(
+          "Delete Account Failed",
+          "There was an issue with deleting your account. Please try again and if the issue persists, contact the developer",
+          true,
+          [
+            { text: "re-try", func: () => deleteAccount() },
+            { text: "reload app", func: () => window.location.reload() }
+          ]
+        );
+      }
+    };
+
+    confirmOperationNotification(
       "Delete Account",
-      "Are you sure deleting your entire account is what you want to do? You will lose all of your data",
-      false,
-      [{ text: "delete", func: (): void => deleteAccount() }]
+      "Are you sure you want to delete your account?",
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
+  };
+  // Network requests -------------------------------------------------------------------------
+
+  // Helpers ----------------------------------------------------------------------------------
+  const logout = (): void => {
+    resetSystemNotification();
+
+    const continueRequest = (): void => {
+      setToken(null);
+      setUser(null);
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("pin");
+    };
+
+    confirmOperationNotification(
+      "Logout",
+      "Are you sure you want to logout?",
+      [{ text: "confirm", func: (): void => continueRequest() }],
+      continueRequest
     );
   };
 
-  const showAllNotes = (): void => {
-    setMainTitle("All Notes");
+  const setFolderCategoryState = (title: string, folderSet: Note[]): void => {
+    setMainTitle(title);
     setFolders([]);
-    setNotes(allData.notes);
+    setNotes(folderSet);
     setMenu(false);
   };
+  // Helpers ----------------------------------------------------------------------------------
 
-  const showAllLocked = (): void => {
-    const lockedNotes = allData.notes.filter((aNote) => aNote.locked);
-    setMainTitle("Locked Notes");
-    setFolders([]);
-    setNotes(lockedNotes);
-    setMenu(false);
-  };
-
-  const deleteAccount = (): void => {
-    resetSystemNotification();
-    try {
-      deleteUser(token)
-        .then((res) => {
-          console.log(res);
-          setUser(null);
-          setToken(null);
-          localStorage.removeItem("signedup");
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("pin");
-        })
-        .catch((err) => {
-          console.log(err);
-          if (err.response) {
-            showErrorNotification("Delete Account Failed", err.response.message, true, [
-              { text: "re-try", func: () => deleteAccount() },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            networkNotificationError([
-              { text: "re-try", func: () => deleteAccount() },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-        });
-    } catch (err) {
-      console.log(err);
-      showErrorNotification(
-        "Delete Account Failed",
-        "There was an error with the application when trying to delete your account, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        true,
-        [
-          { text: "re-try", func: () => deleteAccount() },
-          { text: "reload app", func: () => window.location.reload() }
-        ]
-      );
-    }
-  };
-
-  const showAllDrafts = (): void => {
-    setMainTitle("Drafts");
-    setFolders([]);
-    setNotes(drafts);
-    setMenu(false);
-  };
-
-  const showAllTrashed = (): void => {
-    setMainTitle("Trashed");
-    setFolders([]);
-    setNotes(trashedNotes);
-    setMenu(false);
-  };
-
-  const showAllFavorites = (): void => {
-    setMainTitle("Favorites");
-    setFolders([]);
-    setNotes(favorites);
-    setMenu(false);
-  };
-
+  // Resizing operations -----------------------------------------------------------------------
   const handleResizeWidth = (e): void => {
     e.stopPropagation();
     if (menuRef && menuRef.current) {
@@ -181,6 +176,7 @@ const Menu = (): JSX.Element => {
       JSON.stringify({ ...userPreferences, menuWidth: menuWidth })
     );
   };
+  // Resizing operations -----------------------------------------------------------------------
 
   return (
     <>
@@ -211,24 +207,18 @@ const Menu = (): JSX.Element => {
         <div className="overflow-y-auto h-full p-5 flex flex-col justify-between no-scroll-bar">
           <div className="mb-10">
             <h1 className="text-3xl">{user.username}</h1>
+            <MenuButton
+              notes={allData.notes}
+              title={"All Notes"}
+              userPreferences={userPreferences}
+              color={textThemeString}
+              click={() => setFolderCategoryState("All Notes", allData.notes)}
+            />
             <button
-              onClick={() => showAllNotes()}
-              className={`p-3 rounded-md shadow-md my-3 ${
-                userPreferences.darkMode
-                  ? "bg-[#333] hover:bg-[#444]"
-                  : "bg-slate-300 hover:bg-slate-400"
-              } w-full flex justify-between items-center duration-200`}
-            >
-              <p>All Notes</p>
-              <div className="flex justify-center items-center gap-x-3">
-                <p className="font-semibold">{allData?.notes?.length}</p>
-                <LuFileStack
-                  className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
-                />
-              </div>
-            </button>
-            <button
-              onClick={() => showAllLocked()}
+              onClick={() => {
+                const lockedNotes = allData.notes.filter((aNote) => aNote.locked);
+                setFolderCategoryState("Locked Notes", lockedNotes);
+              }}
               className={`p-3 rounded-md shadow-md my-3 ${
                 userPreferences.darkMode
                   ? "bg-[#333] hover:bg-[#444]"
@@ -246,7 +236,7 @@ const Menu = (): JSX.Element => {
               </div>
             </button>
             <button
-              onClick={() => showAllFavorites()}
+              onClick={() => setFolderCategoryState("Favorites", favorites)}
               className={`p-3 rounded-md shadow-md my-3 ${
                 userPreferences.darkMode
                   ? "bg-[#333] hover:bg-[#444]"
@@ -264,7 +254,7 @@ const Menu = (): JSX.Element => {
               </div>
             </button>
             <button
-              onClick={() => showAllDrafts()}
+              onClick={() => setFolderCategoryState("Drafts", drafts)}
               className={`p-3 rounded-md shadow-md my-3 ${
                 userPreferences.darkMode
                   ? "bg-[#333] hover:bg-[#444]"
@@ -280,7 +270,7 @@ const Menu = (): JSX.Element => {
               </div>
             </button>
             <button
-              onClick={(): void => showAllTrashed()}
+              onClick={(): void => setFolderCategoryState("Trashed", trashedNotes)}
               className={`p-3 rounded-md shadow-md my-3 w-full ${
                 userPreferences.darkMode
                   ? "bg-[#333] hover:bg-[#444]"
@@ -346,7 +336,7 @@ const Menu = (): JSX.Element => {
               Settings
             </button>
             <button
-              onClick={() => confirmLogout()}
+              onClick={() => logout()}
               className={`p-2 rounded-md shadow-md ${
                 userPreferences.theme
                   ? `${userPreferences.theme} hover:${hoverBgString}`
@@ -368,7 +358,7 @@ const Menu = (): JSX.Element => {
               Report A Bug
             </a>
             <button
-              onClick={() => confirmDeleteAccount()}
+              onClick={() => deleteAccount()}
               className="p-2 text-red-500 underline w-full text-sm duration-200"
             >
               Delete Account

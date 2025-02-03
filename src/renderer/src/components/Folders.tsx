@@ -11,6 +11,7 @@ import {
   FaPaintBrush,
   FaPlusSquare,
   FaRegCheckCircle,
+  FaRegCopy,
   FaWindowClose
 } from "react-icons/fa";
 import { TbNotes } from "react-icons/tb";
@@ -18,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
 import UserContext from "@renderer/contexxt/UserContext";
-import { AllData, Folder } from "@renderer/types/types";
+import { AllData, Folder, Note } from "@renderer/types/types";
 import {
   createNewFolder,
   createNewNote,
@@ -26,6 +27,11 @@ import {
   duplicateMultipleContents,
   updateFolder
 } from "@renderer/utils/api";
+import {
+  createCopiesOfFoldersAndNotes,
+  generateMockNotes,
+  organizeNotesAndFolders
+} from "@renderer/utils/helpers";
 
 import Colors from "./Colors";
 
@@ -59,7 +65,8 @@ const Folders = (): JSX.Element => {
     networkNotificationError,
     resetSystemNotification,
     showSuccessNotification,
-    showErrorNotification
+    showErrorNotification,
+    confirmOperationNotification
   } = useContext(UserContext);
 
   const [dragging, setDragging] = useState(false);
@@ -82,7 +89,7 @@ const Folders = (): JSX.Element => {
     if (folderSearchText !== "" && folderRefs.current && folderRefs.current.length > 0) {
       const search = folderSearchText.toLowerCase();
       const possibleElements = folderRefs.current.filter(
-        (refData) => refData && refData.title && refData?.title?.includes(search)
+        (refData: Folder) => refData && refData.title && refData?.title?.includes(search)
       );
       if (possibleElements.length === 1) {
         if (possibleElements[0].el) {
@@ -95,53 +102,22 @@ const Folders = (): JSX.Element => {
     }
   }, [folderSearchText]);
 
-  const openFolder = (folder: Folder): void => {
-    setNesting((prev) => [...prev, { title: folder.title, id: folder.folderid }]);
-    setNotes([]);
-    setFolder(folder);
-    const newPreferences = {
-      ...userPreferences,
-      savedFolder: folder.folderid
+  // Network request and state logic --------------------------------------------------------------------
+  const createNestedNote = async (folder: Folder): Promise<void> => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    const resetState = (): void => {
+      setAllData((prevData) => {
+        const newNotes = prevData.notes.filter((aNote) => aNote.noteid !== tempId);
+        return { ...prevData, notes: newNotes };
+      });
+      setNote(null);
     };
-    setUserPreferences(newPreferences);
-    localStorage.setItem("preferences", JSON.stringify(newPreferences));
-  };
+    const tempId = uuidv4();
 
-  const confirmDelete = (folder: Folder): void => {
-    showSuccessNotification(
-      `Delete ${folder.title}`,
-      "Are you sure you want to delete? This will delete all of the contents within this folder as well, forever",
-      true,
-      [{ text: "delete", func: () => deleteFolder(folder.folderid) }]
-    );
-  };
+    const { newNote, noteToPush } = generateMockNotes(folder, tempId);
 
-  const createNestedFolder = (folder: Folder): void => {
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-    setSelectedFolder(folder);
-    navigate("/newfolder");
-  };
-
-  const createNestedNote = (folder: Folder): void => {
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     try {
-      const tempId = uuidv4();
-      const newNote = {
-        folderId: folder.folderid,
-        title: `New Note inside of the ${folder.title} folder`,
-        htmlNotes: "<p>Change me!!</p>",
-        locked: false
-      };
-      const noteToPush = {
-        noteid: tempId,
-        folderId: folder.folderid,
-        title: `New Note inside of the ${folder.title} folder`,
-        htmlText: "<p>Change me!!</p>",
-        locked: false,
-        createdAt: new Date(),
-        updated: new Date(),
-        trashed: false
-      };
+      // Immediately update state
       setAllData((prevData: AllData) => {
         const newData = {
           ...prevData,
@@ -150,239 +126,122 @@ const Folders = (): JSX.Element => {
         return newData;
       });
       setFolder(folder);
-      setNote(noteToPush);
-      createNewNote(token, newNote)
-        .then((res) => {
-          const newId = res.data.data[0].notesid;
-          setAllData((prevData) => {
-            const newNotes = prevData.notes.map((aNote) => {
-              if (aNote.noteid === tempId) {
-                return { ...aNote, noteid: newId };
-              }
-              return aNote;
-            });
-            return { ...prevData, notes: newNotes };
-          });
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const newNotes = prevData.notes.filter((aNote) => aNote.noteid !== tempId);
-            return { ...prevData, notes: newNotes };
-          });
-          setNote(null);
-          if (err.response) {
-            showErrorNotification("Creating Note", err.response.message, true, [
-              { text: "re-try", func: () => createNestedNote(folder) },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
+      setNote((prev: Note[]): Note[] => [...prev, noteToPush]);
+
+      const response = await createNewNote(token, newNote);
+
+      const resNote = response.data.data[0];
+
+      setAllData((prevData) => {
+        const newNotes = prevData.notes.map((aNote) => {
+          if (aNote.noteid === tempId) {
+            return { ...aNote, noteid: resNote.notesid };
           }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => createNestedNote(folder) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
+          return aNote;
         });
-    } catch (err) {
-      console.log(err);
-      setNote(null);
-      networkNotificationError([]);
-    }
-  };
-
-  const moveFolder = (folder): void => {
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-    setMove({
-      isMoving: true,
-      from: folder.folderid,
-      itemTitle: folder.title,
-      item: [folder],
-      type: "folder"
-    });
-  };
-
-  const confirmDup = (folder: Folder): void => {
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-    showSuccessNotification(
-      `Duplicate ${folder.title}`,
-      "Would you like to duplicate this folder and all of its contents or only the folder?",
-      true,
-      [
-        { text: "duplicate all", func: (): void => dupAll(folder) },
-        { text: "duplicate folder", func: (): void => dupFolder(folder) }
-      ]
-    );
-  };
-
-  const buildChildFolders = (
-    aFoldId: string,
-    newFolders: { folderid: string; title: string; color: string; parentFolderId: string }[]
-  ): void => {
-    const childFolders = allData.folders.filter((fold) => fold.parentFolderId === aFoldId);
-    if (childFolders.length === 0) {
-      return;
-    }
-    childFolders.forEach((child) => {
-      const newFolder = {
-        folderid: child.folderid,
-        title: child.title,
-        color: child.color,
-        parentFolderId: child.parentFolderId
-      };
-      newFolders.push(newFolder);
-      buildChildFolders(child.folderid, newFolders);
-    });
-  };
-
-  const buildChildNotes = (
-    folderIds: string[],
-    newNotes: {
-      title: string;
-      htmlText: string;
-      locked: boolean;
-      trashed: boolean;
-      folderId: string;
-    }[]
-  ): void => {
-    for (let i = 0; i < folderIds.length; i++) {
-      const childNotes = allData.notes.filter((aNote) => aNote.folderId === folderIds[i]);
-      childNotes.forEach((child) => {
-        const newNote = {
-          title: child.title,
-          htmlText: child.htmlText,
-          locked: child.locked,
-          trashed: child.trashed,
-          folderId: child.folderId
-        };
-        newNotes.push(newNote);
+        return { ...prevData, notes: newNotes };
       });
-    }
-  };
 
-  const getNestedFoldersIds = (folderId: string, folderIds: string[]): void => {
-    const childFolders = allData.folders.filter((fold) => fold.parentFolderId === folderId);
-    if (childFolders.length === 0) {
-      return;
-    }
-    childFolders.forEach((child) => {
-      folderIds.push(child.folderid);
-      getNestedFoldersIds(child.folderid, folderIds);
-    });
-  };
-
-  const dupAll = (folder: Folder): void => {
-    const oldFolders = allData.folders;
-    const oldNotes = allData.notes;
-    resetSystemNotification();
-    const newFolders = [];
-    const newNotes = [];
-    const folderIds = [];
-    const newFolder = {
-      folderid: folder.folderid,
-      title: folder.title,
-      color: folder.color,
-      parentFolderId: folder.parentFolderId
-    };
-    newFolders.push(newFolder);
-    folderIds.push(folder.folderid);
-    getNestedFoldersIds(folder.folderid, folderIds);
-    buildChildFolders(folder.folderid, newFolders);
-    buildChildNotes(folderIds, newNotes);
-    for (let i = 0; i < newFolders.length; i++) {
-      const newId = uuidv4();
-      for (let j = 0; j < newNotes.length; j++) {
-        if (newNotes[j].folderId === newFolders[i].folderid) {
-          newNotes[j].folderId = newId;
-        }
-      }
-      for (let k = 0; k < newFolders.length; k++) {
-        if (newFolders[k].parentFolderId === newFolders[i].folderid) {
-          newFolders[k].parentFolderId = newId;
-        }
-      }
-      newFolders[i].folderid = newId;
-    }
-    for (let i = 0; i < newNotes.length; i++) {
-      const newId = uuidv4();
-      newNotes[i].noteid = newId;
-    }
-    setAllData((prev) => {
-      const newData = {
-        ...prev,
-        folders: [...prev.folders, ...newFolders],
-        notes: [...prev.notes, ...newNotes]
-      };
-      return newData;
-    });
-    try {
-      duplicateMultipleContents(token, newFolders, newNotes)
-        .then((res) => {
-          const updatedData = res.data.data;
-          const newFoldersArray = updatedData.newFoldersArray.map((fold) => {
-            return {
-              folderid: fold.folderid,
-              parentFolderId: fold.parentfolderid,
-              title: fold.title,
-              color: fold.color
-            };
-          });
-          const newNotesArray = updatedData.newNotesArray.map((aNote) => {
-            return {
-              noteid: aNote.noteid,
-              htmlText: aNote.htmlnotes,
-              folderId: aNote.folderid,
-              title: aNote.title,
-              createdAt: aNote.createdat,
-              updated: aNote.updated,
-              locked: aNote.locked,
-              trashed: aNote.trashed
-            };
-          });
-          setAllData((prev) => {
-            return {
-              ...prev,
-              folders: [...oldFolders, ...newFoldersArray],
-              notes: [...oldNotes, ...newNotesArray]
-            };
-          });
-          showSuccessNotification("Duplicated All Content", res.data.message, true, []);
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prev) => {
-            return {
-              ...prev,
-              folders: oldFolders,
-              notes: oldNotes
-            };
-          });
-          if (err.response) {
-            showErrorNotification("Duplicating Content", err.response.message, true, [
-              { text: "re-try", func: () => dupAll(folder) },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => dupAll(folder) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
-        });
+      showSuccessNotification(
+        "Note Created",
+        `Note ${resNote.title} was created successfully`,
+        false,
+        []
+      );
     } catch (err) {
       console.log(err);
+      // Reset state
+      resetState();
+      if (err.request) {
+        networkNotificationError([]);
+        return;
+      }
+      if (err.response) {
+        showErrorNotification("Creating Note", err.response.message, true, []);
+        return;
+      }
       showErrorNotification(
-        "Duplicating Content",
-        "Please contact the developer if this issue persists. We seemed to have a problem duplicating your folders and notes. Please close the application, reload it and try the operation again",
+        "Creating Note",
+        "We encountered a problem creating your note. If this issue persists, please contact the developer",
         true,
         []
       );
     }
+  };
+
+  const dupAll = (folder: Folder): void => {
+    resetSystemNotification();
+
+    const oldFolders = allData.folders;
+    const oldNotes = allData.notes;
+
+    const { copyFolders, copyNotes } = createCopiesOfFoldersAndNotes(
+      folder,
+      allData.folders,
+      allData.notes
+    );
+
+    const continueRequest = async (): Promise<void> => {
+      try {
+        // Immediately update state
+        setAllData((prev) => {
+          const newData = {
+            ...prev,
+            folders: [...prev.folders, ...copyFolders],
+            notes: [...prev.notes, ...copyNotes]
+          };
+          return newData;
+        });
+
+        const response = await duplicateMultipleContents(token, copyFolders, copyNotes);
+        const updatedData = response.data.data;
+        const { newFoldersArray, newNotesArray } = organizeNotesAndFolders(updatedData);
+
+        // Update the local state with the server data to make sure ID's match correctly for
+        // Future updating
+        setAllData((prev) => {
+          return {
+            ...prev,
+            folders: [...oldFolders, ...newFoldersArray],
+            notes: [...oldNotes, ...newNotesArray]
+          };
+        });
+        showSuccessNotification("Duplicated All Content", response.data.message, true, []);
+      } catch (err) {
+        console.log(err);
+
+        // Reset state immediately
+        setAllData((prev) => {
+          return {
+            ...prev,
+            folders: oldFolders,
+            notes: oldNotes
+          };
+        });
+
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        if (err.response) {
+          showErrorNotification("Duplicating Content", err.response.message, true, []);
+          return;
+        }
+        showErrorNotification(
+          "Duplicating Content",
+          "We ran into an issue duplicating your content. Try again and if this issue persists. Please contact the developer",
+          true,
+          []
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Duplicate All Content",
+      `Are you sure you want to duplicate all of the contents of this folder? This could take a while`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
   const dupFolder = (folder: Folder): void => {
@@ -394,79 +253,74 @@ const Folders = (): JSX.Element => {
       parentFolderId: folder.parentFolderId,
       createdAt: new Date()
     };
-    try {
-      setAllData((prevData: AllData) => {
-        const newFolders = [...prevData.folders, { ...newFolder, folderid: tempId }];
-        return { ...prevData, folders: newFolders };
-      });
-      createNewFolder(token, newFolder)
-        .then((res) => {
-          const newId = res.data.data[0].folderid;
-          setAllData((prevData) => {
-            const updatedFolders = prevData.folders.map((fold) => {
-              if (fold.folderid === tempId) {
-                return { ...fold, folderid: newId };
-              }
-              return fold;
-            });
-            return {
-              ...prevData,
-              folders: updatedFolders
-            };
-          });
-          showSuccessNotification(
-            "Folder Duplicated",
-            "Successfully duplicated your folder",
-            false,
-            [{ text: "undo", func: (): void => {} }]
-          );
-        })
-        .catch((err) => {
-          setAllData((prevData) => {
-            const updatedFolders = prevData.folders.filter((fold) => fold.folderid !== tempId);
-            return {
-              ...prevData,
-              folders: updatedFolders
-            };
-          });
-          if (err.response) {
-            showErrorNotification("Duplicating Folder", err.response.message, true, [
-              { text: "re-try", func: () => dupFolder(folder) },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => dupFolder(folder) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
+
+    const continueRequest = async (): Promise<void> => {
+      try {
+        // Immediately update state
+        setAllData((prevData: AllData) => {
+          const newFolders = [...prevData.folders, { ...newFolder, folderid: tempId }];
+          return { ...prevData, folders: newFolders };
         });
-    } catch (err) {
-      console.log(err);
-      showErrorNotification(
-        "Duplicating Folder",
-        "Please contact the developer if this issue persists. We seemed to have a problem duplicating your folder. Please close the application, reload it and try the operation again",
-        true,
-        []
-      );
-    }
+
+        const response = await createNewFolder(token, newFolder);
+        const newId = response.data.data[0].folderid;
+
+        // Update new folder state with db ID for future updates
+        setAllData((prevData) => {
+          const updatedFolders = prevData.folders.map((fold) => {
+            if (fold.folderid === tempId) {
+              return { ...fold, folderid: newId };
+            }
+            return fold;
+          });
+          return {
+            ...prevData,
+            folders: updatedFolders
+          };
+        });
+        showSuccessNotification(
+          "Folder Duplicated",
+          "Successfully duplicated your folder",
+          false,
+          []
+        );
+      } catch (err) {
+        console.log(err);
+
+        // Immediately revert state on failure
+        setAllData((prevData) => {
+          const updatedFolders = prevData.folders.filter((fold) => fold.folderid !== tempId);
+          return {
+            ...prevData,
+            folders: updatedFolders
+          };
+        });
+        if (err.response) {
+          showErrorNotification("Duplicating Folder", err.response.message, true, []);
+          return;
+        }
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        showErrorNotification(
+          "Duplicating Folder",
+          "We ran into an issue duplicating your folder. If this continues to happen, please contact the developer",
+          true,
+          []
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Duplicate Folder",
+      `Are you sure you want to duplicate this folder? ${folder.title || ""}?`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
-  const renameFolder = (folder: Folder): void => {
-    setFolderToRename(folder);
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-    if (renameRef.current) {
-      renameRef.current.focus();
-    }
-    setTimeout(() => {
-      renameRef.current.focus();
-    }, 250);
-  };
-
-  const handleRename = (e): void => {
+  const handleRename = async (e): Promise<void> => {
     e.preventDefault();
     resetSystemNotification();
     const oldTitle = folderToRename.title;
@@ -476,7 +330,9 @@ const Folders = (): JSX.Element => {
       color: folderToRename.color,
       parentFolderId: folderToRename.parentFolderId
     };
+
     try {
+      // Immediately update state
       setAllData((prevData) => {
         const newFolders = prevData.folders
           .map((fold: Folder): Folder => {
@@ -493,60 +349,44 @@ const Folders = (): JSX.Element => {
       });
       setFolderToRename(null);
       setRenameText("");
-      updateFolder(token, newFolder)
-        .then(() => {
-          showSuccessNotification("Folder Re-named", "Successfully re-named your folder", false, [
-            { text: "undo", func: (): void => {} }
-          ]);
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const newFolders = prevData.folders
-              .map((fold: Folder): Folder => {
-                if (fold.folderid === folderToRename.folderid) {
-                  return { ...fold, title: oldTitle };
-                }
-                return fold;
-              })
-              .sort((a, b) => a.title.localeCompare(b.title));
-            return {
-              ...prevData,
-              folders: newFolders
-            };
-          });
-          if (err.response) {
-            showErrorNotification("Re-Naming Folder", err.response.message, true, [
-              { text: "re-try", func: () => handleRename(e) },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => handleRename(e) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
-        });
+
+      await updateFolder(token, newFolder);
+      showSuccessNotification("Folder Re-named", "Successfully re-named your folder", false, []);
     } catch (err) {
+      // Immediately reset state
+      setAllData((prevData) => {
+        const newFolders = prevData.folders
+          .map((fold: Folder): Folder => {
+            if (fold.folderid === folderToRename.folderid) {
+              return { ...fold, title: oldTitle };
+            }
+            return fold;
+          })
+          .sort((a, b) => a.title.localeCompare(b.title));
+        return {
+          ...prevData,
+          folders: newFolders
+        };
+      });
       console.log(err);
+      if (err.response) {
+        showErrorNotification("Re-Naming Folder", err.response.message, true, []);
+        return;
+      }
+      if (err.request) {
+        networkNotificationError([]);
+        return;
+      }
       showErrorNotification(
         "Re-naming Folder",
-        "Please contact the developer if this issue persists. We seemed to have a problem renaming your folder. Please close the application, reload it and try the operation again",
+        "There was an issue re-naming your folder. Try again and if this issue persists, please contact the developer",
         true,
         []
       );
     }
   };
 
-  const changeFolderColor = (folder: Folder): void => {
-    setFolderToChangeColor(folder);
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-  };
-
-  const changeColor = (): void => {
+  const changeColor = async (): Promise<void> => {
     resetSystemNotification();
     const tempId = folderToChangeColor.folderid;
     const oldColor = folderToChangeColor.color;
@@ -556,7 +396,9 @@ const Folders = (): JSX.Element => {
       color: newColor,
       parentFolderId: folderToChangeColor.parentFolderId
     };
+
     try {
+      // Immediately update state
       setAllData((prevData) => {
         const newFolders = prevData.folders.map((fold) => {
           if (fold.folderid === tempId) {
@@ -571,39 +413,12 @@ const Folders = (): JSX.Element => {
       });
       setFolderToChangeColor(false);
       setNewColor(null);
-      updateFolder(token, newFolder)
-        .then(() => {
-          showSuccessNotification("New Folder Color", "Your folder color is now updated", false, [
-            { text: "undo", func: (): void => {} }
-          ]);
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const newFolders = prevData.folders.map((fold) => {
-              if (fold.folderid === tempId) {
-                return { ...fold, color: oldColor };
-              }
-              return fold;
-            });
-            return {
-              ...prevData,
-              folders: newFolders
-            };
-          });
-          if (err.response) {
-            showErrorNotification("Updating Folder", err.response.message, true, [
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
-        });
+
+      await updateFolder(token, newFolder);
+
+      showSuccessNotification("New Color", "Your folder color is now updated", false, [
+        { text: "undo", func: (): void => {} }
+      ]);
     } catch (err) {
       console.log(err);
       setAllData((prevData) => {
@@ -618,9 +433,19 @@ const Folders = (): JSX.Element => {
           folders: newFolders
         };
       });
+      if (err.response) {
+        showErrorNotification("Updating Folder", err.response.message, true, [
+          { text: "reload app", func: () => window.location.reload() }
+        ]);
+        return;
+      }
+      if (err.request) {
+        networkNotificationError([{ text: "reload app", func: () => window.location.reload() }]);
+        return;
+      }
       showErrorNotification(
         "Updating Folder",
-        "Please contact the developer if this issue persists. We seemed to have a problem changing your folders color. Please close the application, reload it and try the operation again",
+        "There was an issue updating the color on your folder. Please try again and if the issue persists, contact the developer",
         true,
         []
       );
@@ -630,53 +455,137 @@ const Folders = (): JSX.Element => {
   const deleteFolder = (folderId: string): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     const oldFolder = allData.folders.filter((fold) => fold.folderid == folderId)[0];
-    resetSystemNotification();
-    try {
-      setAllData((prevData) => {
-        const newFolders = prevData.folders.filter((fold) => fold.folderid !== folderId);
-        return { ...prevData, folders: newFolders };
-      });
-      deleteAFolder(token, folderId)
-        .then(() => {
-          showSuccessNotification("Folder Deleted", "Successfully deleted your folder", false, [
-            { text: "undo", func: (): void => {} }
-          ]);
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const newFolders = [...prevData.folders, oldFolder];
-            return {
-              ...prevData,
-              folders: newFolders
-            };
-          });
-          if (err.response) {
-            showErrorNotification("Deleting Folder", err.response.message, true, [
-              { text: "re-try", func: () => deleteFolder(folderId) },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => deleteFolder(folderId) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
+
+    const continueRequest = async (): Promise<void> => {
+      resetSystemNotification();
+      try {
+        // Immediately update the state
+        setAllData((prevData) => {
+          const newFolders = prevData.folders.filter((fold) => fold.folderid !== folderId);
+          return { ...prevData, folders: newFolders };
         });
-    } catch (err) {
-      console.log(err);
-      showErrorNotification(
-        "Deleting Folder",
-        "Please contact the developer if this issue persists. We seemed to have a problem deleting your folder. Please close the application, reload it and try the operation again",
-        true,
-        []
-      );
-    }
+        await deleteAFolder(token, folderId);
+        showSuccessNotification(
+          "Folder Deleted",
+          `Successfully deleted ${oldFolder.title || "your folder"}`,
+          false,
+          []
+        );
+      } catch (err) {
+        console.log(err);
+        // reset the state to contain the original folder
+        setAllData((prevData) => {
+          const newFolders = [...prevData.folders, oldFolder];
+          return {
+            ...prevData,
+            folders: newFolders
+          };
+        });
+
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        if (err.response) {
+          showErrorNotification("Deleting Folder", err.response.message, true, []);
+          return;
+        }
+        showErrorNotification(
+          "Deleting Folder",
+          `We ran into issues deleteing ${oldFolder.title}. If this issue persists, please contact the developer`,
+          true,
+          []
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Delete Folder",
+      `Are you sure you want to delete ${oldFolder.title || "this folder"}?`,
+      [{ text: "delete", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
+  const moveFolderAndContents = (): void => {
+    resetSystemNotification();
+    const folderUpdate = {
+      ...folderDragging,
+      folderId: folderDragging.folderid,
+      parentFolderId: draggedOverFolder.folderid
+    };
+
+    const continueRequest = async (): Promise<void> => {
+      try {
+        // Immediately update state
+        setAllData((prevData) => {
+          const newFolders = prevData.folders.map((fold: Folder): Folder => {
+            if (fold.folderid === folderDragging.folderid) {
+              return { ...fold, parentFolderId: draggedOverFolder.folderid };
+            }
+            return fold;
+          });
+          return { ...prevData, folders: newFolders };
+        });
+        setDraggedInto("");
+
+        await updateFolder(token, folderUpdate);
+
+        showSuccessNotification("Moved Folder", "Successfully moved your folder", false, []);
+        setFolderDragging(null);
+        setDraggedOverFolder(null);
+      } catch (err) {
+        console.log(err);
+
+        // Immediately update state
+        setAllData((prevData) => {
+          const newFolders = prevData.folders.map((fold: Folder): Folder => {
+            if (fold.folderid === folderDragging.folderid) {
+              return { ...fold, parentFolderId: folderDragging.parentFolderId };
+            }
+            return fold;
+          });
+          return { ...prevData, folders: newFolders };
+        });
+
+        if (err.response) {
+          showErrorNotification("Moving Folder", err.response.message, true, [
+            { text: "re-try", func: () => moveFolderAndContents() },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
+          return;
+        }
+        if (err.request) {
+          networkNotificationError([
+            { text: "re-try", func: () => moveFolderAndContents() },
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
+          return;
+        }
+        showErrorNotification(
+          "Moving Folder",
+          "There were issues moving your folder. Please try again and if the issue persists, contact the developer",
+          true,
+          []
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Move Folder",
+      `Are you sure you want to move your folder ${folderDragging.title || ""}?`,
+      [
+        {
+          text: "confirm",
+          func: (): Promise<void> => continueRequest()
+        }
+      ],
+      continueRequest
+    );
+  };
+  // Network request and state logic --------------------------------------------------------------------
+
+  // Folder context menu --------------------------------------------------------------------------------
   const openOptions = (event, folder: Folder): void => {
     event.preventDefault();
     event.stopPropagation();
@@ -713,7 +622,7 @@ const Folders = (): JSX.Element => {
         {
           title: "new note",
           icon: <FaPlusSquare />,
-          func: (): void => createNestedNote(folder)
+          func: (): Promise<void> => createNestedNote(folder)
         },
         {
           title: "move",
@@ -721,9 +630,14 @@ const Folders = (): JSX.Element => {
           func: (): void => moveFolder(folder)
         },
         {
-          title: "duplicate",
+          title: "duplicate all",
           icon: <FaCopy />,
-          func: (): void => (userPreferences.confirm ? confirmDup(folder) : dupFolder(folder))
+          func: (): void => dupAll(folder)
+        },
+        {
+          title: "duplicate folder",
+          icon: <FaRegCopy />,
+          func: (): void => dupFolder(folder)
         },
         {
           title: "rename",
@@ -738,12 +652,63 @@ const Folders = (): JSX.Element => {
         {
           title: "delete",
           icon: <FaWindowClose />,
-          func: (): void =>
-            userPreferences.confirm ? confirmDelete(folder) : deleteFolder(folder.folderid)
+          func: (): void => deleteFolder(folder.folderid)
         }
       ]
     };
     setContextMenu(newMenu);
+  };
+  // Folder context menu --------------------------------------------------------------------------------
+
+  // Helpers -------------------------------------------------------------------------------
+  const moveFolder = (folder: Folder): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    setMove({
+      isMoving: true,
+      from: folder.folderid,
+      itemTitle: folder.title,
+      item: [folder],
+      type: "folder"
+    });
+  };
+
+  const openFolder = (folder: Folder): void => {
+    setNesting((prev) => [...prev, { title: folder.title, id: folder.folderid }]);
+    setNotes([]);
+    setFolder(folder);
+    const newPreferences = {
+      ...userPreferences,
+      savedFolder: folder.folderid
+    };
+    setUserPreferences(newPreferences);
+
+    try {
+      localStorage.setItem("preferences", JSON.stringify(newPreferences));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const createNestedFolder = (folder: Folder): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    setSelectedFolder(folder);
+    navigate("/newfolder");
+  };
+
+  const renameFolder = (folder: Folder): void => {
+    setFolderToRename(folder);
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+    if (renameRef.current) {
+      renameRef.current.focus();
+    }
+    setTimeout(() => {
+      renameRef.current.focus();
+    }, 250);
+  };
+
+  const changeFolderColor = (folder: Folder): void => {
+    setFolderToChangeColor(folder);
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
 
   const select = (folderId: string): void => {
@@ -755,6 +720,24 @@ const Folders = (): JSX.Element => {
       return setSelectedForEdit(newSelected);
     }
     setSelectedForEdit((prev) => [...prev, folderId]);
+  };
+
+  const listenForRenameCancel = (e): void => {
+    if (e.key === "Escape" || e.key === "Delete") {
+      setRenameText("");
+      setFolderToRename(null);
+    }
+  };
+  // Helpers -------------------------------------------------------------------------------
+
+  // Handling folder drag logic -----------------------------------------------------
+  const handleNoteDrag = (folder): void => {
+    if (noteIsMoving) {
+      return;
+    }
+    if (noteDrag && noteDragging !== null) {
+      setNoteDragFolder(folder);
+    }
   };
 
   const onDragStart = (e, folder: Folder): void => {
@@ -776,6 +759,15 @@ const Folders = (): JSX.Element => {
   const onDragEnd = (e): void => {
     e.preventDefault();
     setDragging(false);
+
+    const cancelMove = (): void => {
+      setDraggedInto("");
+      resetSystemNotification();
+      setDraggedOverFolder(null);
+      setDragging(false);
+      setFolderDragging(null);
+    };
+
     if (!draggedOverFolder) {
       cancelMove();
       return;
@@ -787,100 +779,15 @@ const Folders = (): JSX.Element => {
     if (!userPreferences.confirm) {
       return moveFolderAndContents();
     }
-    showSuccessNotification(
+
+    confirmOperationNotification(
       `Move ${folderDragging.title} to ${draggedOverFolder.title}`,
       `Are you sure you want to move your ${folderDragging.title} folder and all of its contents?`,
-      true,
-      [{ text: "move", func: (): void => moveFolderAndContents() }]
+      [{ text: "move", func: (): void => moveFolderAndContents() }],
+      moveFolderAndContents
     );
   };
-
-  const cancelMove = (): void => {
-    setDraggedInto("");
-    resetSystemNotification();
-    setDraggedOverFolder(null);
-    setDragging(false);
-    setFolderDragging(null);
-  };
-
-  const moveFolderAndContents = (): void => {
-    resetSystemNotification();
-    const folderUpdate = {
-      ...folderDragging,
-      folderId: folderDragging.folderid,
-      parentFolderId: draggedOverFolder.folderid
-    };
-    try {
-      setAllData((prevData) => {
-        const newFolders = prevData.folders.map((fold: Folder): Folder => {
-          if (fold.folderid === folderDragging.folderid) {
-            return { ...fold, parentFolderId: draggedOverFolder.folderid };
-          }
-          return fold;
-        });
-        return { ...prevData, folders: newFolders };
-      });
-      setDraggedInto("");
-      updateFolder(token, folderUpdate)
-        .then(() => {
-          showSuccessNotification("Moved Folder", "Successfully moved your folder", false, [
-            { text: "undo", func: (): void => {} }
-          ]);
-          setFolderDragging(null);
-          setDraggedOverFolder(null);
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const newFolders = prevData.folders.map((fold: Folder): Folder => {
-              if (fold.folderid === folderDragging.folderid) {
-                return { ...fold, parentFolderId: folderDragging.parentFolderId };
-              }
-              return fold;
-            });
-            return { ...prevData, folders: newFolders };
-          });
-          if (err.response) {
-            showErrorNotification("Moving Folder", err.response.message, true, [
-              { text: "re-try", func: () => moveFolderAndContents() },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => moveFolderAndContents() },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
-        });
-    } catch (err) {
-      console.log(err);
-      showErrorNotification(
-        "Moving Folder",
-        "Please contact the developer if this issue persists. We seemed to have a problem moving your folder. Please close the application, reload it and try the operation again",
-        true,
-        []
-      );
-    }
-  };
-
-  const listenForRenameCancel = (e): void => {
-    if (e.key === "Escape" || e.key === "Delete") {
-      setRenameText("");
-      setFolderToRename(null);
-    }
-  };
-
-  const handleNoteDrag = (folder): void => {
-    if (noteIsMoving) {
-      return;
-    }
-    if (noteDrag && noteDragging !== null) {
-      setNoteDragFolder(folder);
-    }
-  };
+  // Handling folder drag logic -----------------------------------------------------
 
   return (
     <div className="flex flex-wrap justify-start items-start gap-5 w-full mt-5">

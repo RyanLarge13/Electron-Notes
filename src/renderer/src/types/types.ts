@@ -286,4 +286,10 @@ export interface ContextProps {
     hasCancel: boolean,
     actions: SystemNotifAction[]
   ) => void;
+  confirmOperationNotification: (
+    title: string,
+    text: string,
+    actions: SystemNotifAction[],
+    callback: () => void
+  ) => void;
 }

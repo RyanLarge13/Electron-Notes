@@ -572,6 +572,32 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     }
   };
 
+  const confirmOperationNotification = (
+    title: string,
+    text: string,
+    actions: SystemNotifAction[],
+    callback: () => void
+  ) => {
+    if (userPreferences.confirm) {
+      setSystemNotif({
+        show: true,
+        title,
+        text,
+        color: userPreferences.theme || "bg-amber-300",
+        hasCancel: true,
+        actions: [
+          {
+            text: "close",
+            func: () => resetSystemNotification()
+          },
+          ...actions
+        ]
+      });
+    } else {
+      callback();
+    }
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -680,7 +706,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         networkNotificationError,
         resetSystemNotification,
         showErrorNotification,
-        showSuccessNotification
+        showSuccessNotification,
+        confirmOperationNotification
       }}
     >
       {children}

@@ -14,7 +14,8 @@ const Connections = (): JSX.Element => {
     setCreateCon,
     setConnectionRequestsSent,
     showSuccessNotification,
-    showErrorNotification
+    showErrorNotification,
+    confirmOperationNotification
   } = useContext(UserContext);
 
   const [email, setEmail] = useState("");
@@ -23,34 +24,49 @@ const Connections = (): JSX.Element => {
   const sendRequest = (e): void => {
     e.preventDefault();
     if (!email) {
+      showErrorNotification(
+        "No Email Provided",
+        "Please provide an email that is valid",
+        false,
+        []
+      );
       return;
     }
-    try {
-      setLoading(true);
-      createConRequest(token, email)
-        .then((res) => {
-          setCreateCon(false);
-          showSuccessNotification("Connection Request Sent", res.data.message, true, [
-            {
-              text: "cancel",
-              func: (): void => {}
-            }
-          ]);
-          setConnectionRequestsSent((prev) => [
-            ...prev,
-            { id: res.data.data.conreqid, to: email, from: user.email }
-          ]);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.log(err);
-          setLoading(false);
-          showErrorNotification("Error Sending Request", err.response.data.message, false, []);
-        });
-    } catch (err) {
-      setLoading(false);
-      console.log(err);
-    }
+    const continueRequest = async (): Promise<void> => {
+      try {
+        setLoading(true);
+        createConRequest(token, email)
+          .then((res) => {
+            setCreateCon(false);
+            showSuccessNotification("Connection Request Sent", res.data.message, true, [
+              {
+                text: "cancel",
+                func: (): void => {}
+              }
+            ]);
+            setConnectionRequestsSent((prev) => [
+              ...prev,
+              { id: res.data.data.conreqid, to: email, from: user.email }
+            ]);
+            setLoading(false);
+          })
+          .catch((err) => {
+            console.log(err);
+            setLoading(false);
+            showErrorNotification("Error Sending Request", err.response.data.message, false, []);
+          });
+      } catch (err) {
+        setLoading(false);
+        console.log(err);
+      }
+    };
+
+    confirmOperationNotification(
+      "Send Connection Request",
+      `Are you sure you want to send a connection request to this user email? ${email}`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
   return (

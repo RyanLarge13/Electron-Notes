@@ -153,7 +153,7 @@ const NoteShareComponent = (): JSX.Element => {
           <p className="text-xl font-semibold">Your Notes</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {notesToShow.map((note: Note, index: number) => (
+          {allData.notes.map((note: Note, index: number) => (
             <button
               key={note.noteid}
               onClick={() => setShareInfo(null, note.noteid)}

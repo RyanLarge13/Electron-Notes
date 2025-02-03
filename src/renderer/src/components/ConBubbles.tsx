@@ -30,11 +30,12 @@ const ConBubbles = (): JSX.Element => {
     setHoverConnections,
     showSuccessNotification,
     networkNotificationError,
-    showErrorNotification
+    showErrorNotification,
+    confirmOperationNotification
   } = useContext(UserContext);
 
-  const [options, setOptions] = useState<Connection>({ id: "", email: "" });
-  const [conOptions, setConOptions] = useState<Connection>({ id: "", email: "" });
+  const [options, setOptions] = useState<Connection>({ id: "", email: "", userId: "" });
+  const [conOptions, setConOptions] = useState<Connection>({ id: "", email: "", userId: "" });
 
   const themeStringText = userPreferences?.theme
     ? userPreferences.theme.replace("bg", "text")
@@ -43,86 +44,107 @@ const ConBubbles = (): JSX.Element => {
   const outlineThemeString = themeStringText.replace("text", "outline");
 
   // Handling connection requests ------------------------------------------------------------------
-  const confirmAccept = (requestId: string, userEmail: string): void => {
-    if (userPreferences.confirm) {
-      showSuccessNotification(
-        "Accept Connection",
-        `Are you sure you know the person from this email? ${userEmail} and you would like to create a connection with them?`,
-        true,
-        [{ text: "accept", func: () => acceptRequest(requestId, userEmail) }]
-      );
-      return;
-    }
-    acceptRequest(requestId, userEmail);
-  };
+  const acceptRequest = (requestId: string, userEmail: string): void => {
+    const continueRequest = async (): Promise<void> => {
+      try {
+        const response = await acceptRequestConnection(token, requestId, userEmail);
+        console.log(response);
+        showSuccessNotification("New Connection", response.data.message, false, []);
+        setConnections((prev) => [
+          ...prev,
+          {
+            id: response.data.data.conreqid,
+            email: userEmail,
+            userId: response.data.data.userId || 0
+          }
+        ]);
+        setConnectionRequestsReceived((prev) => prev.filter((aCon) => aCon.id !== requestId));
+      } catch (err) {
+        if (err.response) {
+          showErrorNotification("New Connection", err.response.message, true, []);
+        }
+        if (err.request) {
+          networkNotificationError([]);
+        }
+      }
+    };
 
-  const acceptRequest = async (requestId: string, userEmail: string): Promise<void> => {
-    try {
-      const response = await acceptRequestConnection(token, requestId, userEmail);
-      console.log(response);
-      showSuccessNotification("New Connection", response.data.message, false, []);
-      setConnections((prev) => [...prev, { id: response.data.data.conreqid, email: userEmail }]);
-      setConnectionRequestsReceived((prev) => prev.filter((aCon) => aCon.id !== requestId));
-    } catch (err) {
-      if (err.response) {
-        showErrorNotification("New Connection", err.response.message, true, []);
-      }
-      if (err.request) {
-        networkNotificationError([]);
-      }
-    }
+    confirmOperationNotification(
+      "Accept Connection",
+      `Are you sure you know the person from this email? ${userEmail}, and you would like to create a connection with them?`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
   const declineRequest = async (requestId: string, userEmail: string): Promise<void> => {
-    try {
-      const response = await declineConnectionRequest(token, requestId);
-      console.log(response);
-      setConnectionRequestsReceived((prev: ConReq[]): ConReq[] =>
-        prev.filter((aCon: ConReq): boolean => aCon.id !== requestId)
-      );
-      showSuccessNotification(
-        `Declined Connection With ${userEmail}`,
-        response.data.message,
-        true,
-        []
-      );
-    } catch (err) {
-      console.log(err);
-      if (err.response) {
-        showErrorNotification("Declining Connection Request", err.response.message, true, []);
+    const continueRequest = async (): Promise<void> => {
+      try {
+        const response = await declineConnectionRequest(token, requestId);
+        console.log(response);
+        setConnectionRequestsReceived((prev: ConReq[]): ConReq[] =>
+          prev.filter((aCon: ConReq): boolean => aCon.id !== requestId)
+        );
+        showSuccessNotification(
+          `Declined Connection With ${userEmail}`,
+          response.data.message,
+          true,
+          []
+        );
+      } catch (err) {
+        console.log(err);
+        if (err.response) {
+          showErrorNotification("Declining Connection Request", err.response.message, true, []);
+        }
+        if (err.request) {
+          networkNotificationError([]);
+        }
       }
-      if (err.request) {
-        networkNotificationError([]);
-      }
-    }
+    };
+
+    confirmOperationNotification(
+      "Decline Request",
+      `Are you sure you would like to decline the request to connect with ${userEmail}?`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
   // Handling connection requests ------------------------------------------------------------------
 
   // Handle current connections --------------------------------------------------------------------
-  const removeExistingConnection = async (conId: string, conEmail: string): Promise<void> => {
-    try {
-      const response = await removeConnection(conEmail, token);
-      console.log(response);
-      setConnections((prev: Connection[]) =>
-        prev.filter((aCon: Connection): boolean => aCon.id !== conId)
-      );
-      showSuccessNotification("Removed Connection", response.data.message, false, []);
-    } catch (err) {
-      console.log(err);
-      if (err.response) {
-        showErrorNotification("Removing Connection", err.response.message, true, []);
+  const removeExistingConnection = (conId: string, conEmail: string): void => {
+    const continueRequest = async (): Promise<void> => {
+      try {
+        const response = await removeConnection(conEmail, token);
+        console.log(response);
+        setConnections((prev: Connection[]) =>
+          prev.filter((aCon: Connection): boolean => aCon.id !== conId)
+        );
+        showSuccessNotification("Removed Connection", response.data.message, false, []);
+      } catch (err) {
+        console.log(err);
+        if (err.response) {
+          showErrorNotification("Removing Connection", err.response.message, true, []);
+        }
+        if (err.request) {
+          networkNotificationError([]);
+        }
       }
-      if (err.request) {
-        networkNotificationError([]);
-      }
-    }
+    };
+
+    confirmOperationNotification(
+      "Remove Connection",
+      `Are you sure you want to remove your connection with ${conEmail}?`,
+      [{ text: "confirm", func: () => continueRequest() }],
+      continueRequest
+    );
   };
   // Handle current connections --------------------------------------------------------------------
 
   // Note sharing logic ----------------------------------------------------
   const requestNoteShare = (conId: string): void => {
     // Select Note
-    setConOptions({ id: "", email: "" });
+    setConOptions({ id: "", email: "", userId: "" });
     setNoteShare((prev) => {
       if (prev.connections.includes(conId)) {
         return {
@@ -210,9 +232,9 @@ const ConBubbles = (): JSX.Element => {
             onClick={() =>
               setConOptions((prev) => {
                 if (prev.id === con.id) {
-                  return { id: "", email: "" };
+                  return { id: "", email: "", userId: "" };
                 } else {
-                  return { id: con.id, email: con.email };
+                  return { id: con.id, email: con.email, userId: "" };
                 }
               })
             }
@@ -267,7 +289,7 @@ const ConBubbles = (): JSX.Element => {
               >
                 <p className="mb-2 p-2 pr-12 font-semibold">{options.email}</p>
                 <button
-                  onClick={() => confirmAccept(conReq.id, conReq.from)}
+                  onClick={() => acceptRequest(conReq.id, conReq.from)}
                   className={`p-3 px-5 w-full duration-200 flex justify-between items-center ${
                     userPreferences.darkMode
                       ? "bg-[#333] hover:bg-[#444]"
@@ -295,11 +317,11 @@ const ConBubbles = (): JSX.Element => {
           <button
             onMouseEnter={() => setHoverConnections(true)}
             onClick={() =>
-              setOptions((prev: { id: string; email: string }) => {
+              setOptions((prev: { id: string; email: string; userId: string }) => {
                 if (prev.id === conReq.id) {
-                  return { id: "", email: "" };
+                  return { id: "", email: "", userId: "" };
                 }
-                return { id: conReq.id, email: conReq.from };
+                return { id: conReq.id, email: conReq.from, userId: "" };
               })
             }
             style={{ top: 25 * index + 60, zIndex: index }}

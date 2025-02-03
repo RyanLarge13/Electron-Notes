@@ -11,7 +11,8 @@ const ConnectionRequestsSent = () => {
     token,
     setConnectionRequestsSent,
     networkNotificationError,
-    showErrorNotification
+    showErrorNotification,
+    confirmOperationNotification
   } = useContext(UserContext);
 
   const [showConReqOptions, setShowConReqOptions] = useState(false);
@@ -20,20 +21,29 @@ const ConnectionRequestsSent = () => {
     ? userPreferences.theme.replace("bg", "text")
     : "text-amber-300";
 
-  const cancelSentRequest = async (con: ConReq): Promise<void> => {
-    try {
-      const response = await cancelExistingConReq(con.id, token);
-      setConnectionRequestsSent((prev) => prev.filter((aCon) => aCon.id !== con.id));
-      console.log(response);
-    } catch (err) {
-      console.log(err);
-      if (err.request) {
-        networkNotificationError([]);
+  const cancelSentRequest = (con: ConReq): void => {
+    const continueRequest = async (): Promise<void> => {
+      try {
+        const response = await cancelExistingConReq(con.id, token);
+        setConnectionRequestsSent((prev) => prev.filter((aCon) => aCon.id !== con.id));
+        console.log(response);
+      } catch (err) {
+        console.log(err);
+        if (err.request) {
+          networkNotificationError([]);
+        }
+        if (err.response) {
+          showErrorNotification("Canceling Request", err.response.data.message, true, []);
+        }
       }
-      if (err.response) {
-        showErrorNotification("Canceling Request", err.response.data.message, true, []);
-      }
-    }
+    };
+
+    confirmOperationNotification(
+      "Cancel Connection Request",
+      `Are you sure you want to cancel the connection request you sent to ${con.to}?`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
   return (
