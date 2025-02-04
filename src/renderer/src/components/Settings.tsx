@@ -22,6 +22,7 @@ const Settings = (): JSX.Element => {
     networkNotificationError,
     showSuccessNotification,
     showErrorNotification,
+    confirmOperationNotification,
     view,
     order,
     filter,
@@ -211,10 +212,7 @@ const Settings = (): JSX.Element => {
         "Error Updating Preferences",
         "There was an error with the application when trying to update notification preferences, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
         true,
-        [
-          { text: "re-try", func: () => setNotifyAll(currentState) },
-          { text: "reload app", func: () => window.location.reload() }
-        ]
+        []
       );
     }
   };
@@ -302,105 +300,111 @@ const Settings = (): JSX.Element => {
     }
   };
 
-  const changeUsername = async (e): Promise<void> => {
+  const changeUsername = (e): void => {
     e.preventDefault();
     const prevUsername = user.username;
-    setUser((prevUser) => {
-      return { ...prevUser, username: newUsername };
-    });
     setUsername(false);
-    try {
-      updateUsername(newUsername, token)
-        .then((res) => {
-          console.log(res);
-          const newToken = res.data.data.token;
-          localStorage.setItem("authToken", newToken);
-          setNewUsername("");
-          showSuccessNotification(
-            "New Username",
-            `Your new username is now ${newUsername}`,
-            false,
-            []
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-          setUser((prevUser) => {
-            return { ...prevUser, username: prevUsername };
-          });
-          if (err.response) {
-            showErrorNotification("Username Update Failed", err.response.message, true, [
-              { text: "re-try", func: () => changeUsername(e) },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => changeUsername(e) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
-        });
-    } catch (err) {
-      console.log(err);
-      showErrorNotification(
-        "Update Username Failed",
-        "There was an error with the application when trying to update your username, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        true,
-        [
-          { text: "re-try", func: () => changeUsername(e) },
-          { text: "reload app", func: () => window.location.reload() }
-        ]
-      );
+    if (!newUsername) {
+      showErrorNotification("Invalid Username", "Please provide a valid username", true, []);
+      return;
     }
+
+    const continueRequest = async (): Promise<void> => {
+      try {
+        const response = await updateUsername(newUsername, token);
+        const newToken = response.data.data.token;
+        localStorage.setItem("authToken", newToken);
+        setUser((prevUser) => {
+          return { ...prevUser, username: newUsername };
+        });
+        setNewUsername("");
+        showSuccessNotification(
+          "New Username",
+          `Your new username is now ${newUsername}`,
+          false,
+          []
+        );
+      } catch (err) {
+        console.log(err);
+        setUser((prevUser) => {
+          return { ...prevUser, username: prevUsername };
+        });
+        if (err.response) {
+          showErrorNotification("Username Update Failed", err.response.message, true, []);
+          return;
+        }
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        showErrorNotification(
+          "Update Username Failed",
+          "There was an error with the application when trying to update your username, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
+          true,
+          [
+            { text: "re-try", func: () => changeUsername(e) },
+            { text: "reload app", func: () => window.location.reload() }
+          ]
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Change Username",
+      `Are you sure you want to change your username to ${newUsername}?`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
-  const changePass = async (e): Promise<void> => {
+  const changePass = (e): void => {
     e.preventDefault();
     setNewPassLoading(true);
-    try {
-      updatePassword(currentPass, newPass, token)
-        .then((res) => {
-          console.log(res);
-          setToken(null);
-          setUser(null);
-          localStorage.removeItem("signedup");
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("pin");
-          showSuccessNotification(
-            "Password Update",
-            "Be sure to write down your new password so you do not forget it. An email was sent to you containing your new credentials. Please log back in to your account with your new credentials",
-            true,
-            []
-          );
-          setNewPassLoading(false);
-        })
-        .catch((err) => {
-          console.log(err);
-          if (err.response) {
-            showErrorNotification("Password Update Failed", err.response.message, true, [
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            networkNotificationError([
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          setNewPassLoading(false);
-        });
-    } catch (err) {
-      console.log(err);
-      showErrorNotification(
-        "Update Password Failed",
-        "There was an error with the application when trying to update your password, please try again. \n If the issue persists please contact the developer at ryanlarge@ryanlarge.dev",
-        true,
-        [{ text: "reload app", func: () => window.location.reload() }]
-      );
-      setNewPassLoading(false);
-    }
+
+    const continueRequest = async (): Promise<void> => {
+      try {
+        await updatePassword(currentPass, newPass, token);
+
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem("signedup");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("pin");
+        showSuccessNotification(
+          "Password Update",
+          "Be sure to write down your new password so you do not forget it. An email was sent to you containing your new credentials. Please log back in to your account with your new credentials",
+          true,
+          []
+        );
+        setNewPassLoading(false);
+      } catch (err) {
+        console.log(err);
+        setNewPassLoading(false);
+        if (err.response) {
+          showErrorNotification("Password Update Failed", err.response.message, true, [
+            { text: "reload app", func: () => window.location.reload() }
+          ]);
+          return;
+        }
+        if (err.request) {
+          networkNotificationError([{ text: "reload app", func: () => window.location.reload() }]);
+          return;
+        }
+        showErrorNotification(
+          "Update Password Failed",
+          "We had an issue updating your password. Please try again and if the issue persists, contact the developer",
+          true,
+          [{ text: "reload app", func: () => window.location.reload() }]
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Change Password",
+      "Are you positive you would like to change your password?",
+      [{ text: "confimr", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
   const setAutoSave = (): void => {

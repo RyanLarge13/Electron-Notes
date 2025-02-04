@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { BiShareAlt } from "react-icons/bi";
 import { MdCancel } from "react-icons/md";
 
@@ -17,8 +17,8 @@ const NoteShareComponent = (): JSX.Element => {
     userPreferences,
     token,
     user,
-    shareRequestsFrom,
-    sharedNotes,
+    // shareRequestsFrom,
+    // sharedNotes,
     setNoteShare,
     networkNotificationError,
     showSuccessNotification,
@@ -27,7 +27,7 @@ const NoteShareComponent = (): JSX.Element => {
   } = useContext(UserContext);
 
   // Filter out notes below by users who you have shared notes previously with in the future
-  const [notesToShow] = useState(allData.notes);
+  // const [notesToShow] = useState(allData.notes);
 
   const themeStringText = userPreferences?.theme
     ? userPreferences.theme.replace("bg", "text")
@@ -70,8 +70,6 @@ const NoteShareComponent = (): JSX.Element => {
 
       const response = await createShareNoteRequest(conEmails[0], notesToSend[0], token);
 
-      console.log(response);
-
       showSuccessNotification("Shared Note", response.data.message, false, []);
 
       const newShare: ShareReq = {
@@ -96,10 +94,18 @@ const NoteShareComponent = (): JSX.Element => {
           true,
           []
         );
+        return;
       }
       if (err.request) {
         networkNotificationError([]);
+        return;
       }
+      showErrorNotification(
+        "Sharing Note",
+        " We encountered an issue sharing your note. Pleasae try again and if the issue persists, contact the developer",
+        true,
+        []
+      );
     }
   };
 

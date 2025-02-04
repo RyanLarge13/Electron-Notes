@@ -46,10 +46,18 @@ const ShareRequestsFrom = ({ con, setConOptions }) => {
       console.log(err);
       if (err.request) {
         networkNotificationError([]);
+        return;
       }
       if (err.response) {
         showErrorNotification("Canceling Request", err.response.data.message, true, []);
+        return;
       }
+      showErrorNotification(
+        "Canceling Request",
+        "We had an issue canceling your request. Please try again and if the issue persists, contact the developer",
+        true,
+        []
+      );
     }
   };
 

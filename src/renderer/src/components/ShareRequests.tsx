@@ -5,8 +5,8 @@ import { Connection, ShareReq } from "@renderer/types/types";
 import { createShare } from "@renderer/utils/api";
 
 const ShareRequests = ({
-  con,
-  setConOptions
+  con
+  // setConOptions
 }: {
   con: Connection;
   setConOptions: Dispatch<SetStateAction<{ id: string; email: string }>>;
@@ -31,20 +31,27 @@ const ShareRequests = ({
   const acceptNote = async (req: ShareReq): Promise<void> => {
     try {
       const response = await createShare(req.id, req.from, token);
-      console.log(response);
       showSuccessNotification("Accepted Note", response.data.data.message, false, []);
     } catch (err) {
       console.log(err);
       if (err.request) {
         networkNotificationError([]);
+        return;
       }
       if (err.response) {
         showErrorNotification("Accepting Note", err.response.data.message, true, []);
+        return;
       }
+      showErrorNotification(
+        "Accepting Note",
+        "We had an issue accepting this note for you. Please try again and if the issue persists, contact the developer",
+        true,
+        []
+      );
     }
   };
 
-  const rejectNote = async (req: ShareReq): Promise<void> => {};
+  // const rejectNote = async (req: ShareReq): Promise<void> => {};
 
   return (
     <div>
@@ -79,7 +86,7 @@ const ShareRequests = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    rejectNote(req);
+                    // rejectNote(req);
                   }}
                   className={`text-red-400 px-5 py-3 duration-200 whitespace-nowrap w-full ${userPreferences.darkMode ? "hover:bg-[#555]" : "hover:bg-slate-400"}`}
                 >
