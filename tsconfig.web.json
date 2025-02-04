@@ -9,7 +9,7 @@
     "src/renderer/src/threads/*", 
     "src/renderer/childWindows/*.ts",
     "src/renderer/childWindows/*.tsx"  
-, "src/renderer/windows"],
+, "src/renderer/windows", "global.d.ts"],
   "compilerOptions": {
     "strict": false,
     "strictNullChecks": false,

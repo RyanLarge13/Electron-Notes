@@ -83,7 +83,8 @@ const Notes = (): JSX.Element => {
     resetSystemNotification,
     networkNotificationError,
     showSuccessNotification,
-    showErrorNotification
+    showErrorNotification,
+    confirmOperationNotification
   } = useContext(UserContext);
 
   const [pinInput, setPinInput] = useState(false);
@@ -176,16 +177,6 @@ const Notes = (): JSX.Element => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
   };
 
-  const confirmDuplicate = (note: Note): void => {
-    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
-    showSuccessNotification(
-      `Duplicate ${note.title}`,
-      "Are you sure you want to duplicate this note?",
-      true,
-      [{ text: "duplicate", func: (): void => duplicate(note) }]
-    );
-  };
-
   const duplicate = (note: Note): void => {
     resetSystemNotification();
     const tempId = uuidv4();
@@ -194,63 +185,68 @@ const Notes = (): JSX.Element => {
       htmlNotes: note.htmlText,
       folderId: note.folderId
     };
-    setAllData((prevData) => {
-      const newNotes = [...prevData.notes, { ...note, noteid: tempId }];
-      return {
-        ...prevData,
-        notes: newNotes
-      };
-    });
-    try {
-      createNewNote(token, noteToDuplicate)
-        .then((res) => {
-          const returnedNoteId = res.data.data[0].notesid;
-          setAllData((prevData) => {
-            const newNotes = prevData.notes.map((aNote) => {
-              if (aNote.noteid === tempId) {
-                return { ...aNote, noteid: returnedNoteId };
-              }
-              return aNote;
-            });
-            return { ...prevData, notes: newNotes };
-          });
-          showSuccessNotification(
-            "Duplicated Note",
-            `You successfully duplicated your note: ${note.title}`,
-            false,
-            [{ text: "undo", func: (): void => {} }]
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const oldNotes = prevData.notes.filter((aNote) => aNote.noteid !== tempId);
-            return { ...prevData, notes: oldNotes };
-          });
-          if (err.response) {
-            showErrorNotification("Duplicating Note", err.response.message, true, [
-              { text: "re-try", func: () => duplicate(note) },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => duplicate(note) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
+
+    const continueRequest = async (): Promise<void> => {
+      // Immediately update state
+      setAllData((prevData) => {
+        const newNotes = [...prevData.notes, { ...note, noteid: tempId }];
+        return {
+          ...prevData,
+          notes: newNotes
+        };
+      });
+
+      try {
+        const response = await createNewNote(token, noteToDuplicate);
+        const noteIdFromServer = response.data.data[0].notesid;
+
+        // Update id's to correct server ids for future updating
+        setAllData((prevData) => {
+          const newNotes = prevData.notes.map((aNote) => {
+            if (aNote.noteid === tempId) {
+              return { ...aNote, noteid: noteIdFromServer };
             }
-          }
+            return aNote;
+          });
+          return { ...prevData, notes: newNotes };
         });
-    } catch (err) {
-      console.log(err);
-      showErrorNotification(
-        "Duplicating Note",
-        "Please contact the developer if this issue persists. We seemed to have a problem duplicating your note. Please close the application, reload it and try the operation again.",
-        true,
-        []
-      );
-    }
+        showSuccessNotification(
+          "Duplicated Note",
+          `You successfully duplicated your note: ${note.title}`,
+          false,
+          []
+        );
+      } catch (err) {
+        console.log(err);
+
+        // Immediately revert state
+        setAllData((prevData) => {
+          const oldNotes = prevData.notes.filter((aNote) => aNote.noteid !== tempId);
+          return { ...prevData, notes: oldNotes };
+        });
+        if (err.response) {
+          showErrorNotification("Duplicating Note", err.response.message, true, []);
+          return;
+        }
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        showErrorNotification(
+          "Duplicating Note",
+          "Please contact the developer if this issue persists. We seemed to have a problem duplicating your note. Please close the application, reload it and try the operation again.",
+          true,
+          []
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Duplicate Note",
+      `Are you sure you want to duplicate this note? ${note.title}`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
   const rename = (note: Note): void => {
@@ -264,7 +260,7 @@ const Notes = (): JSX.Element => {
     }, 250);
   };
 
-  const changeTitle = (e): void => {
+  const changeTitle = async (e): Promise<void> => {
     e.preventDefault();
     const oldTitle = renameANote.title;
     const newNote = {
@@ -274,7 +270,9 @@ const Notes = (): JSX.Element => {
       title: renameText,
       folderId: renameANote.folderId
     };
+
     try {
+      // Immediately update state
       setAllData((prevData) => {
         const newNotes = prevData.notes.map((aNote) => {
           if (aNote.noteid === renameANote.noteid) {
@@ -287,43 +285,34 @@ const Notes = (): JSX.Element => {
       setRenameANote(null);
       setRenameText("");
       navigate("/");
-      updateNote(token, newNote)
-        .then(() => {
-          showSuccessNotification("Updated Note Title", "Successfully renamed your note", false, [
-            { text: "undo", func: (): void => {} }
-          ]);
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const newNotes = prevData.notes.map((aNote) => {
-              if (aNote.noteid === renameANote.noteid) {
-                return { ...aNote, title: oldTitle };
-              }
-              return aNote;
-            });
-            return { ...prevData, notes: newNotes };
-          });
-          if (err.response) {
-            showErrorNotification("Updating Note", err.response.message, true, [
-              { text: "re-try", func: () => changeTitle(e) },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => changeTitle(e) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
-        });
+
+      await updateNote(token, newNote);
+
+      showSuccessNotification("Updated Note Title", "Successfully renamed your note", false, []);
     } catch (err) {
       console.log(err);
+
+      // Immediately reset state
+      setAllData((prevData) => {
+        const newNotes = prevData.notes.map((aNote) => {
+          if (aNote.noteid === renameANote.noteid) {
+            return { ...aNote, title: oldTitle };
+          }
+          return aNote;
+        });
+        return { ...prevData, notes: newNotes };
+      });
+      if (err.response) {
+        showErrorNotification("Updating Note", err.response.message, true, []);
+        return;
+      }
+      if (err.request) {
+        networkNotificationError([]);
+        return;
+      }
       showErrorNotification(
         "Updating Title",
-        "Please contact the developer if this issue persists. We seemed to have a problem updating your note. Please close the application, reload it and try the operation again.",
+        "We ran into an issue trying to update the title to your note. Please try again and if this issue persists, contact the developer",
         true,
         []
       );
@@ -341,193 +330,167 @@ const Notes = (): JSX.Element => {
     });
   };
 
-  const confirmTrash = (note: Note): void => {
-    showSuccessNotification(
-      `Trash ${note.title}`,
-      "Are you sure you want to move this note to your trash bin?",
-      true,
-      [{ text: "trash", func: () => moveToTrash(note) }]
-    );
-  };
-
   const moveToTrash = (note: Note): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     resetSystemNotification();
     const trashed = note.trashed;
     const newNote = { ...note, trashed: !trashed };
-    try {
-      setAllData((prevData) => {
-        const newNotes = prevData.notes.map((aNote) => {
-          if (aNote.noteid === note.noteid) {
-            return newNote;
-          }
-          return aNote;
-        });
-        return {
-          ...prevData,
-          notes: newNotes
-        };
-      });
-      !trashed
-        ? setTrashedNotes((prevTrash) => [...prevTrash, newNote])
-        : setTrashedNotes((prevTrash) => prevTrash.filter((aNote) => aNote.noteid !== note.noteid));
-      if (drafts.find((aDraft) => aDraft.noteid === note.noteid)) {
-        return;
-      }
-      moveNoteToTrash(token, note.noteid, !trashed)
-        .then(() => {
-          showSuccessNotification(
-            `${note.title} ${trashed ? "Moved" : "Trashed"}`,
-            `Successfully moved your note ${trashed ? "out of" : "into"} your trash`,
-            false,
-            [{ text: "undo", func: (): void => {} }]
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const newNotes = prevData.notes.map((aNote) => {
-              if (aNote.noteid === note.noteid) {
-                return { ...aNote, trashed: trashed };
-              }
-              return aNote;
-            });
-            return {
-              ...prevData,
-              notes: newNotes
-            };
-          });
-          trashed
-            ? setTrashedNotes((prevTrash) => [...prevTrash, newNote])
-            : setTrashedNotes((prevTrash) =>
-                prevTrash.filter((aNote) => aNote.noteid !== note.noteid)
-              );
-          if (err.response) {
-            showErrorNotification(
-              `Issues ${trashed ? "Moving" : "Trashing"} Note`,
-              err.response.message,
-              true,
-              [
-                { text: "re-try", func: () => moveToTrash(note) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]
-            );
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => moveToTrash(note) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
-        });
-    } catch (err) {
-      console.log(err);
-      setAllData((prevData) => {
-        const newNotes = prevData.notes.map((aNote) => {
-          if (aNote.noteid === note.noteid) {
-            return { ...aNote, trashed: trashed };
-          }
-          return aNote;
-        });
-        return {
-          ...prevData,
-          notes: newNotes
-        };
-      });
-      trashed
-        ? setTrashedNotes((prevTrash) => [...prevTrash, newNote])
-        : setTrashedNotes((prevTrash) => prevTrash.filter((aNote) => aNote.noteid !== note.noteid));
-      showErrorNotification(
-        `Issues ${trashed ? "Moving" : "Trashing"} Note`,
-        `Please contact the developer if this issue persists. We seemed to have a problem ${
-          trashed ? "moving" : "trashing"
-        } your note. Please close the application, reload it and try the operation again.`,
-        true,
-        []
-      );
-    }
-  };
 
-  const confirmDelete = (note: Note): void => {
-    showSuccessNotification(
-      `Delete ${note.title}`,
-      "Are you sure you want to delete this note?",
-      true,
-      [{ text: "delete", func: () => deleteNote(note) }]
+    const toggleTrashed = (isTrashed) => {
+      if (isTrashed) {
+        setTrashedNotes((prevTrash) => [...prevTrash, newNote]);
+      } else {
+        setTrashedNotes((prevTrash) => prevTrash.filter((aNote) => aNote.noteid !== note.noteid));
+      }
+    };
+
+    const continueRequest = async (): Promise<void> => {
+      try {
+        // Immediately update state
+        setAllData((prevData) => {
+          const newNotes = prevData.notes.map((aNote) => {
+            if (aNote.noteid === note.noteid) {
+              return newNote;
+            }
+            return aNote;
+          });
+          return {
+            ...prevData,
+            notes: newNotes
+          };
+        });
+
+        toggleTrashed(trashed);
+
+        if (drafts.find((aDraft) => aDraft.noteid === note.noteid)) {
+          return;
+        }
+
+        await moveNoteToTrash(token, note.noteid, !trashed);
+
+        showSuccessNotification(
+          `${note.title} ${trashed ? "Moved" : "Trashed"}`,
+          `Successfully moved your note ${trashed ? "out of" : "into"} your trash`,
+          false,
+          [{ text: "undo", func: (): void => {} }]
+        );
+      } catch (err) {
+        console.log(err);
+
+        // Immediately revert state
+        setAllData((prevData) => {
+          const newNotes = prevData.notes.map((aNote) => {
+            if (aNote.noteid === note.noteid) {
+              return { ...aNote, trashed: trashed };
+            }
+            return aNote;
+          });
+          return {
+            ...prevData,
+            notes: newNotes
+          };
+        });
+        toggleTrashed(trashed);
+        if (err.response) {
+          showErrorNotification(
+            `Issues ${trashed ? "Moving" : "Trashing"} Note`,
+            err.response.message,
+            true,
+            []
+          );
+          return;
+        }
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        showErrorNotification(
+          `Issues ${trashed ? "Moving" : "Trashing"} Note`,
+          `Please contact the developer if this issue persists. We seemed to have a problem ${
+            trashed ? "moving" : "trashing"
+          } your note. Please close the application, reload it and try the operation again.`,
+          true,
+          []
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Move To Trash",
+      `Are you sure you want to move this note to the trash? ${note.title}`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
     );
   };
 
   const deleteNote = (note: Note): void => {
     setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
     resetSystemNotification();
-    try {
-      if (note.locked) {
-        setTrashedNotes((prev: Note[]): Note[] =>
-          prev.filter((aNote: Note): boolean => aNote.noteid !== note.noteid)
-        );
-      } else {
-        setAllData((prevData: AllData): AllData => {
-          const newNotes: Note[] = prevData.notes.filter(
-            (aNote: Note): boolean => aNote.noteid !== note.noteid
+
+    const continueRequest = async (): Promise<void> => {
+      try {
+        // Immediately update state and check for locked note
+        if (note.locked) {
+          setTrashedNotes((prev: Note[]): Note[] =>
+            prev.filter((aNote: Note): boolean => aNote.noteid !== note.noteid)
           );
-          return {
-            ...prevData,
-            notes: newNotes
-          };
-        });
-      }
-      deleteANote(token, note.noteid)
-        .then(() => {
-          showSuccessNotification(
-            `${note.title} Deleted`,
-            "Successfully deleted your note",
-            false,
-            [{ text: "undo", func: (): void => {} }]
-          );
-          const newNoteDems = userPreferences.noteDems.filter((aDem) => aDem.id !== note.noteid);
-          setUserPreferences((prev) => {
-            return { ...prev, noteDems: newNoteDems };
-          });
-          localStorage.setItem(
-            "preferences",
-            JSON.stringify({ ...userPreferences, noteDems: newNoteDems })
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-          setAllData((prevData) => {
-            const newNotes = [...prevData.notes, note];
+        } else {
+          setAllData((prevData: AllData): AllData => {
+            const newNotes: Note[] = prevData.notes.filter(
+              (aNote: Note): boolean => aNote.noteid !== note.noteid
+            );
             return {
               ...prevData,
               notes: newNotes
             };
           });
-          if (err.response) {
-            showErrorNotification("Deleting Note", err.response.message, true, [
-              { text: "re-try", func: () => deleteNote(note) },
-              { text: "reload app", func: () => window.location.reload() }
-            ]);
-          }
-          if (err.request) {
-            if (userPreferences.notify.notifyAll && userPreferences.notify.notifyErrors) {
-              networkNotificationError([
-                { text: "re-try", func: () => deleteNote(note) },
-                { text: "reload app", func: () => window.location.reload() }
-              ]);
-            }
-          }
+        }
+
+        await deleteANote(token, note.noteid);
+
+        showSuccessNotification(`${note.title} Deleted`, "Successfully deleted your note", false, [
+          { text: "undo", func: (): void => {} }
+        ]);
+        const newNoteDems = userPreferences.noteDems.filter((aDem) => aDem.id !== note.noteid);
+        setUserPreferences((prev) => {
+          return { ...prev, noteDems: newNoteDems };
         });
-    } catch (err) {
-      console.log(err);
-      showErrorNotification(
-        "Deleting Note",
-        "Please contact the developer if this issue persists. We seemed to have a problem deleting your note. Please close the application, reload it and try the operation again.",
-        true,
-        []
-      );
-    }
+        localStorage.setItem(
+          "preferences",
+          JSON.stringify({ ...userPreferences, noteDems: newNoteDems })
+        );
+      } catch (err) {
+        console.log(err);
+        setAllData((prevData) => {
+          const newNotes = [...prevData.notes, note];
+          return {
+            ...prevData,
+            notes: newNotes
+          };
+        });
+        if (err.response) {
+          showErrorNotification("Deleting Note", err.response.message, true, []);
+          return;
+        }
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        showErrorNotification(
+          "Deleting Note",
+          "Please contact the developer if this issue persists. We seemed to have a problem deleting your note. Please close the application, reload it and try the operation again.",
+          true,
+          []
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Delete Note",
+      `Are you sure you want to delete your note? ${note.title}`,
+      [{ text: "delete", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
   };
 
   const confirmDeleteDraft = (note: Note): void => {
@@ -560,7 +523,7 @@ const Notes = (): JSX.Element => {
 
   const saveFileToSystem = async (note: Note): Promise<void> => {
     const plainText = extractText(note.htmlText);
-    await window.save.saveTxt(plainText);
+    await window.save.saveTxt(plainText, note.title);
     setContextMenu({
       show: false,
       meta: { title: "", color: "" },
@@ -707,13 +670,7 @@ const Notes = (): JSX.Element => {
           },
           {
             title: "delete forever",
-            func: (): void => {
-              if (userPreferences.confirm) {
-                confirmDelete(note);
-              } else {
-                deleteNote(note);
-              }
-            },
+            func: (): void => deleteNote(note),
             icon: <MdDeleteForever />
           }
         ]
@@ -773,7 +730,7 @@ const Notes = (): JSX.Element => {
         {
           title: "duplicate",
           icon: <FaCopy />,
-          func: () => (userPreferences.confirm ? confirmDuplicate(note) : duplicate(note))
+          func: () => duplicate(note)
         },
         {
           title: "rename",
@@ -808,12 +765,12 @@ const Notes = (): JSX.Element => {
         {
           title: "move to trash",
           icon: <FaTrash />,
-          func: (): void => (userPreferences.confirm ? confirmTrash(note) : moveToTrash(note))
+          func: (): void => moveToTrash(note)
         },
         {
           title: "delete forever",
           icon: <FaWindowClose />,
-          func: (): void => (userPreferences.confirm ? confirmDelete(note) : deleteNote(note))
+          func: (): void => deleteNote(note)
         }
       ]
     };
@@ -1009,12 +966,14 @@ const Notes = (): JSX.Element => {
     showSuccessNotification(`${note.title}`, `${note.title} was successfully saved`, false, []);
   };
 
-  const updateFavorite = (newFavorite: boolean, note: Note): void => {
+  const updateFavorite = async (newFavorite: boolean, note: Note): Promise<void> => {
     const newNote = {
       ...note,
       favorite: newFavorite
     };
     const oldNotes = allData.notes;
+
+    // Immediately update state
     setAllData((prev) => {
       return {
         ...prev,
@@ -1027,31 +986,36 @@ const Notes = (): JSX.Element => {
         })
       };
     });
-    updateFavoriteOnNote(token, note.noteid, newFavorite)
-      .then(() => {
-        showSuccessNotification(
-          `${note.title}`,
-          `${note.title} was favored successfully`,
-          false,
-          []
-        );
-      })
-      .catch((err) => {
-        console.log(err);
-        setAllData((prev) => {
-          return {
-            ...prev,
-            notes: oldNotes
-          };
-        });
 
-        showErrorNotification(
-          "Favoring Note",
-          "Please contact the developer if this issue persists. We seemed to have a problem favoring your note. Please close the application, reload it and try the operation again.",
-          true,
-          []
-        );
+    try {
+      await updateFavoriteOnNote(token, note.noteid, newFavorite);
+      showSuccessNotification(`${note.title}`, `${note.title} was favored successfully`, false, []);
+    } catch (err) {
+      console.log(err);
+
+      // Immediately revert state
+      setAllData((prev) => {
+        return {
+          ...prev,
+          notes: oldNotes
+        };
       });
+
+      if (err.request) {
+        networkNotificationError([]);
+        return;
+      }
+      if (err.response) {
+        showErrorNotification("Favoring Note", err.response.data.message, true, []);
+        return;
+      }
+      showErrorNotification(
+        "Favoring Note",
+        "We had an issue favoring your note. Please try again, and if the issue persists, contact the developer",
+        true,
+        []
+      );
+    }
   };
 
   return (
@@ -1298,7 +1262,7 @@ const Notes = (): JSX.Element => {
                     <button
                       onClick={(e): void => {
                         e.stopPropagation();
-                        confirmTrash(note);
+                        moveToTrash(note);
                       }}
                     >
                       <TbTrash className="text-red-500" />
@@ -1497,7 +1461,7 @@ const Notes = (): JSX.Element => {
                 <button
                   onClick={(e): void => {
                     e.stopPropagation();
-                    confirmTrash(note);
+                    moveToTrash(note);
                   }}
                 >
                   <TbTrash className="text-red-500" />

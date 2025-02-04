@@ -1,7 +1,5 @@
-import { motion } from "framer-motion";
+import { color, motion } from "framer-motion";
 import { useContext, useRef, useState } from "react";
-import { BsStarFill } from "react-icons/bs";
-import { FaFirstdraft, FaLock, FaShareAlt, FaTrashAlt } from "react-icons/fa";
 import { LuFileStack } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
@@ -207,6 +205,7 @@ const Menu = (): JSX.Element => {
         <div className="overflow-y-auto h-full p-5 flex flex-col justify-between no-scroll-bar">
           <div className="mb-10">
             <h1 className="text-3xl">{user.username}</h1>
+            {/* MenuButton is local component */}
             <MenuButton
               notes={allData.notes}
               title={"All Notes"}
@@ -214,101 +213,44 @@ const Menu = (): JSX.Element => {
               color={textThemeString}
               click={() => setFolderCategoryState("All Notes", allData.notes)}
             />
-            <button
-              onClick={() => {
+            <MenuButton
+              notes={allData.notes.filter((aNote: Note): boolean => aNote.locked)}
+              title={"Locked Notes"}
+              userPreferences={userPreferences}
+              color={textThemeString}
+              click={() => {
                 const lockedNotes = allData.notes.filter((aNote) => aNote.locked);
                 setFolderCategoryState("Locked Notes", lockedNotes);
               }}
-              className={`p-3 rounded-md shadow-md my-3 ${
-                userPreferences.darkMode
-                  ? "bg-[#333] hover:bg-[#444]"
-                  : "bg-slate-300 hover:bg-slate-400"
-              } w-full flex justify-between items-center duration-200`}
-            >
-              <p>Locked Notes</p>
-              <div className="flex justify-center items-center gap-x-3">
-                <p className="font-semibold">
-                  {allData?.notes?.filter((note) => note.locked).length}
-                </p>
-                <FaLock
-                  className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
-                />
-              </div>
-            </button>
-            <button
-              onClick={() => setFolderCategoryState("Favorites", favorites)}
-              className={`p-3 rounded-md shadow-md my-3 ${
-                userPreferences.darkMode
-                  ? "bg-[#333] hover:bg-[#444]"
-                  : "bg-slate-300 hover:bg-slate-400"
-              } w-full flex justify-between items-center duration-200`}
-            >
-              <p>Favorite Notes</p>
-              <div className="flex justify-center items-center gap-x-3">
-                <p className="font-semibold">
-                  {allData?.notes?.filter((note) => note.favorite).length}
-                </p>
-                <BsStarFill
-                  className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
-                />
-              </div>
-            </button>
-            <button
-              onClick={() => setFolderCategoryState("Drafts", drafts)}
-              className={`p-3 rounded-md shadow-md my-3 ${
-                userPreferences.darkMode
-                  ? "bg-[#333] hover:bg-[#444]"
-                  : "bg-slate-300 hover:bg-slate-400"
-              } w-full flex justify-between items-center duration-200`}
-            >
-              <p>Draft Notes</p>
-              <div className="flex justify-center items-center gap-x-3">
-                <p className="font-semibold">{drafts.length}</p>
-                <FaFirstdraft
-                  className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
-                />
-              </div>
-            </button>
-            <button
-              onClick={(): void => setFolderCategoryState("Trashed", trashedNotes)}
-              className={`p-3 rounded-md shadow-md my-3 w-full ${
-                userPreferences.darkMode
-                  ? "bg-[#333] hover:bg-[#444]"
-                  : "bg-slate-300 hover:bg-slate-400"
-              } flex justify-between items-center duration-200`}
-            >
-              <p>Trash Notes</p>
-              <div className="flex justify-center items-center gap-x-3">
-                <p className="font-semibold">{trashedNotes.length}</p>
-                <FaTrashAlt
-                  className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
-                />
-              </div>
-            </button>
-            <button
-              className={`p-3 rounded-md shadow-md my-3 w-full ${
-                userPreferences.darkMode
-                  ? "bg-[#333] hover:bg-[#444]"
-                  : "bg-slate-300 hover:bg-slate-400"
-              } flex justify-between items-center duration-200`}
-            >
-              <div className="flex justify-center items-center gap-x-5">
-                <p>Shared Notes </p>
-                <p
-                  className={`${
-                    userPreferences.theme ? textThemeString : "text-amber-300"
-                  } text-sm font-bold`}
-                >
-                  Beta
-                </p>
-              </div>
-              <div className="flex justify-center items-center gap-x-3">
-                <p className="font-semibold">{sharedNotes.length}</p>
-                <FaShareAlt
-                  className={`${userPreferences.theme ? textThemeString : "text-amber-300"} text-sm`}
-                />
-              </div>
-            </button>
+            />
+            <MenuButton
+              notes={favorites}
+              title={"Favorite Notes"}
+              userPreferences={userPreferences}
+              color={textThemeString}
+              click={() => setFolderCategoryState("Favorites", favorites)}
+            />
+            <MenuButton
+              notes={drafts}
+              title={"Draft Notes"}
+              userPreferences={userPreferences}
+              color={textThemeString}
+              click={() => setFolderCategoryState("Drafts", drafts)}
+            />
+            <MenuButton
+              notes={trashedNotes}
+              title={"Trash"}
+              userPreferences={userPreferences}
+              color={textThemeString}
+              click={() => setFolderCategoryState("Trashed", trashedNotes)}
+            />
+            <MenuButton
+              notes={sharedNotes}
+              title={"Shared Notes"}
+              userPreferences={userPreferences}
+              color={textThemeString}
+              click={() => setFolderCategoryState("Shared Notes", sharedNotes)}
+            />
             <p className="text-2xl my-5">Folders</p>
             <Tree
               moving={false}
