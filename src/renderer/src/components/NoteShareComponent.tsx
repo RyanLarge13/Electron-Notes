@@ -88,12 +88,7 @@ const NoteShareComponent = (): JSX.Element => {
     } catch (err) {
       console.log(err);
       if (err.response) {
-        showErrorNotification(
-          "Sharing Note",
-          `We could not complete your request to share this note`,
-          true,
-          []
-        );
+        showErrorNotification("Sharing Note", err.response.data.message, true, []);
         return;
       }
       if (err.request) {
@@ -102,7 +97,7 @@ const NoteShareComponent = (): JSX.Element => {
       }
       showErrorNotification(
         "Sharing Note",
-        " We encountered an issue sharing your note. Pleasae try again and if the issue persists, contact the developer",
+        " We encountered an issue sharing your note. Please try again and if the issue persists, contact the developer",
         true,
         []
       );
