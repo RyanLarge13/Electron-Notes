@@ -1,7 +1,7 @@
 import { motion, useDragControls } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react";
 import { CiDesktop } from "react-icons/ci";
-import { FaCopy, FaEdit, FaShareAlt, FaTrashAlt } from "react-icons/fa";
+import { FaCopy, FaEdit, FaShareAlt } from "react-icons/fa";
 import { IoCloseCircle } from "react-icons/io5";
 import { MdDragHandle, MdMinimize, MdNotAccessible } from "react-icons/md";
 import { TbMaximize } from "react-icons/tb";
@@ -15,6 +15,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
   const {
     userPreferences,
     minimizeArray,
+    setNoteShare,
     setMinimizeArray,
     setUserPreferences,
     setNote,
@@ -68,7 +69,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
 
   const editNote = (): void => {
     setNoteToEdit((prev) => [...prev, note]);
-    setNote((prev) => prev.filter((aNote) => aNote.noteid !== note.noteid));
+    setNote((prev) => prev.filter((aNote: Note) => aNote.noteid !== note.noteid));
     navigate("/newnote");
   };
 
@@ -207,7 +208,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
       setResizing(true);
       const rect = noteRef.current.getBoundingClientRect();
       const offsetY = e.pageY - rect.top;
-      const percentagePointer = ((offsetY + noteTop - 45) / window.innerHeight) * 100;
+      const percentagePointer = ((offsetY + noteTop) / window.innerHeight) * 100;
       setNoteHeight(100 - percentagePointer);
     }
   };
@@ -216,10 +217,10 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
     if (noteRef && noteRef.current && resizing) {
       const rect = noteRef.current.getBoundingClientRect();
       const offsetY = e.pageY - rect.top;
-      const percentagePointer = ((offsetY + noteTop - 45) / window.innerHeight) * 100;
-      if (rect.height > 200 && rect.height < window.innerHeight - 40) {
-        setNoteHeight(100 - percentagePointer);
-      }
+      const percentagePointer = ((offsetY + noteTop) / window.innerHeight) * 100;
+      // if (rect.height > 200 && rect.height < window.innerHeight - 40) {
+      setNoteHeight(100 - percentagePointer);
+      // }
     }
   };
 
@@ -278,9 +279,15 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
     return index;
   };
 
-  const trashNote = (): void => {};
-
-  const shareNote = (): void => {};
+  const shareNote = (note: Note): void => {
+    setNoteShare(() => {
+      return {
+        show: true,
+        notes: [note.noteid],
+        connections: []
+      };
+    });
+  };
 
   return (
     <>
@@ -330,7 +337,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
         whileDrag={{ boxShadow: `0px 0px 4px 1px rgba(255,255,255,0.75)`, cursor: "grabbing" }}
         className={`shadow-md fixed z-40 ${
           userPreferences.darkMode ? "bg-[#222]" : "bg-white"
-        } ${includesMinimize ? `w-80 h-10 min-h-10 max-h-10 max-w-80 min-w-80 shadow-white shadow-sm` : "min-w-80 min-h-80 max-w-[95%] max-h-[90%]"} overflow-hidden origin-bottom select-none rounded-md cursor shadow-md pb-5`}
+        } ${includesMinimize ? `w-80 h-10 min-h-10 max-h-10 max-w-80 min-w-80 shadow-white shadow-sm` : "min-w-80 max-w-[95%] max-h-[90%]"} min-h-40 overflow-hidden origin-bottom select-none rounded-md cursor shadow-md pb-5`}
       >
         <div
           className={`${userPreferences.theme ? userPreferences.theme : "bg-amber-300"} absolute isolate right-0 touch-none top-[50%] translate-y-[-50%] w-1 h-20 rounded-full ${resizing ? "cursor-grabbing" : "cursor-grab"}`}
@@ -422,7 +429,7 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
             >
               <FaCopy />
             </button>
-            <button onClick={() => shareNote()}>
+            <button onClick={() => shareNote(note)}>
               <FaShareAlt />
             </button>
             <button
@@ -431,9 +438,6 @@ const NoteView = ({ note }: { note: Note }): JSX.Element => {
               onClick={() => editNote()}
             >
               <FaEdit />
-            </button>
-            <button onClick={() => trashNote()}>
-              <FaTrashAlt />
             </button>
           </div>
         </div>

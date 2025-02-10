@@ -640,6 +640,66 @@ const Notes = (): JSX.Element => {
     });
   };
 
+  const openMenuShareNote = (event, note: Note): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    const { clientX, clientY } = event;
+    let dynamicTop = clientY;
+    let dynamicLeft = clientX;
+    if (clientY + 325 > window.innerHeight) {
+      dynamicTop -= 325;
+    }
+    if (clientX + 200 > window.innerWidth) {
+      dynamicLeft -= 245;
+    }
+    setPosition({ top: dynamicTop, left: dynamicLeft });
+    const newMenu = {
+      show: true,
+      meta: {
+        title: note.title,
+        color: `${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`
+      },
+      options: [
+        {
+          title: "edit",
+          icon: <FaEdit />,
+          func: () => edit(note, false)
+        },
+        {
+          title: "open in new window",
+          icon: <FaDesktop />,
+          func: () => openWindow(note)
+        },
+        {
+          title: "duplicate",
+          icon: <FaCopy />,
+          func: () => duplicate(note)
+        },
+        {
+          title: "save file as .txt",
+          icon: <BsFiletypeTxt />,
+          func: () => saveFileToSystem(note)
+        },
+        {
+          title: "save file as .html",
+          icon: <BsFiletypeHtml />,
+          func: (): Promise<void> => saveFileToSysAsHtml(note)
+        },
+        {
+          title: "save file as .pdf",
+          icon: <BsFiletypePdf />,
+          func: (): Promise<void> => saveFileToSysAsPdf(note)
+        },
+        {
+          title: "save file as .docx",
+          icon: <BsFiletypeDocx />,
+          func: (): Promise<void> => saveFileToSysAsDocX(note)
+        }
+      ]
+    };
+    setContextMenu(newMenu);
+  };
+
   const openNotesOptions = (event, note: Note): void => {
     event.preventDefault();
     event.stopPropagation();
@@ -1029,6 +1089,7 @@ const Notes = (): JSX.Element => {
             key={shareNote.noteid}
             className={`${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto ${userPreferences.darkMode ? "bg-[#333]" : "bg-[#e2e8f0]"}`}
             onClick={() => (!renameANote ? openNote(shareNote) : renameRef.current.focus())}
+            onContextMenu={(e) => openMenuShareNote(e, shareNote)}
           >
             <div
               className={`duration-200 ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444] text-white" : "bg-slate-200 hover:bg-slate-300 text-black"} p-2 rounded-t-md mb-3`}
