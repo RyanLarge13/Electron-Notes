@@ -1,4 +1,4 @@
-import { color, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useContext, useRef, useState } from "react";
 import { LuFileStack } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";

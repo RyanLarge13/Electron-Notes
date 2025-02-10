@@ -402,7 +402,7 @@ const Settings = (): JSX.Element => {
     confirmOperationNotification(
       "Change Password",
       "Are you positive you would like to change your password?",
-      [{ text: "confimr", func: (): Promise<void> => continueRequest() }],
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
       continueRequest
     );
   };

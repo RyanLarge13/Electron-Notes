@@ -492,7 +492,7 @@ const Folders = (): JSX.Element => {
         }
         showErrorNotification(
           "Deleting Folder",
-          `We ran into issues deleteing ${oldFolder.title}. If this issue persists, please contact the developer`,
+          `We ran into issues deleting ${oldFolder.title}. If this issue persists, please contact the developer`,
           true,
           []
         );

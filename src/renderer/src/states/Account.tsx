@@ -117,7 +117,7 @@ const Account = (): JSX.Element => {
     });
   });
 
-  window.noteUpdate.saveNoteFromWindow((newNote: Note) => {
+  window.noteUpdate.saveNoteFromWindow((newNote): void => {
     removeUnsavedChanges(newNote.noteid);
     if (!token) {
       return;
@@ -171,10 +171,11 @@ const Account = (): JSX.Element => {
   };
 
   const moveAllSelected = (): void => {
-    const foldersToMove = allData.folders.map((fold: Folder) => {
+    const foldersToMove = allData.folders.map((fold: Folder): Folder => {
       if (selectedForEdit.some((id) => id === fold.folderid)) {
         return fold;
       }
+      return null;
     });
     setMove({
       isMoving: true,

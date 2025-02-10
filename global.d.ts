@@ -13,5 +13,12 @@ declare global {
     openNewWin: {
       openNoteInNewWindow: (note: Note, darkMode: boolean) => Promise<void>;
     };
+    noteUpdate: {
+      receiveCustomData: (data) => Promise<void>;
+      saveNoteFromWindow: (newNote) => void;
+    };
+    closeWin: {
+      closeMainWin: () => void;
+    };
   }
 }

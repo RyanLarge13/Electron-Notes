@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useContext, useState } from "react";
-import { FaLock, FaLockOpen } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 import { v4 as uuidv4 } from "uuid";
@@ -27,12 +26,12 @@ const NewFolder = (): JSX.Element => {
 
   const [color, setColor] = useState(selectedFolder ? selectedFolder.color : "bg-amber-300");
   const [title, setTitle] = useState(selectedFolder ? selectedFolder.title : "");
-  const [lock, setLock] = useState(selectedFolder ? selectedFolder.locked : false);
+  // const [lock, setLock] = useState(selectedFolder ? selectedFolder.locked : false);
   const [loading, setLoading] = useState(false);
 
-  const textThemeString = userPreferences?.theme
-    ? userPreferences.theme.replace("bg", "text")
-    : "text-amber-300";
+  // const textThemeString = userPreferences?.theme
+  //   ? userPreferences.theme.replace("bg", "text")
+  //   : "text-amber-300";
 
   const createFolder = (e): void => {
     e.preventDefault();
@@ -157,13 +156,13 @@ const NewFolder = (): JSX.Element => {
             "Create Folder"
           )}
         </button>
-        <button onClick={() => setLock((prev) => !prev)} className="absolute bottom-5 right-5">
+        {/* <button onClick={() => setLock((prev) => !prev)} className="absolute bottom-5 right-5">
           {!lock ? (
             <FaLockOpen />
           ) : (
             <FaLock className={`${userPreferences.theme ? textThemeString : "text-amber-300"}`} />
           )}
-        </button>
+        </button> */}
       </motion.section>
     </>
   );
