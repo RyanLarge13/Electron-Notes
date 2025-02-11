@@ -226,6 +226,23 @@ export const fetchASingleNote = (noteId: string, token: string): Promise<AxiosRe
   return res;
 };
 
+export const lockOrUnlockANote = (
+  noteId: string,
+  token: string,
+  lock: boolean
+): Promise<AxiosResponse> => {
+  const res = Axios.patch(
+    `${devUrl}/notes/update/lock`,
+    { noteId: noteId, lock: lock },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+  return res;
+};
+
 // Connection requests -------------------------------------------------------------------------------------------
 export const createConRequest = (token: string, email: string): Promise<AxiosResponse> => {
   const res = Axios.post(
@@ -315,3 +332,12 @@ export const createShare = async (
   return res;
 };
 // Sharing Notes Requests ----------------------------------------------------------------------------------------
+
+// Notes being shared --------------------------------------------------------------------------------------------
+export const removeShare = async (token: string, shareId: string): Promise<AxiosResponse> => {
+  const res = Axios.delete(`${devUrl}/share/remove/${shareId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res;
+};
+// Notes being shared --------------------------------------------------------------------------------------------

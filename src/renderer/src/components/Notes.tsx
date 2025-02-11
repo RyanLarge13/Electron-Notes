@@ -18,6 +18,7 @@ import {
   FaEdit,
   FaFolder,
   FaLock,
+  FaLockOpen,
   FaSave,
   FaTrash,
   FaUser,
@@ -26,6 +27,7 @@ import {
 import { IoRemoveCircle } from "react-icons/io5";
 import { MdCancel, MdDeleteForever, MdRestore, MdUpdate } from "react-icons/md";
 import { TbEdit, TbNotes, TbPinned, TbTrash, TbX } from "react-icons/tb";
+import { TiCancelOutline } from "react-icons/ti";
 import Masonry from "react-masonry-css";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
@@ -35,7 +37,9 @@ import { AllData, Connection, Note, NoteShare, ShareReq } from "@renderer/types/
 import {
   createNewNote,
   deleteANote,
+  lockOrUnlockANote,
   moveNoteToTrash,
+  removeShare,
   updateFavoriteOnNote,
   updateNote
 } from "@renderer/utils/api";
@@ -61,6 +65,7 @@ const Notes = (): JSX.Element => {
     shareRequests,
     sharedNotes,
     connections,
+    setSharedNotes,
     setNoteShare,
     setNote,
     setNoteIsMoving,
@@ -94,6 +99,7 @@ const Notes = (): JSX.Element => {
   const [renameText, setRenameText] = useState("");
   const [unsavedChangesOptions, setUnsavedChangesOptions] = useState(null);
   const [lockedOpenNewWinNote, setLockedOpenNewWinNote] = useState(false);
+  const [unlockingFromContextMenu, setUnlockingFromContextMenu] = useState(false);
 
   const firstInput = useRef(null);
   const secondInput = useRef(null);
@@ -145,6 +151,10 @@ const Notes = (): JSX.Element => {
     if (pin.fourth !== "") {
       const validPin = checkPin();
       if (validPin) {
+        if (unlockingFromContextMenu) {
+          handleUnlockNote();
+          return;
+        }
         unlockNote();
         return;
       }
@@ -158,6 +168,75 @@ const Notes = (): JSX.Element => {
       firstInput.current.focus();
     }
   }, [pin.fourth]);
+
+  const handleUnlockNote = (): void => {
+    setPinInput(false);
+    setPin({ first: "", second: "", third: "", fourth: "" });
+    const note: Note = awaitingNote;
+    setAwaitingNote(null);
+
+    const continueRequest = async (): Promise<void> => {
+      try {
+        // Immediately update notes
+        setAllData((prev: AllData): AllData => {
+          const newNotes = prev.notes.map((aNote: Note): Note => {
+            if (aNote.noteid === note.noteid) {
+              return {
+                ...aNote,
+                locked: false
+              };
+            } else {
+              return aNote;
+            }
+          });
+
+          return {
+            user: prev.user,
+            folders: prev.folders,
+            notes: newNotes
+          };
+        });
+
+        const response = await lockOrUnlockANote(note.noteid, token, false);
+        showSuccessNotification("Unlocked", response.data.data.message, false, []);
+      } catch (err) {
+        console.log(err);
+
+        // Immediately reset state
+        setAllData((prev: AllData): AllData => {
+          const newNotes = prev.notes.map((aNote: Note): Note => {
+            if (aNote.noteid === note.noteid) {
+              return {
+                ...aNote,
+                locked: true
+              };
+            } else {
+              return aNote;
+            }
+          });
+
+          return {
+            user: prev.user,
+            folders: prev.folders,
+            notes: newNotes
+          };
+        });
+
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        showErrorNotification("Unlocking Note", err.response.data.message, true, []);
+      }
+    };
+
+    confirmOperationNotification(
+      `Unlock ${awaitingNote.title}?`,
+      "Are you sure you want to unlock this note?",
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
+  };
 
   const edit = (note: Note, draft: boolean): void => {
     if (draft) {
@@ -640,6 +719,49 @@ const Notes = (): JSX.Element => {
     });
   };
 
+  const cancelShare = (note: Note): void => {
+    setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+
+    const tempNote = note;
+
+    const continueRequest = async (): Promise<void> => {
+      // Immediately update state
+      setSharedNotes((prev: Note[]): Note[] =>
+        prev.filter((aNote: Note): boolean => aNote.noteid !== note.noteid)
+      );
+      try {
+        const response = await removeShare(token, note.noteid);
+        showSuccessNotification("Removed Share", response.data.data.message, false, []);
+      } catch (err) {
+        console.log(err);
+
+        // Immediately update state
+        setSharedNotes((prev: Note[]): Note[] => [...prev, tempNote]);
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        if (err.response) {
+          showErrorNotification("Removing Share", err.response.data.message, true, []);
+          return;
+        }
+        showErrorNotification(
+          "Removing Share",
+          "We are having trouble removing your share. Please try again and if the issue persists contact the developer",
+          true,
+          []
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Remove This Note?",
+      `You will no longer have access to this note or be able to update it in anyway unless it is shared with you again. Are you sure you want to cancel this share?`,
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
+  };
+
   const openMenuShareNote = (event, note: Note): void => {
     event.preventDefault();
     event.stopPropagation();
@@ -694,6 +816,11 @@ const Notes = (): JSX.Element => {
           title: "save file as .docx",
           icon: <BsFiletypeDocx />,
           func: (): Promise<void> => saveFileToSysAsDocX(note)
+        },
+        {
+          title: "stop sharing",
+          icon: <TiCancelOutline />,
+          func: (): void => cancelShare(note)
         }
       ]
     };
@@ -797,11 +924,22 @@ const Notes = (): JSX.Element => {
           icon: <FaEdit />,
           func: () => rename(note)
         },
-        !note.locked && {
-          title: "lock",
-          icon: <FaLock />,
-          func: () => lockNote(note)
-        },
+        !note.locked
+          ? {
+              title: "lock",
+              icon: <FaLock />,
+              func: () => lockNote(note)
+            }
+          : {
+              title: "unlock",
+              icon: <FaLockOpen />,
+              func: () => {
+                setContextMenu({ show: false, meta: { title: "", color: "" }, options: [] });
+                setAwaitingNote(note);
+                setPinInput(true);
+                setUnlockingFromContextMenu(true);
+              }
+            },
         {
           title: "save file as .txt",
           icon: <BsFiletypeTxt />,
