@@ -1,10 +1,11 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from "electron";
-import { join } from "path";
-import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { Document, Packer, Paragraph, TextRun } from "docx";
-import PDFDocument from "pdfkit";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import fs from "fs";
-import path from "path";
+import path, { join } from "path";
+import PDFDocument from "pdfkit";
+
+import { electronApp, is, optimizer } from "@electron-toolkit/utils";
+
 import appIcon from "../../resources/icon.png?asset";
 
 let preloaderWindow;
@@ -186,7 +187,7 @@ function createWindow(): void {
   });
 
   mainWindow.loadFile(join(__dirname, "../renderer/index.html"), { hash: "login" });
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
