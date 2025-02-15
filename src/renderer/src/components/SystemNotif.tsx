@@ -1,7 +1,8 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import UserContext from "@renderer/contexxt/UserContext";
 import { ClipLoader } from "react-spinners";
+
+import UserContext from "@renderer/contexxt/UserContext";
 import { SystemNotifAction } from "@renderer/types/types";
 
 const SystemNotif = (): JSX.Element => {
@@ -50,7 +51,7 @@ const SystemNotif = (): JSX.Element => {
 
   return (
     <AnimatePresence>
-      {systemNotif.show && (
+      {systemNotif?.show && (
         <>
           <motion.div
             drag="x"

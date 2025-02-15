@@ -44,6 +44,9 @@ const Connections = (): JSX.Element => {
                 func: (): void => {}
               }
             ]);
+            if (!res.data.data) {
+              return;
+            }
             setConnectionRequestsSent((prev) => [
               ...prev,
               { id: res.data.data.conreqid, to: email, from: user.email }

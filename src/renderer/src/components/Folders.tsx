@@ -847,20 +847,17 @@ const Folders = (): JSX.Element => {
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               className={`absolute inset-0 p-3 z-[999] flex flex-col justify-end items-start rounded-md shadow-md ${
-                userPreferences.darkMode ? "bg-slate-900" : "bg-slate-200"
+                userPreferences.darkMode ? "bg-[#333]" : "bg-slate-200"
               }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setFolderToChangeColor(null);
-              }}
+              // onClick={(e) => {
+              //   e.stopPropagation();
+              //   setFolderToChangeColor(null);
+              // }}
             >
-              <div
-                className={`z-10 absolute top-0 right-0 w-[50%] h-3 rounded-bl-md rounded-tr-md ${newColor} bg-amber-300`}
-              ></div>
               <Colors setColor={setNewColor} />
               <button
                 onClick={() => changeColor()}
-                className="py-1 px-3 mt-3 duration-200 hover:bg-amber-200 rounded-md bg-amber-300 text-black"
+                className={`py-1 px-3 mt-3 duration-200 ${newColor} rounded-md text-black`}
               >
                 Change Color &rarr;
               </button>

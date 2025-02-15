@@ -728,7 +728,7 @@ const Account = (): JSX.Element => {
             userPreferences.theme ? themeStringText : "text-amber-300"
           } ${
             userPreferences.darkMode
-              ? "bg-slate-600 hover:bg-slate-500"
+              ? "bg-[#333] hover:bg-[#444]"
               : "bg-slate-300 hover:bg-slate-400"
           } duration-200 w-10 h-10 flex justify-center items-center shadow-sm z-[999]`}
           onClick={() => setConOptions((prev) => !prev)}
@@ -745,11 +745,11 @@ const Account = (): JSX.Element => {
             animate={{ opacity: 1, y: 0 }}
             className={`rounded-md shadow-md fixed top-10 right-10 ${
               userPreferences.darkMode ? "bg-[#222]" : "bg-slate-200"
-            } flex flex-col justify-center items-center font-bold w-40`}
+            } flex flex-col justify-center items-center font-bold w-40 overflow-hidden z-[1000]`}
           >
             <button
               className={`flex justify-between items-center w-full py-3 px-4 ${
-                userPreferences.darkMode ? "hover:bg-[#333]" : "hover:bg-slate-300"
+                userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
               }`}
               onClick={() => {
                 setConOptions(false);
@@ -761,7 +761,7 @@ const Account = (): JSX.Element => {
             </button>
             <button
               className={`flex justify-between items-center w-full py-3 px-4 ${
-                userPreferences.darkMode ? "hover:bg-slate-600" : "hover:bg-slate-300"
+                userPreferences.darkMode ? "hover:bg-[#444]" : "hover:bg-slate-300"
               }`}
               onClick={() => {
                 setConOptions(false);

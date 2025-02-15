@@ -1,4 +1,5 @@
 import { useContext } from "react";
+
 import UserContext from "@renderer/contexxt/UserContext";
 import { ContextMenuOption } from "@renderer/types/types";
 
@@ -7,7 +8,7 @@ const ContextMenu = (): JSX.Element => {
 
   return (
     <>
-      {contextMenu.show && (
+      {contextMenu?.show && (
         <>
           <div
             className="fixed inset-0 z-30"
