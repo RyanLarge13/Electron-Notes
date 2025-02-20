@@ -34,6 +34,7 @@ const ShareRequests = ({
   const acceptNote = async (req: ShareReq): Promise<void> => {
     try {
       const response = await createShare(req.id, req.from, token);
+      setShareRequests((prev) => prev.filter((aShareReq) => aShareReq.id !== req.id));
       setSharedNotes((prev) => [response.data.data, ...prev]);
       showSuccessNotification("Accepted Note", response.data.message, false, []);
     } catch (err) {

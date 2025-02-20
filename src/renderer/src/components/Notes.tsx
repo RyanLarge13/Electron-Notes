@@ -731,7 +731,7 @@ const Notes = (): JSX.Element => {
       );
       try {
         const response = await removeShare(token, note.noteid);
-        showSuccessNotification("Removed Share", response.data.data.message, false, []);
+        showSuccessNotification("Removed Share", response.data.message, false, []);
       } catch (err) {
         console.log(err);
 
@@ -1223,7 +1223,7 @@ const Notes = (): JSX.Element => {
           className={`absolute bottom-0 right-0 left-0 h-1 rounded-full w-full ${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`}
         ></div>
         {sharedNotes.map((shareNote: Note) =>
-          !shareNote.from ? (
+          connections.find((aCon: Connection) => aCon.userId === shareNote.from) ? (
             <div
               key={shareNote.noteid}
               className={`${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto ${userPreferences.darkMode ? "bg-[#333]" : "bg-[#e2e8f0]"}`}
@@ -1265,14 +1265,14 @@ const Notes = (): JSX.Element => {
                 className="mt-3 renderHtml max-h-[75%] overflow-y-clip"
                 dangerouslySetInnerHTML={{
                   __html:
-                    shareNote.htmlText.slice(
+                    shareNote.htmlText?.slice(
                       0,
-                      shareNote.htmlText.length / 5 < 500
-                        ? shareNote.htmlText.length / 5 < 100
+                      shareNote.htmlText?.length / 5 < 500
+                        ? shareNote.htmlText?.length / 5 < 100
                           ? 100
                           : 500
                         : 500
-                    ) + " ..."
+                    ) || "" + " ..."
                 }}
               ></div>
             </div>
@@ -1627,7 +1627,7 @@ const Notes = (): JSX.Element => {
                     <p>
                       {connections
                         .find((aCon: Connection) => aCon.userId === aShare.to)
-                        .email[0].toUpperCase() || "?"}
+                        ?.email[0]?.toUpperCase() || "?"}
                     </p>
                   </div>
                 ))}
