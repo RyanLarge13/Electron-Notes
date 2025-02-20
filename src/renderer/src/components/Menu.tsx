@@ -40,6 +40,7 @@ const Menu = (): JSX.Element => {
     networkNotificationError,
     showErrorNotification,
     confirmOperationNotification,
+    deleteIndexedDB,
     userPreferences,
     favorites,
     user,
@@ -119,8 +120,11 @@ const Menu = (): JSX.Element => {
     const continueRequest = (): void => {
       setToken(null);
       setUser(null);
+      deleteIndexedDB();
       localStorage.removeItem("authToken");
+      localStorage.removeItem("preferences");
       localStorage.removeItem("pin");
+      resetSystemNotification();
     };
 
     confirmOperationNotification(

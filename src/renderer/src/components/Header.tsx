@@ -9,6 +9,7 @@ import { IoReturnUpBackSharp } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
 import UserContext from "@renderer/contexxt/UserContext";
+import { Note } from "@renderer/types/types";
 
 const Header = (): JSX.Element => {
   const {
@@ -69,7 +70,7 @@ const Header = (): JSX.Element => {
 
   useEffect(() => {
     if (!search) {
-      const topLevelNotes = allData.notes.filter((aNote) => aNote.folderId === null);
+      const topLevelNotes = allData.notes.filter((aNote: Note) => aNote.folderId === null);
       return setNotes(topLevelNotes);
     }
     if (folder) {
@@ -88,7 +89,7 @@ const Header = (): JSX.Element => {
       const searchedNotes = allData.notes.filter((aNote) => aNote.title.includes(searchText));
       setNotes(searchedNotes);
     }
-  }, [searchText]);
+  }, [search, searchText]);
 
   const takeUserHome = (): void => {
     if (editCurrentFolder) {

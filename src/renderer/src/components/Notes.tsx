@@ -1222,60 +1222,62 @@ const Notes = (): JSX.Element => {
         <div
           className={`absolute bottom-0 right-0 left-0 h-1 rounded-full w-full ${userPreferences.theme ? userPreferences.theme : "bg-amber-300"}`}
         ></div>
-        {sharedNotes.map((shareNote: Note) => (
-          <div
-            key={shareNote.noteid}
-            className={`${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto ${userPreferences.darkMode ? "bg-[#333]" : "bg-[#e2e8f0]"}`}
-            onClick={() => (!renameANote ? openNote(shareNote) : renameRef.current.focus())}
-            onContextMenu={(e) => openMenuShareNote(e, shareNote)}
-          >
+        {sharedNotes.map((shareNote: Note) =>
+          !shareNote.from ? (
             <div
-              className={`duration-200 ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444] text-white" : "bg-slate-200 hover:bg-slate-300 text-black"} p-2 rounded-t-md mb-3`}
+              key={shareNote.noteid}
+              className={`${view === "list" ? "h-80" : view === "grid" ? "h-80" : "h-auto"} p-4 rounded-md shadow-lg relative cursor-pointer mx-3 my-5 pointer-events-auto ${userPreferences.darkMode ? "bg-[#333]" : "bg-[#e2e8f0]"}`}
+              onClick={() => (!renameANote ? openNote(shareNote) : renameRef.current.focus())}
+              onContextMenu={(e) => openMenuShareNote(e, shareNote)}
             >
-              <p className="flex justify-center items-center gap-x-3 text-xs">
-                From <FaUser />{" "}
-                {connections.find((aCon: Connection) => aCon.userId === shareNote.from)?.email ||
-                  "Unknown"}
-              </p>
-            </div>
-            <div
-              className={`absolute top-[-5px] left-[-5px] font-bold text-lg ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
-            >
-              <BiShareAlt />
-            </div>
-            <p className="font-semibold text-2xl">{shareNote.title}</p>
-            <div
-              className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
-                userPreferences.darkMode ? "bg-[#222] text-white" : "bg-white text-black"
-              } rounded-tl-md`}
-            >
-              <p className="flex justify-center items-center gap-x-1">
-                <MdUpdate className="text-lg" />
-                <span>
-                  {new Date(shareNote.updated).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric"
-                  })}
-                </span>
-              </p>
-            </div>
-            <div
-              className="mt-3 renderHtml max-h-[75%] overflow-y-clip"
-              dangerouslySetInnerHTML={{
-                __html:
-                  shareNote.htmlText.slice(
-                    0,
-                    shareNote.htmlText.length / 5 < 500
-                      ? shareNote.htmlText.length / 5 < 100
-                        ? 100
+              <div
+                className={`duration-200 ${userPreferences.darkMode ? "bg-[#333] hover:bg-[#444] text-white" : "bg-slate-200 hover:bg-slate-300 text-black"} p-2 rounded-t-md mb-3`}
+              >
+                <p className="flex justify-center items-center gap-x-3 text-xs">
+                  From <FaUser />{" "}
+                  {connections.find((aCon: Connection) => aCon.userId === shareNote.from)?.email ||
+                    "Unknown"}
+                </p>
+              </div>
+              <div
+                className={`absolute top-[-5px] left-[-5px] font-bold text-lg ${userPreferences.theme ? textThemeString || "text-amber-300" : "text-amber-300"}`}
+              >
+                <BiShareAlt />
+              </div>
+              <p className="font-semibold text-2xl">{shareNote.title}</p>
+              <div
+                className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
+                  userPreferences.darkMode ? "bg-[#222] text-white" : "bg-white text-black"
+                } rounded-tl-md`}
+              >
+                <p className="flex justify-center items-center gap-x-1">
+                  <MdUpdate className="text-lg" />
+                  <span>
+                    {new Date(shareNote.updated).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    })}
+                  </span>
+                </p>
+              </div>
+              <div
+                className="mt-3 renderHtml max-h-[75%] overflow-y-clip"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    shareNote.htmlText.slice(
+                      0,
+                      shareNote.htmlText.length / 5 < 500
+                        ? shareNote.htmlText.length / 5 < 100
+                          ? 100
+                          : 500
                         : 500
-                      : 500
-                  ) + " ..."
-              }}
-            ></div>
-          </div>
-        ))}
+                    ) + " ..."
+                }}
+              ></div>
+            </div>
+          ) : null
+        )}
         {shareRequests.map((shareNoteReq: ShareReq) => (
           <div
             key={shareNoteReq.id}
@@ -1612,6 +1614,25 @@ const Notes = (): JSX.Element => {
               aria-hidden="true"
               className="absolute inset-0 radial-gradient pointer-events-none"
             ></div>
+            {/* People sharing with */}
+            <div className="absolute bottom-0 left-0 z-[999] flex justify-start items-center">
+              {sharedNotes
+                .filter((aNote) => aNote.noteid === note.noteid)
+                .map((aShare, index) => (
+                  <div
+                    key={aShare.noteid}
+                    style={{ transform: `translateX(-${10 * index}px)` }}
+                    className={`rounded-full w-7 h-7 flex justify-center items-center ${userPreferences.darkMode ? "bg-[#222] text-white" : "bg-slate-200 text-black"}`}
+                  >
+                    <p>
+                      {connections
+                        .find((aCon: Connection) => aCon.userId === aShare.to)
+                        .email[0].toUpperCase() || "?"}
+                    </p>
+                  </div>
+                ))}
+            </div>
+            {/* Date last modified */}
             <div
               className={`absolute right-0 bottom-0 shadow-md pt-2 pb-1 px-3 font-semibold text-sm z-10 ${
                 userPreferences.darkMode ? "bg-[#222] text-white" : "bg-white text-black"

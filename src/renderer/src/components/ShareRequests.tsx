@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useContext, useState } from "react";
 
 import UserContext from "@renderer/contexxt/UserContext";
 import { Connection, ShareReq } from "@renderer/types/types";
-import { createShare } from "@renderer/utils/api";
+import { cancelExistingShare, createShare } from "@renderer/utils/api";
 
 const ShareRequests = ({
   con
@@ -15,9 +15,12 @@ const ShareRequests = ({
     shareRequests,
     userPreferences,
     token,
+    setShareRequests,
+    setSharedNotes,
     networkNotificationError,
     showErrorNotification,
-    showSuccessNotification
+    showSuccessNotification,
+    confirmOperationNotification
   } = useContext(UserContext);
 
   const [shareReqOptions, setShareReqOptions] = useState(false);
@@ -31,7 +34,8 @@ const ShareRequests = ({
   const acceptNote = async (req: ShareReq): Promise<void> => {
     try {
       const response = await createShare(req.id, req.from, token);
-      showSuccessNotification("Accepted Note", response.data.data.message, false, []);
+      setSharedNotes((prev) => [response.data.data, ...prev]);
+      showSuccessNotification("Accepted Note", response.data.message, false, []);
     } catch (err) {
       console.log(err);
       if (err.request) {
@@ -51,7 +55,38 @@ const ShareRequests = ({
     }
   };
 
-  // const rejectNote = async (req: ShareReq): Promise<void> => {};
+  const rejectNote = (req: ShareReq): void => {
+    const continueRequest = async () => {
+      try {
+        const response = await cancelExistingShare(req.id, token);
+        setShareRequests((prev) => prev.filter((aReq) => aReq.id !== req.id));
+        showSuccessNotification("Declined Note", response.data.message, false, []);
+      } catch (err) {
+        console.log(err);
+        if (err.request) {
+          networkNotificationError([]);
+          return;
+        }
+        if (err.response) {
+          showErrorNotification("Declining Share", err.response.data.message, true, []);
+          return;
+        }
+        showErrorNotification(
+          "Declining Share",
+          "We had an issue declining this note for you. Please try again and if the issue persists, contact the developer",
+          true,
+          []
+        );
+      }
+    };
+
+    confirmOperationNotification(
+      "Decline Share",
+      "Are you sure you want to decline this note from being shared with you?",
+      [{ text: "confirm", func: (): Promise<void> => continueRequest() }],
+      continueRequest
+    );
+  };
 
   return (
     <div>
@@ -86,7 +121,7 @@ const ShareRequests = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    // rejectNote(req);
+                    rejectNote(req);
                   }}
                   className={`text-red-400 px-5 py-3 duration-200 whitespace-nowrap w-full ${userPreferences.darkMode ? "hover:bg-[#555]" : "hover:bg-slate-400"}`}
                 >

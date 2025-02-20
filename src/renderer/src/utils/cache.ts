@@ -44,15 +44,25 @@ class LocalCache {
         if (data.length > 1) {
           await store.bulkAdd(data);
         } else {
-          await store.add(data);
+          // This keeps throwing error resulting in catch call
+          await store.add(data[0]);
         }
       } catch (err) {
-        console.log("error when adding data", err);
+        console.log("error when adding data", err, storeName, data);
       }
       // console.log(`Data updated successfully in ${storeName}`);
     } catch (error) {
       console.error(`Error updating data in ${storeName}:`, error);
       throw error;
+    }
+  }
+
+  async deleteAllData() {
+    try {
+      this.db.close();
+      await this.db.delete();
+    } catch (err) {
+      console.log(`Error deleting indexedDB data. Error: ${err}`);
     }
   }
 }

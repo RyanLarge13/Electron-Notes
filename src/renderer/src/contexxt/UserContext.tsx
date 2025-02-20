@@ -345,7 +345,7 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
   };
 
   const uploadCache = async (data): Promise<void> => {
-    await cacheHandler.updateData("user", data.user);
+    await cacheHandler.updateData("user", [data.user]);
     await cacheHandler.updateData(
       "folders",
       data.folders.sort((a, b) => a.title.localeCompare(b.title))
@@ -421,9 +421,13 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         trashed: note.sharednotetrashed,
         favorite: false,
         isNew: false,
-        from: note.from
+        from: note.from,
+        to: note.to
       });
     });
+
+    console.log(`Here are your shared notes`);
+    console.log(sharedNotes);
 
     return {
       filteredConnections,
@@ -670,6 +674,10 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     }
   };
 
+  const deleteIndexedDB = (): void => {
+    cacheHandler.deleteAllData();
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -779,7 +787,8 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
         resetSystemNotification,
         showErrorNotification,
         showSuccessNotification,
-        confirmOperationNotification
+        confirmOperationNotification,
+        deleteIndexedDB
       }}
     >
       {children}

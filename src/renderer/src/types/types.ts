@@ -27,6 +27,7 @@ export type Note = {
   favorite: boolean;
   isNew?: boolean;
   from?: string;
+  to?: string;
 };
 
 export type apiNote = {
@@ -38,7 +39,7 @@ export type apiNote = {
 };
 
 export type User = {
-  id: number;
+  id: string;
   username: string;
   email: string;
   createdAt: Date;
@@ -292,4 +293,5 @@ export interface ContextProps {
     actions: SystemNotifAction[],
     callback: () => void
   ) => void;
+  deleteIndexedDB: () => void;
 }

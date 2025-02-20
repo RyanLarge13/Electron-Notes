@@ -1,4 +1,5 @@
 import { FormEvent, useContext, useEffect, useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import UserContext from "@renderer/contexxt/UserContext";
 import { loginUser } from "@renderer/utils/api";
@@ -15,6 +16,7 @@ const Login = (): JSX.Element => {
   const [username, setUsername] = useState("");
   const [signup, setSignup] = useState(false);
   const [forgotCreds, setForgotCreds] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   useEffect(() => {
     const hasSignedUp = localStorage.getItem("signedup");
@@ -112,13 +114,22 @@ const Login = (): JSX.Element => {
               value={email}
               onChange={(e) => handleChangeEmail(e)}
             />
-            <input
-              type="password"
-              className="p-3 focus:outline-slate-300 rounded-md shadow-md focus:border-none w-full my-2 hover:bg-slate-100 duration-200 focus:bg-slate-100"
-              placeholder="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className=" rounded-md shadow-md bg-slate-100 focus:border-none w-full my-2 flex justify-between items-center relative">
+              <input
+                type={showPass ? "text" : "password"}
+                className="w-full p-3 focus:outline-slate-300 rounded-md focus:bg-slate-100 hover:bg-slate-100 duration-200"
+                placeholder="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass((prev) => !prev)}
+                className="absolute right-3 top-[50%] translate-y-[-50%]"
+              >
+                {!showPass ? <FaEye /> : <FaEyeSlash />}
+              </button>
+            </div>
             <button
               type="submit"
               className="py-2 px-4 rounded-md shadow-md bg-amber-200 text-black mt-3 font-semibold self-start hover:bg-[#222] focus:bg-[#222] focus:text-white hover:scale-[0.99] w-full hover:text-white duration-200"

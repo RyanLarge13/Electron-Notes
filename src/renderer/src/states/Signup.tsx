@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ClipLoader } from "react-spinners";
 
 import UserContext from "@renderer/contexxt/UserContext";
@@ -17,6 +18,7 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loadingState, setLoadingState] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   useEffect(() => {
     const signupCreds = localStorage.getItem("signupCreds");
@@ -206,14 +208,22 @@ const Signup = ({ setSignup }: { setSignup: Dispatch<SetStateAction<boolean>> })
           onChange={(e) => handleChangeEmail(e)}
           onKeyUp={validateEmail}
         />
-        <input
-          type="password"
-          className="p-3 focus:outline-slate-300 rounded-md shadow-md focus:border-none w-full my-2 hover:bg-slate-100 duration-200 focus:bg-slate-100"
-          placeholder="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyUp={validatePass}
-        />
+        <div className=" rounded-md shadow-md bg-slate-100 focus:border-none w-full my-2 flex justify-between items-center relative">
+          <input
+            type={showPass ? "text" : "password"}
+            className="w-full p-3 focus:outline-slate-300 rounded-md focus:bg-slate-100 hover:bg-slate-100 duration-200"
+            placeholder="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPass((prev) => !prev)}
+            className="absolute right-3 top-[50%] translate-y-[-50%]"
+          >
+            {!showPass ? <FaEye /> : <FaEyeSlash />}
+          </button>
+        </div>
         {!loadingState ? (
           <button
             type="submit"
