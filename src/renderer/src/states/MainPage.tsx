@@ -32,19 +32,19 @@ const MainPage = (): JSX.Element => {
     setSettings,
     setSearch,
     setUserPreferences,
-    setNotes,
+    // setNotes,
     setNote,
     setFolder,
     setNoteToEdit,
     setFolderSearchText,
     setFolderSearch,
     resetSystemNotification,
-    showSuccessNotification,
+    // showSuccessNotification,
     showErrorNotification,
     folders,
     folderSearch,
     folderSearchText,
-    allData,
+    // allData,
     order,
     view,
     menu,
@@ -178,47 +178,50 @@ const MainPage = (): JSX.Element => {
     }
   }, [keyPresses]);
 
-  const handleUnloadChecks = (e): void => {
-    const unsavedChanges = userPreferences.unsavedNotes;
-    const unsavedNotes = [];
-    if (unsavedChanges.length > 0) {
-      unsavedChanges.forEach((unsaved) => {
-        const note = allData.notes.map((aNote) => aNote.noteid === unsaved.id);
-        if (!note[0]) {
-          // remove that from storage
-        } else {
-          unsavedNotes.push(note[0]);
-        }
-      });
-      setNotes(unsavedNotes);
-      e.preventDefault();
-      showSuccessNotification(
-        "Unsaved Notes",
-        "You have unsaved changes to some notes, are you sure you don't want to save first?",
-        true,
-        [
-          {
-            text: "exit",
-            func: async (): Promise<void> => {
-              window.removeEventListener("beforeunload", handleUnloadChecks);
-              await window.closeWin.closeMainWin();
-            }
-          }
-        ]
-      );
-    } else {
-      null;
-    }
-  };
+  // This needs to be commented out for now until the logic is fixed and does not cause the app
+  // from closing --------------------------------------------------------------------------------------------------------------------------------------
+
+  // const handleUnloadChecks = (e): void => {
+  //   const unsavedChanges = userPreferences.unsavedNotes;
+  //   const unsavedNotes = [];
+  //   if (unsavedChanges.length > 0) {
+  //     unsavedChanges.forEach((unsaved) => {
+  //       const note = allData.notes.map((aNote) => aNote.noteid === unsaved.id);
+  //       if (!note[0]) {
+  //         // remove that from storage
+  //       } else {
+  //         unsavedNotes.push(note[0]);
+  //       }
+  //     });
+  //     setNotes(unsavedNotes);
+  //     e.preventDefault();
+  //     showSuccessNotification(
+  //       "Unsaved Notes",
+  //       "You have unsaved changes to some notes, are you sure you don't want to save first?",
+  //       true,
+  //       [
+  //         {
+  //           text: "exit",
+  //           func: (): void => {
+  //             window.removeEventListener("beforeunload", handleUnloadChecks);
+  //             window.closeWin.closeMainWin();
+  //           }
+  //         }
+  //       ]
+  //     );
+  //   } else {
+  //     null;
+  //   }
+  // };
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
     window.addEventListener("keyup", handleKeyUp);
-    window.addEventListener("beforeunload", handleUnloadChecks);
+    // window.addEventListener("beforeunload", handleUnloadChecks);
     return () => {
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("keydown", handleKeyPress);
-      window.removeEventListener("beforeunload", handleUnloadChecks);
+      // window.removeEventListener("beforeunload", handleUnloadChecks);
     };
   }, []);
 
